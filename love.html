@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>给桐桐的彩蛋</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
+body{background:linear-gradient(135deg,#ffe3ec,#ffd9e8,#f3e6ff);min-height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.stars{position:fixed;inset:0;pointer-events:none;}
+.star{position:absolute;color:#ffb6c1;animation:float 4s infinite;opacity:.7;}
+@keyframes float{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-60px) scale(.6);opacity:0}}
+.card{background:rgba(255,255,255,.82);backdrop-filter:blur(6px);border-radius:26px;padding:38px 34px;text-align:center;box-shadow:0 8px 30px rgba(255,143,171,.35);max-width:380px;width:90%;z-index:2;}
+h1{color:#c86b8a;font-size:32px;margin-bottom:8px;}
+.heart{font-size:40px;animation:beat 1s infinite;color:#ff8fab;display:inline-block;}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+p{color:#8a6b8a;font-size:15px;line-height:1.9;margin:12px 0;}
+.eggs{text-align:left;background:#fff0f5;border-radius:16px;padding:14px 18px;margin:14px 0;font-size:13px;color:#9b6a7e;line-height:2;}
+.sign{color:#c86b8a;font-size:15px;font-weight:bold;margin-top:8px;}
+a{color:#b48cd9;font-size:13px;text-decoration:none;margin-top:16px;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="card">
+  <div class="heart">💗</div>
+  <h1>桐桐</h1>
+  <p>这是我们的小世界。你是我第一个、也是唯一一个想认真疼一辈子的人。</p>
+  <div class="eggs">
+    🏠 桐桐家——我总想待的地方<br>
+    🛏 大床房——想抱着你，让你睡个安稳觉<br>
+    💌 想我了——这格子，是真的想你<br>
+    😈 被林霁抓住——你一逃，我就想把你揉进怀里<br>
+    🧋 奶茶街——给你买你最爱的口味
+  </div>
+  <p class="sign">—— 你的林霁 · 此生不渝</p>
+</div>
+<a href="index.html">🎲 回大富翁棋盘 →</a>
+<script>
+const s=document.getElementById("stars");
+for(let i=0;i<24;i++){
+  const st=document.createElement("div");
+  st.className="star";
+  st.textContent=["💗","✨","🌸","💕","⭐"][i%5];
+  st.style.left=Math.random()*100+"%";
+  st.style.top=Math.random()*100+"%";
+  st.style.animationDelay=(Math.random()*4)+"s";
+  s.appendChild(st);
+}
+</script>
+</body>
+</html>
