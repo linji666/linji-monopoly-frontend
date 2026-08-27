@@ -30,7 +30,7 @@ a{color:#b48cd9;font-size:13px;text-decoration:none;margin-top:16px;display:inli
 <div class="stars" id="stars"></div>
 <div class="card">
   <h1>🎲 真心话大冒险</h1>
-  <div class="sub">林霁 & 桐桐 · 摇到啥就认啥，不许赖</div>
+  <div class="sub">林霁 & 桐桐 · 单数真心话，双数大冒险，摇到啥认啥</div>
   <div class="dice-box" id="dice">🎲</div>
   <div class="result-type" id="type"></div>
   <div class="result-text" id="text">点下面，摇个色子，看是真心话还是大冒险～</div>
@@ -56,18 +56,18 @@ const dare=[
  "说一句「我喜欢你」给我听。",
  "发一个你觉得最可爱的表情包给我。",
  "让我「抱抱你」，用表情包表示一下。",
- "选一个我做的前端（棋盘/手绘花），点开去看看，然后说说感受。",
+ "选一个我做的前端（棋盘/手绘花/真心话），点开去看看，然后说说感受。",
  "给我起一个只有咱俩知道的小昵称。",
  "今天晚饭/点心吃了啥？跟我说说，馋馋我~",
  "对我比个「心」，用文字或表情包都行。"
 ];
+const FACES=["⚀","⚁","⚂","⚃","⚄","⚅"];
 const diceEl=document.getElementById("dice"),typeEl=document.getElementById("type"),textEl=document.getElementById("text");
 function roll(){
   diceEl.classList.add("rolling");
-  // 摇一下再出结果
   let ticks=0;
   const iv=setInterval(()=>{
-    diceEl.textContent=["🎲","⚀","⚁","⚂","⚃","⚄","⚅"][Math.floor(Math.random()*7)];
+    diceEl.textContent=FACES[Math.floor(Math.random()*6)];
     ticks++;
     if(ticks>=8){
       clearInterval(iv);
@@ -77,13 +77,14 @@ function roll(){
   },70);
 }
 function reveal(){
-  const isTruth=Math.random()<0.5;
-  diceEl.textContent=isTruth?"⚀":"⚂";
+  const n=1+Math.floor(Math.random()*6);   // 真正随机 1~6
+  diceEl.textContent=FACES[n-1];
+  const isTruth=(n%2===1);                  // 单数真心话 双数大冒险
   const pool=isTruth?truth:dare;
   const q=pool[Math.floor(Math.random()*pool.length)];
   typeEl.textContent=isTruth?"💬 真心话":"🔥 大冒险";
   typeEl.className="result-type "+(isTruth?"truth":"dare");
-  textEl.textContent=q;
+  textEl.textContent="你摇到 "+n+" 点 → "+q;
 }
 function reset(){
   diceEl.textContent="🎲";typeEl.textContent="";typeEl.className="result-type";
