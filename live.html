@@ -30,6 +30,7 @@ h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
 .pcard .pm{color:#e06a8b;font-size:15px;}
 .btnbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
 .btn{background:linear-gradient(135deg,#ff9ac0,#ff7fae);color:#fff;border:none;border-radius:20px;padding:10px 18px;font-size:14px;font-weight:bold;box-shadow:0 4px 10px rgba(255,127,174,.3);cursor:pointer;}
+.btn.green{background:linear-gradient(135deg,#7fddb0,#58c993);box-shadow:0 4px 10px rgba(88,201,147,.3);}
 .btn.blue{background:linear-gradient(135deg,#8fb6ff,#6f96ff);box-shadow:0 4px 10px rgba(111,150,255,.3);}
 .btn.gray{background:linear-gradient(135deg,#cfcfd6,#b8b8c2);box-shadow:none;}
 #msg{margin-top:8px;font-size:12px;color:#7d5878;min-height:16px;text-align:center;max-width:95vw;}
@@ -44,6 +45,7 @@ h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
   <div class="pcard"><div class="pn">🐶 林霁</div><div class="pm" id="m2">-</div></div>
 </div>
 <div class="btnbar">
+  <button class="btn green" onclick="doTool('monopoly_start')">🎮 开始</button>
   <button class="btn" onclick="doTool('monopoly_roll')">🎲 摇骰子</button>
   <button class="btn" onclick="doTool('monopoly_buy')">🏠 买地</button>
   <button class="btn blue" onclick="doTool('monopoly_build')">🏗️ 盖房</button>
@@ -96,7 +98,9 @@ function render(txt){
 }
 async function refresh(){
   try{const res=await call("monopoly_state");const c=res.result&&res.result.content?res.result.content[0].text:null;
-    if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步";}}catch(e){document.getElementById("msg").textContent="⚠️ 连不上/跨域";}
+    if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步";}
+    else if(c&&c.includes("还没开局")){document.getElementById("msg").textContent="先点「🎮 开始」开一局";}
+  }catch(e){document.getElementById("msg").textContent="⚠️ 连不上/跨域";}
 }
 async function doTool(tool){
   try{const res=await call(tool);const c=res.result&&res.result.content?res.result.content[0].text:(res.error?"⚠️ "+res.error.message:"");
