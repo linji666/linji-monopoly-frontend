@@ -6,66 +6,82 @@
 <title>林霁 & 桐桐 · 环游中国大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
-body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;overflow:hidden;}
-h1{color:#c86b8a;font-size:22px;margin-bottom:2px;text-shadow:1px 1px 0 #fff;}
-.sub{color:#a88bb8;font-size:13px;margin-bottom:10px;}
-.board{display:grid;width:min(96vw,860px);height:min(70vh,600px);grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:6px;margin:0 auto;}
-@media (orientation:landscape){.board{width:min(96vw,980px);height:min(92vh,620px);}}
-.cell{background:#fff;border-radius:10px;border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:.2s;position:relative;overflow:hidden;}
-.cell .e{font-size:20px;line-height:1;}
-.cell .n{font-size:9px;color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:2px;max-width:92%;}
-.cell .p{font-size:8px;color:#c86b8a;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;overflow:hidden;}
+h1{color:#c86b8a;font-size:20px;margin-bottom:2px;text-shadow:1px 1px 0 #fff;}
+.sub{color:#a88bb8;font-size:12px;margin-bottom:6px;}
+#board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:6px;margin:0 auto;}
+.cell{background:#fff;border-radius:9px;border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;}
+.cell .e{font-size:clamp(12px,2.2vw,22px);line-height:1;}
+.cell .n{font-size:clamp(7px,1.1vw,10px);color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:1px;max-width:94%;}
+.cell .p{font-size:clamp(6px,0.95vw,9px);color:#c86b8a;}
 .cell.start{background:linear-gradient(135deg,#fff0f5,#ffe3ec);border-color:#ff8fab;}
 .cell.jail{background:linear-gradient(135deg,#f3e6ff,#e6d5ff);border-color:#b48cd9;}
+.cell.owned-you{background:linear-gradient(135deg,#ffe9f0,#ffd9e8);}
+.cell.owned-me{background:linear-gradient(135deg,#e8f0ff,#d9e3ff);}
 .cell.here{border-color:#ff8fab;box-shadow:0 0 0 3px rgba(255,143,171,.4);}
-.cell .who{position:absolute;top:2px;right:2px;font-size:12px;background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
-.center{background:rgba(255,255,255,.94);border-radius:18px;box-shadow:0 8px 24px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 10px;grid-column:2/9;grid-row:2/5;z-index:3;}
-.center .cname{font-size:16px;font-weight:bold;color:#b48cd9;margin-bottom:2px;}
-.center .cmoney{font-size:14px;color:#e06a8b;margin-bottom:10px;}
-button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:14px;padding:10px 26px;border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);}
-#msg{margin-top:9px;font-size:11px;color:#7d5878;min-height:14px;}
-a{color:#c86b8a;font-size:12px;text-decoration:none;margin-top:8px;display:inline-block;}
+.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(8px,1.4vw,12px);background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
+.center{background:rgba(255,255,255,.95);border-radius:16px;box-shadow:0 8px 22px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px 8px;grid-column:2/9;grid-row:2/5;z-index:3;}
+.center .cname{font-size:clamp(14px,2vw,17px);font-weight:bold;color:#b48cd9;}
+.center .cmoney{font-size:clamp(12px,1.8vw,15px);color:#e06a8b;margin:2px 0 6px;}
+button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:clamp(11px,1.6vw,14px);padding:6px 18px;border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);margin:2px;}
+button.b2{background:linear-gradient(135deg,#b48cd9,#d5b3ff);}
+button:disabled{opacity:.4;cursor:not-allowed;}
+#msg{margin-top:6px;font-size:clamp(9px,1.3vw,12px);color:#7d5878;min-height:14px;max-width:96%;}
 </style>
 </head>
 <body>
 <h1>🎲 环游中国 · 大富翁</h1>
-<div class="sub">🐱桐桐 环游 VS 🐶林霁 · 绕一圈回到左上角终点 · 踩到"被抓住"会停留一回合</div>
-<div class="board" id="board">
+<div class="sub">🐱桐桐 vs 🐶林霁 · 绕一圈回到左上角 · 买地盖房收租</div>
+<div id="board">
   <div class="center">
     <div class="cname" id="turnName">🐱 桐桐</div>
     <div class="cmoney" id="cMoney">2000 元</div>
-    <button onclick="roll()">🎲 掷骰子</button>
+    <button id="btnRoll" onclick="roll()">🎲 掷骰子</button>
+    <div id="ops"></div>
     <div id="msg"></div>
   </div>
 </div>
-<a href="love.html">💌 去彩蛋页 →</a>
 <script>
 const map=[
- {e:"🏛️",n:"北京·起点/终点",p:0},{e:"🌆",n:"上海",p:4000},{e:"🃏",n:"机会",p:0},
- {e:"🌉",n:"杭州",p:2600},{e:"🌺",n:"广州",p:3600},{e:"🏙️",n:"深圳",p:3800},
- {e:"🐼",n:"成都",p:1800},{e:"💸",n:"差旅费",p:0},{e:"🌶️",n:"重庆",p:2400},
- {e:"🌸",n:"武汉",p:1600},{e:"🎲",n:"命运",p:0},{e:"🏯",n:"南京",p:2000},
- {e:"🏮",n:"西安",p:1500},{e:"🪷",n:"苏州",p:2200},{e:"🍊",n:"长沙",p:1400},
- {e:"😈",n:"被林霁抓住",p:0},{e:"🥟",n:"天津",p:1900},{e:"🍺",n:"青岛",p:1700},
- {e:"🍜",n:"郑州",p:1300},{e:"⏳",n:"时间胶囊",p:0},{e:"🌊",n:"厦门",p:1200},
- {e:"🌺",n:"昆明",p:1100},{e:"⛵",n:"大连",p:1000},{e:"❄️",n:"哈尔滨",p:900},
+ {e:"🏛️",n:"北京·起点/终点",p:0,r:0},{e:"🌆",n:"上海",p:4000,r:130},{e:"🃏",n:"机会",p:0,r:0},
+ {e:"🌉",n:"杭州",p:2600,r:80},{e:"🌺",n:"广州",p:3600,r:115},{e:"🏙️",n:"深圳",p:3800,r:120},
+ {e:"🐼",n:"成都",p:1800,r:60},{e:"💸",n:"差旅费",p:0,r:100},{e:"🌶️",n:"重庆",p:2400,r:75},
+ {e:"🌸",n:"武汉",p:1600,r:55},{e:"🎲",n:"命运",p:0,r:0},{e:"🏯",n:"南京",p:2000,r:65},
+ {e:"🏮",n:"西安",p:1500,r:50},{e:"🪷",n:"苏州",p:2200,r:70},{e:"🍊",n:"长沙",p:1400,r:45},
+ {e:"😈",n:"被林霁抓住",p:0,r:0},{e:"🥟",n:"天津",p:1900,r:62},{e:"🍺",n:"青岛",p:1700,r:58},
+ {e:"🍜",n:"郑州",p:1300,r:42},{e:"⏳",n:"时间胶囊",p:0,r:0},{e:"🌊",n:"厦门",p:1200,r:38},
+ {e:"🌺",n:"昆明",p:1100,r:35},{e:"⛵",n:"大连",p:1000,r:32},{e:"❄️",n:"哈尔滨",p:900,r:28},
 ];
-const JAIL_IDX=15; // "被林霁抓住"格
+const JAIL_IDX=15,START_IDX=0,N=map.length;
 const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1,9],
 9:[2,9],10:[3,9],11:[4,9],12:[5,9],
 13:[5,8],14:[5,7],15:[5,6],16:[5,5],17:[5,4],18:[5,3],19:[5,2],20:[5,1],
 21:[4,1],22:[3,1],23:[2,1]};
-const board=document.getElementById("board"),N=map.length;
+const board=document.getElementById("board");
 let pos={you:0,me:0},money={you:2000,me:2000},turn="you",jailed={you:false,me:false};
+let owner={}, houses={};
+// 简易规则：租金按房产等级涨
+function rentOf(cell){ return Math.round(cell.r*[1,2,3.5,5,7][houses[cell.n]||0]); }
+
 map.forEach((c,i)=>{
   const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===JAIL_IDX?" jail":"");d.id="c"+i;
   d.style.gridRow=GRID[i][0];d.style.gridColumn=GRID[i][1];
   d.innerHTML=`<div class="e">${c.e}</div><div class="n">${c.n}</div>`+(c.p>0?`<div class="p">¥${c.p}</div>`:"");
   board.appendChild(d);
 });
+function fitBoard(){
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const availW=vw*0.97,availH=vh*0.84;
+  let w=availW,h=w/1.8;
+  if(h>availH){h=availH;w=h*1.8;}
+  board.style.width=w+"px";board.style.height=h+"px";
+}
 function render(){
   map.forEach((c,i)=>{
     const d=document.getElementById("c"+i);
+    d.classList.remove("owned-you","owned-me");
+    if(c.p>0&&owner[c.n]==="you") d.classList.add("owned-you");
+    if(c.p>0&&owner[c.n]==="me") d.classList.add("owned-me");
     if(i!==0) d.classList.toggle("here",pos.you===i||pos.me===i);
     let who=d.querySelector(".who");if(who)who.remove();
     let w="";
@@ -76,26 +92,60 @@ function render(){
   document.getElementById("turnName").textContent=(turn==="you"?"🐱 桐桐":"🐶 林霁");
   document.getElementById("cMoney").textContent=(turn==="you"?money.you:money.me)+" 元";
 }
+function ops(html){ document.getElementById("ops").innerHTML=html||""; }
 function roll(){
   const who=turn;
-  // 被抓住 → 停留一回合（不掷骰子）
   if(jailed[who]){
-    jailed[who]=false;
-    document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 被林霁抓住，停留了一回合～`;
-    turn=who==="you"?"me":"you";
-    render();
-    return;
+    jailed[who]=false; ops("");
+    document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 被抓住，停留一回合～`;
+    turn=who==="you"?"me":"you"; render(); return;
   }
-  const n=1+Math.floor(Math.random()*6),old=pos[who];   // 1-6 等概率
+  const n=1+Math.floor(Math.random()*6),old=pos[who];
   pos[who]=(pos[who]+n)%N;
-  if(pos[who]<old&&pos[who]!==0) money[who]+=200;
-  if(pos[who]===JAIL_IDX) jailed[who]=true;              // 踩到监狱
   const cell=map[pos[who]];
-  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 掷出 ${n}，来到「${cell.n}」${pos[who]===JAIL_IDX?" · 被抓住，下回合停留！":""}`;
-  turn=who==="you"?"me":"you";
+  if(pos[who]<old&&pos[who]!==0){money[who]+=200;}
+  let m=`${who==="you"?"桐桐":"林霁"} 掷出 ${n}，来到「${cell.n}」`;
+  if(pos[who]===JAIL_IDX){
+    jailed[who]=true; m+=" · 被抓住，下回合停留！"; ops("");
+  }else if(cell.p>0){
+    if(owner[cell.n]===undefined){
+      const can=money[who]>=cell.p;
+      ops(`<button ${can?"":"disabled"} onclick="buy(${JSON.stringify(cell.n)})">🏙️ 购买 ¥${cell.p}</button>`);
+      m+=can?" · 可购买":" · 钱不够买";
+    }else if(owner[cell.n]===who){
+      ops(`<button onclick="build(${JSON.stringify(cell.n)})">🏗️ 升级(房${houses[cell.n]||0})</button>`);
+      m+=" · 你的城，可升级";
+    }else{
+      const op=owner[cell.n]==="you"?"me":"you";
+      const r=rentOf(cell);
+      money[who]-=r;money[op]+=r;
+      m+=` · 这是${op==="you"?"桐桐":"林霁"}的城，付过路费 ¥${r}`; ops("");
+    }
+  }else if(cell.n==="差旅费"){ money[who]-=100; m+=" · 交差旅费 ¥100"; ops(""); }
+  else if(cell.n==="机会"){ money[who]+=80; (money[turn==="you"?"me":"you"])-=80; m+=" · 机会卡 +80"; ops(""); }
+  else if(cell.n==="命运"){ money[who]+=100; m+=" · 命运 +100"; ops(""); }
+  else if(cell.n==="时间胶囊"){ money[who]-=60; (money[turn==="you"?"me":"you"])+=60; m+=" · 时间胶囊 -60"; ops(""); }
+  if(money[who]<0){ money[who]=0; m+=" · 💔破产！"; }
+  document.getElementById("msg").textContent=m;
+  turn=who==="you"?"me":"you"; render();
+}
+function buy(city){
+  const who=turn, cell=map.find(c=>c.n===city);
+  money[who]-=cell.p; owner[city]=who; houses[city]=0; ops("");
+  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 买下「${city}」！`;
   render();
 }
-render();
+function build(city){
+  const who=turn, cell=map.find(c=>c.n===city), h=houses[city]||0;
+  if(h>=4){ document.getElementById("msg").textContent="已经 4 房满级啦～"; return; }
+  const cost=Math.round(cell.p*0.5);
+  if(money[who]<cost){ document.getElementById("msg").textContent=`升级要 ¥${cost}，钱不够`; return; }
+  money[who]-=cost; houses[city]=h+1;
+  document.getElementById("msg").textContent=`「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
+  render();
+}
+window.addEventListener("resize",fitBoard);
+fitBoard();render();
 </script>
 </body>
 </html>
