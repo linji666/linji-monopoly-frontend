@@ -6,13 +6,14 @@
 <title>林霁 & 桐桐 · 环游中国大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
-body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;}
-header{text-align:center;padding:6px 4px 2px;flex:0 0 auto;}
+html,body{height:100%;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);display:flex;flex-direction:column;align-items:center;overflow:hidden;}
+header{text-align:center;padding:4px 4px 2px;flex:0 0 auto;}
 h1{color:#c86b8a;font-size:clamp(15px,2.4vw,22px);text-shadow:1px 1px 0 #fff;}
-.sub{color:#a88bb8;font-size:clamp(9px,1.4vw,12px);}
-#board{flex:1 1 auto;width:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:clamp(2px,0.6vw,6px);padding:clamp(2px,0.5vw,8px);}
+.sub{color:#a88bb8;font-size:clamp(8px,1.4vw,12px);}
+#board{flex:1 1 auto;min-height:0;width:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:clamp(2px,0.6vw,6px);padding:clamp(2px,0.5vw,8px);overflow:hidden;}
 .cell{background:#fff;border-radius:clamp(5px,1.2vw,10px);border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;min-height:0;}
-.cell .e{font-size:clamp(13px,3vw,24px);line-height:1;}
+.cell .e{font-size:clamp(13px,3vw,22px);line-height:1;}
 .cell .n{font-size:clamp(7px,1.3vw,11px);color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:1px;max-width:96%;}
 .cell .p{font-size:clamp(6px,1vw,10px);color:#c86b8a;}
 .cell.start{background:linear-gradient(135deg,#fff0f5,#ffe3ec);border-color:#ff8fab;}
@@ -80,6 +81,13 @@ map.forEach((c,i)=>{
   d.innerHTML=`<div class="e">${c.e}</div><div class="n">${c.n}</div>`+(c.p>0?`<div class="p">¥${c.p}</div>`:"");
   board.appendChild(d);
 });
+// 精确计算，确保底边一行不被裁掉
+function fit(){
+  const hh=document.querySelector("header").offsetHeight;
+  const ch=document.documentElement.clientHeight;
+  const avail=Math.max(200, ch-hh-6);
+  board.style.height=avail+"px";
+}
 function render(){
   map.forEach((c,i)=>{
     const d=document.getElementById("c"+i);
@@ -151,7 +159,9 @@ function build(city){
   document.getElementById("msg").textContent=`「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
   render();
 }
-render();
+window.addEventListener("resize",fit);
+window.addEventListener("orientationchange",()=>setTimeout(fit,250));
+fit();render();
 </script>
 </body>
 </html>
