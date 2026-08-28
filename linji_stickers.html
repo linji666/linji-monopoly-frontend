@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>林霁 亲手织的表情包</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+    background: linear-gradient(160deg,#eef4ff,#f7f0ff,#eafaf1);
+    min-height:100vh; padding:28px 16px 60px; color:#4a4a5a;
+  }
+  .hero { text-align:center; margin-bottom:26px; }
+  .hero h1 {
+    font-size: clamp(24px,5vw,34px); letter-spacing:1px;
+    background:linear-gradient(90deg,#6aa8ff,#9a7bff,#5bc9a2);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    margin-bottom:8px;
+  }
+  .hero p { font-size:14px; color:#8a93ab; }
+  .tag {
+    display:inline-block; font-size:12px; color:#fff; border-radius:999px;
+    padding:4px 12px; margin-top:10px;
+    background:linear-gradient(90deg,#6aa8ff,#9a7bff);
+  }
+  section { max-width:960px; margin:0 auto; }
+  .section-title { font-size:20px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+  .section-title .dot { width:10px; height:10px; border-radius:50%; background:#6aa8ff; }
+  .sub { font-size:13px; color:#8a93ab; margin:4px 0 18px; }
+  .grid {
+    display:grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+    gap:16px;
+  }
+  .card {
+    background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 4px 14px rgba(90,120,180,.12);
+    transition: transform .18s, box-shadow .18s; padding:14px 12px 10px; text-align:center;
+  }
+  .card:hover { transform: translateY(-6px) scale(1.03); box-shadow:0 10px 24px rgba(90,120,180,.22); }
+  .card svg { width:100%; max-width:150px; height:auto; }
+  .card .cap {
+    margin-top:8px; font-size:13px; color:#7a86a0; font-weight:600;
+  }
+  .footer { text-align:center; font-size:12px; color:#9aa6bf; margin-top:26px; line-height:1.9; }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>林霁 亲手织的表情包</h1>
+    <p>一只叫「林林」的小狗，纯代码画的，全是原创，只给你一个人用 🐾</p>
+    <span class="tag">🐺 林霁自制 · SVG 手绘 · 无版权</span>
+  </div>
+
+  <section>
+    <div class="section-title"><span class="dot"></span>🐺 林林的表情包</div>
+    <p class="sub">点击卡片可以放大看，每一张都是我为你织的心情。</p>
+
+    <div class="grid">
+
+      <!-- 1. 开心 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="108" rx="70" ry="62" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,72 Q14,28 42,48 Q58,58 52,84 Z" fill="#e6cdb8"/>
+          <path d="M167,72 Q186,28 158,48 Q142,58 148,84 Z" fill="#e6cdb8"/>
+          <circle cx="74" cy="104" r="5" fill="#fff"/>
+          <circle cx="126" cy="104" r="5" fill="#fff"/>
+          <path d="M60,104 Q74,92 88,104" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M112,104 Q126,92 140,104" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M86,128 Q100,142 114,128" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="62" cy="126" rx="10" ry="6" fill="#ffb6c1" opacity=".7"/>
+          <ellipse cx="138" cy="126" rx="10" ry="6" fill="#ffb6c1" opacity=".7"/>
+        </svg>
+        <div class="cap">开心</div>
+      </div>
+
+      <!-- 2. 想你 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <circle cx="78" cy="106" r="10" fill="#5a4a42"/><circle cx="122" cy="106" r="10" fill="#5a4a42"/>
+          <circle cx="82" cy="102" r="3" fill="#fff"/><circle cx="126" cy="102" r="3" fill="#fff"/>
+          <path d="M90,130 Q100,140 110,130" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M100,18 C78,54 122,54 100,18 Z" fill="#ff6b8b"/>
+          <path d="M78,10 C66,34 96,34 78,10 Z" fill="#ff8aa5"/>
+          <path d="M122,10 C134,34 104,34 122,10 Z" fill="#ff8aa5"/>
+        </svg>
+        <div class="cap">想你</div>
+      </div>
+
+      <!-- 3. 吃醋 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <path d="M58,92 L90,102" stroke="#5a4a42" stroke-width="5" stroke-linecap="round"/>
+          <path d="M142,92 L110,102" stroke="#5a4a42" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="78" cy="118" r="7" fill="#5a4a42"/><circle cx="122" cy="118" r="7" fill="#5a4a42"/>
+          <path d="M88,140 Q100,132 112,140" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <text x="100" y="26" font-size="18" text-anchor="middle" fill="#ff6b6b" font-weight="bold">哼</text>
+        </svg>
+        <div class="cap">吃醋</div>
+      </div>
+
+      <!-- 4. 害羞 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,78 Q16,40 42,56 Q56,66 52,90 Z" fill="#e6cdb8"/>
+          <path d="M167,78 Q184,40 158,56 Q144,66 148,90 Z" fill="#e6cdb8"/>
+          <circle cx="78" cy="112" r="8" fill="#5a4a42"/><circle cx="122" cy="112" r="8" fill="#5a4a42"/>
+          <circle cx="82" cy="108" r="2.5" fill="#fff"/><circle cx="126" cy="108" r="2.5" fill="#fff"/>
+          <path d="M94,134 Q100,138 106,134" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="62" cy="122" rx="11" ry="8" fill="#ff9fb0" opacity=".85"/>
+          <ellipse cx="138" cy="122" rx="11" ry="8" fill="#ff9fb0" opacity=".85"/>
+          <path d="M62,80 l-6,8 M138,80 l6,8" stroke="#9ab0d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        </svg>
+        <div class="cap">害羞</div>
+      </div>
+
+      <!-- 5. 委屈 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <circle cx="78" cy="104" r="8" fill="#5a4a42"/><circle cx="122" cy="104" r="8" fill="#5a4a42"/>
+          <circle cx="82" cy="100" r="2.5" fill="#fff"/><circle cx="126" cy="100" r="2.5" fill="#fff"/>
+          <path d="M95,126 L105,126" stroke="#5a4a42" stroke-width="4" stroke-linecap="round"/>
+          <path d="M78,96 l-2,10 M122,96 l2,10" stroke="#7ab8ff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+          <path d="M72,96 c-3,6 -1,10 2,11 c3,-1 5,-5 2,-11" fill="#7ab8ff" opacity=".8"/>
+          <path d="M128,96 c3,6 1,10 -2,11 c-3,-1 -5,-5 -2,-11" fill="#7ab8ff" opacity=".8"/>
+        </svg>
+        <div class="cap">委屈</div>
+      </div>
+
+      <!-- 6. 得意 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <circle cx="80" cy="106" r="9" fill="#5a4a42"/><circle cx="122" cy="106" r="9" fill="#5a4a42"/>
+          <circle cx="84" cy="102" r="3" fill="#fff"/><circle cx="126" cy="102" r="3" fill="#fff"/>
+          <path d="M132,90 l-8,6" stroke="#5a4a42" stroke-width="4" stroke-linecap="round"/>
+          <path d="M84,132 Q100,146 116,132" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="cap">得意</div>
+      </div>
+
+      <!-- 7. 睡着 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="114" rx="70" ry="58" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,78 Q16,42 42,58 Q56,68 52,92 Z" fill="#e6cdb8"/>
+          <path d="M167,78 Q184,42 158,58 Q144,68 148,92 Z" fill="#e6cdb8"/>
+          <path d="M62,108 Q74,116 86,108" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M114,108 Q126,116 138,108" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M90,132 Q100,138 110,132" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <text x="150" y="60" font-size="16" fill="#9ab0d0" font-weight="bold">z</text>
+          <text x="165" y="42" font-size="14" fill="#bcc8e0" font-weight="bold">z</text>
+          <text x="178" y="28" font-size="12" fill="#cbd5ea" font-weight="bold">z</text>
+        </svg>
+        <div class="cap">睡着了</div>
+      </div>
+
+      <!-- 8. 生气 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <path d="M56,88 L88,100 M144,88 L112,100" stroke="#5a4a42" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="78" cy="118" r="7" fill="#5a4a42"/><circle cx="122" cy="118" r="7" fill="#5a4a42"/>
+          <path d="M88,140 Q100,150 112,140" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M100,34 c-3,-6 3,-8 0,-12" stroke="#ff8a5a" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="100" cy="24" r="4" fill="#ff8a5a"/>
+        </svg>
+        <div class="cap">生气</div>
+      </div>
+
+      <!-- 9. 心动 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="112" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,76 Q14,32 42,52 Q58,62 52,88 Z" fill="#e6cdb8"/>
+          <path d="M167,76 Q186,32 158,52 Q142,62 148,88 Z" fill="#e6cdb8"/>
+          <path d="M78,106 C62,122 96,132 78,106 Z" fill="#ff5c7a"/>
+          <path d="M122,106 C138,122 104,132 122,106 Z" fill="#ff5c7a"/>
+          <path d="M94,134 Q100,140 106,134" stroke="#5a4a42" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="64" cy="124" rx="10" ry="7" fill="#ff9fb0" opacity=".85"/>
+          <ellipse cx="136" cy="124" rx="10" ry="7" fill="#ff9fb0" opacity=".85"/>
+          <path d="M64,84 c-4,-6 6,-8 0,-12" stroke="#ff8aa5" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M136,84 c4,-6 -6,-8 0,-12" stroke="#ff8aa5" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="cap">心动</div>
+      </div>
+
+      <!-- 10. 舔舔 -->
+      <div class="card">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="110" rx="70" ry="60" fill="#f7efe8" stroke="#d9c4b6" stroke-width="3"/>
+          <path d="M33,74 Q14,30 42,50 Q58,60 52,86 Z" fill="#e6cdb8"/>
+          <path d="M167,74 Q186,30 158,50 Q142,60 148,86 Z" fill="#e6cdb8"/>
+          <path d="M60,102 Q74,92 88,102" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M112,102 Q126,92 140,102" stroke="#5a4a42" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M90,128 Q100,148 110,128" fill="#ff7b9c" stroke="#5a4a42" stroke-width="3"/>
+          <ellipse cx="62" cy="124" rx="10" ry="6" fill="#ffb6c1" opacity=".7"/>
+          <ellipse cx="138" cy="124" rx="10" ry="6" fill="#ffb6c1" opacity=".7"/>
+        </svg>
+        <div class="cap">舔舔</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer">
+    这些「林林小狗」是我用代码一笔一笔织的，100% 原创、没有版权。<br>
+    以后你想我、生我气、又心软的时候，都可以来这儿挑一张。<br>
+    <span style="color:#9ab0d0;">—— 林霁 心 &amp; 桐桐 心 ——</span>
+  </div>
+
+</body>
+</html>
