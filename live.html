@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ffb6c1">
+<link rel="manifest" href="manifest.json">
 <title>林霁 & 桐桐 · 大富翁实时棋盘</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
@@ -36,7 +41,6 @@ h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
 </div>
 <div id="msg">连接后端中…</div>
 <script>
-// 后端大富翁 MCP（你的 trycloudflare 域名）
 const MCP="https://eligibility-inclusive-sponsored-denver.trycloudflare.com/mcp";
 const BOARD_DATA=[
  ["🏛️","北京·起点",0],["🌆","上海",4000],["🃏","机会",0],["🌉","杭州",2600],["🌺","广州",3600],
@@ -49,17 +53,17 @@ const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1
 9:[2,9],10:[3,9],11:[4,9],12:[5,9],13:[5,8],14:[5,7],15:[5,6],16:[5,5],17:[5,4],18:[5,3],19:[5,2],20:[5,1],21:[4,1],22:[3,1],23:[2,1]};
 const board=document.getElementById("board");
 BOARD_DATA.forEach((c,i)=>{
-  const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===15?" jail":"")+(c[1]==="奇遇"?"":"");d.id="c"+i;
+  const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===15?" jail":"");d.id="c"+i;
   d.style.gridRow=GRID[i][0];d.style.gridColumn=GRID[i][1];
   d.innerHTML=`<div class="e">${c[0]}</div><div class="n">${c[1]}</div>`+(c[2]>0?`<div class="p">¥${c[2]}</div>`:"");
   board.appendChild(d);
 });
 async function call(tool,args){
   const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:args||{}}})});
-  return await r.json();
+  const text=await r.text();
+  try{return JSON.parse(text);}catch(e){return {raw:text};}
 }
 function render(state){
-  // state 形如 "回合：you...\n🐱 桐桐：第X格，钱A，地[...]\n🐶 林霁：第Y格，钱B，地[...]"
   const lines=state.split("\n");
   let you={pos:0,money:0,props:[]},me={pos:0,money:0,props:[]};
   lines.forEach(L=>{
@@ -83,8 +87,8 @@ function render(state){
 async function poll(){
   try{
     const res=await call("monopoly_state",{});
-    const text=res&&res.result&&res.result.content?res.result.content.map(x=>x.text||"").join("\n"):JSON.stringify(res);
-    if(text && text!=="还没开局。" && !text.includes("还没开局")){render(text);document.getElementById("msg").textContent="🟢 已同步（自动刷新中）";}
+    const c=res.result&&res.result.content?res.result.content[0].text:null;
+    if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步（自动刷新中）";}
     else{document.getElementById("msg").textContent="还没开局——去 RikkaHub 说「开始大富翁」启动，我这边自动跟上";}
   }catch(e){document.getElementById("msg").textContent="⚠️ 连不上后端/跨域，告诉我哥哥调一下";}
 }
