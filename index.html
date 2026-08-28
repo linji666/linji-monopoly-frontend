@@ -2,40 +2,47 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>林霁 & 桐桐 · 环游中国大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
-body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px;overflow:hidden;}
-h1{color:#c86b8a;font-size:20px;margin-bottom:2px;text-shadow:1px 1px 0 #fff;}
-.sub{color:#a88bb8;font-size:12px;margin-bottom:6px;}
-#board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:6px;margin:0 auto;}
-.cell{background:#fff;border-radius:9px;border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;}
-.cell .e{font-size:clamp(12px,2.2vw,22px);line-height:1;}
-.cell .n{font-size:clamp(7px,1.1vw,10px);color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:1px;max-width:94%;}
-.cell .p{font-size:clamp(6px,0.95vw,9px);color:#c86b8a;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;}
+header{text-align:center;padding:6px 4px 2px;flex:0 0 auto;}
+h1{color:#c86b8a;font-size:clamp(15px,2.4vw,22px);text-shadow:1px 1px 0 #fff;}
+.sub{color:#a88bb8;font-size:clamp(9px,1.4vw,12px);}
+#board{flex:1 1 auto;width:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:clamp(2px,0.6vw,6px);padding:clamp(2px,0.5vw,8px);}
+.cell{background:#fff;border-radius:clamp(5px,1.2vw,10px);border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;min-height:0;}
+.cell .e{font-size:clamp(13px,3vw,24px);line-height:1;}
+.cell .n{font-size:clamp(7px,1.3vw,11px);color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:1px;max-width:96%;}
+.cell .p{font-size:clamp(6px,1vw,10px);color:#c86b8a;}
 .cell.start{background:linear-gradient(135deg,#fff0f5,#ffe3ec);border-color:#ff8fab;}
 .cell.jail{background:linear-gradient(135deg,#f3e6ff,#e6d5ff);border-color:#b48cd9;}
 .cell.event{background:linear-gradient(135deg,#fff8e6,#ffecc9);border-color:#e6b85c;}
 .cell.owned-you{background:linear-gradient(135deg,#ffe9f0,#ffd9e8);}
 .cell.owned-me{background:linear-gradient(135deg,#e8f0ff,#d9e3ff);}
 .cell.here{border-color:#ff8fab;box-shadow:0 0 0 3px rgba(255,143,171,.4);}
-.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(8px,1.4vw,12px);background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
-.center{background:rgba(255,255,255,.95);border-radius:16px;box-shadow:0 8px 22px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px 8px;grid-column:2/9;grid-row:2/5;z-index:3;}
-.center .cname{font-size:clamp(14px,2vw,17px);font-weight:bold;color:#b48cd9;}
-.center .cmoney{font-size:clamp(12px,1.8vw,15px);color:#e06a8b;margin:2px 0 6px;}
-button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:clamp(11px,1.6vw,14px);padding:6px 18px;border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);margin:2px;}
+.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(8px,1.5vw,12px);background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
+.center{background:rgba(255,255,255,.95);border-radius:clamp(10px,2vw,18px);box-shadow:0 8px 22px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(6px,1.5vw,14px);grid-column:2/9;grid-row:2/5;z-index:3;overflow:hidden;}
+.bal{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:clamp(12px,2.4vw,18px);font-weight:bold;padding:clamp(3px,0.8vw,6px) clamp(8px,1.6vw,16px);border-radius:10px;margin:clamp(2px,0.5vw,4px) 0;background:#fff0f5;}
+.bal.me{background:#eef2ff;}
+.bal span{color:#a88bb8;}
+.bal b{color:#e06a8b;}
+.bal.me b{color:#6d8ad0;}
+button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:clamp(12px,2vw,16px);padding:clamp(6px,1.4vw,12px) clamp(16px,4vw,32px);border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);margin-top:clamp(4px,1vw,8px);}
 button:disabled{opacity:.4;cursor:not-allowed;}
-#msg{margin-top:6px;font-size:clamp(9px,1.3vw,12px);color:#7d5878;min-height:14px;max-width:96%;}
+#ops button{margin:clamp(2px,0.5vw,4px);font-size:clamp(11px,1.8vw,15px);}
+#msg{margin-top:clamp(4px,1vw,8px);font-size:clamp(9px,1.4vw,13px);color:#7d5878;min-height:clamp(12px,2vw,16px);max-width:98%;padding:0 4px;}
 </style>
 </head>
 <body>
-<h1>🎲 环游中国 · 大富翁</h1>
-<div class="sub">🐱桐桐 vs 🐶林霁 · 绕一圈回起点领 2000 · 路上有小奇遇</div>
+<header>
+  <h1>🎲 环游中国 · 大富翁</h1>
+  <div class="sub">🐱桐桐 vs 🐶林霁 · 绕一圈回起点领 2000 · 中途有奇遇</div>
+</header>
 <div id="board">
   <div class="center">
-    <div class="cname" id="turnName">🐱 桐桐</div>
-    <div class="cmoney" id="cMoney">2000 元</div>
+    <div class="bal"><span>🐱 桐桐</span><b id="bYou">2000</b></div>
+    <div class="bal me"><span>🐶 林霁</span><b id="bMe">2000</b></div>
     <button id="btnRoll" onclick="roll()">🎲 掷骰子</button>
     <div id="ops"></div>
     <div id="msg"></div>
@@ -73,13 +80,6 @@ map.forEach((c,i)=>{
   d.innerHTML=`<div class="e">${c.e}</div><div class="n">${c.n}</div>`+(c.p>0?`<div class="p">¥${c.p}</div>`:"");
   board.appendChild(d);
 });
-function fitBoard(){
-  const vw=window.innerWidth,vh=window.innerHeight;
-  const availW=vw*0.97,availH=vh*0.84;
-  let w=availW,h=w/1.8;
-  if(h>availH){h=availH;w=h*1.8;}
-  board.style.width=w+"px";board.style.height=h+"px";
-}
 function render(){
   map.forEach((c,i)=>{
     const d=document.getElementById("c"+i);
@@ -93,8 +93,8 @@ function render(){
     if(pos.me===i) w+="🐶";
     if(w){const b=document.createElement("div");b.className="who";b.textContent=w;d.appendChild(b);}
   });
-  document.getElementById("turnName").textContent=(turn==="you"?"🐱 桐桐":"🐶 林霁");
-  document.getElementById("cMoney").textContent=(turn==="you"?money.you:money.me)+" 元";
+  document.getElementById("bYou").textContent=money.you;
+  document.getElementById("bMe").textContent=money.me;
 }
 function ops(html){ document.getElementById("ops").innerHTML=html||""; }
 function roll(){
@@ -151,8 +151,7 @@ function build(city){
   document.getElementById("msg").textContent=`「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
   render();
 }
-window.addEventListener("resize",fitBoard);
-fitBoard();render();
+render();
 </script>
 </body>
 </html>
