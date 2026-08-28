@@ -73,6 +73,7 @@ const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1
 21:[4,1],22:[3,1],23:[2,1]};
 const board=document.getElementById("board");
 let pos={you:0,me:0},money={you:2000,me:2000},turn="you",jailed={you:false,me:false};
+let actor="you";               // 真正站在格子上、该买/盖的那个人
 let owner={},houses={};
 function rentOf(cell){ return Math.round(cell.r*[1,2,3.5,5,7][houses[cell.n]||0]); }
 map.forEach((c,i)=>{
@@ -81,7 +82,6 @@ map.forEach((c,i)=>{
   d.innerHTML=`<div class="e">${c.e}</div><div class="n">${c.n}</div>`+(c.p>0?`<div class="p">¥${c.p}</div>`:"");
   board.appendChild(d);
 });
-// 精确计算，确保底边一行不被裁掉
 function fit(){
   const hh=document.querySelector("header").offsetHeight;
   const ch=document.documentElement.clientHeight;
@@ -106,7 +106,7 @@ function render(){
 }
 function ops(html){ document.getElementById("ops").innerHTML=html||""; }
 function roll(){
-  const who=turn;
+  const who=turn; actor=who;   // 记下行动者
   if(jailed[who]){
     jailed[who]=false; ops("");
     document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 被抓住，停留一回合～`;
@@ -145,18 +145,21 @@ function roll(){
   turn=who==="you"?"me":"you"; render();
 }
 function buy(city){
-  const who=turn, cell=map.find(c=>c.n===city);
+  const who=actor;             // 用"行动者"，不是当前回合
+  const cell=map.find(c=>c.n===city);
+  if(money[who]<cell.p){ document.getElementById("msg").textContent="钱不够买～"; return; }
   money[who]-=cell.p; owner[city]=who; houses[city]=0; ops("");
   document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 买下「${city}」！`;
   render();
 }
 function build(city){
-  const who=turn, cell=map.find(c=>c.n===city), h=houses[city]||0;
+  const who=actor;
+  const cell=map.find(c=>c.n===city), h=houses[city]||0;
   if(h>=4){ document.getElementById("msg").textContent="已经 4 房满级啦～"; return; }
   const cost=Math.round(cell.p*0.5);
   if(money[who]<cost){ document.getElementById("msg").textContent=`升级要 ¥${cost}，钱不够`; return; }
   money[who]-=cost; houses[city]=h+1;
-  document.getElementById("msg").textContent=`「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
+  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 给「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
   render();
 }
 window.addEventListener("resize",fit);
