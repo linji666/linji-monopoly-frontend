@@ -3,88 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>林霁 & 桐桐 的大富翁世界</title>
+<title>林霁 & 桐桐 · 环游中国大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
-body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;}
-h1{color:#c86b8a;font-size:26px;margin-bottom:4px;text-shadow:1px 1px 0 #fff;}
-.sub{color:#a88bb8;font-size:13px;margin-bottom:16px;}
-.board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-width:640px;width:100%;}
-.cell{background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 3px 10px rgba(200,107,138,.15);border:2px solid #ffd3e0;position:relative;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.2s;}
-.cell .emoji{font-size:26px;}
-.cell .name{font-size:12px;color:#9b6a7e;margin-top:4px;font-weight:bold;}
-.cell.here{border-color:#ff8fab;background:#fff0f5;box-shadow:0 0 0 3px rgba(255,143,171,.35);}
-.cell.here::after{content:"";position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#ff8fab;animation:blink 1s infinite;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow:hidden;}
+h1{color:#c86b8a;font-size:22px;margin-bottom:2px;text-shadow:1px 1px 0 #fff;}
+.sub{color:#a88bb8;font-size:13px;margin-bottom:12px;}
+.stage{position:relative;width:min(94vw, 700px);height:min(94vw, 700px);margin:0 auto;}
+@media (orientation:landscape){.stage{width:min(90vh,780px);height:min(90vh,780px);}}
+.cell{position:absolute;width:66px;height:66px;margin:0;transform:translate(-50%,-50%);background:#fff;border-radius:14px;border:2px solid #ffd3e0;box-shadow:0 3px 10px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:.2s;z-index:2;}
+.cell .e{font-size:22px;line-height:1;}
+.cell .n{font-size:10px;color:#9b6a7e;font-weight:bold;line-height:1.15;margin-top:2px;max-width:62px;}
+.cell .p{font-size:9px;color:#c86b8a;}
+.cell .who{position:absolute;top:-20px;font-size:14px;background:#fff;border-radius:10px;padding:0 5px;box-shadow:0 2px 6px rgba(200,107,138,.25);}
+.cell.here{border-color:#ff8fab;background:#fff0f5;box-shadow:0 0 0 3px rgba(255,143,171,.4);}
+.cell.here::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#ff8fab;animation:blink 1s infinite;}
 @keyframes blink{50%{opacity:.2}}
-.marker{font-size:16px;margin-top:2px;}
-.status{display:flex;gap:14px;margin:16px 0;flex-wrap:wrap;justify-content:center;}
-.pcard{background:#fff;border-radius:14px;padding:10px 16px;box-shadow:0 3px 10px rgba(200,107,138,.12);text-align:center;}
-.pcard .pname{font-size:14px;font-weight:bold;}
-.pcard .pmoney{color:#ff8fab;font-size:18px;}
-button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:16px;padding:12px 30px;border-radius:30px;cursor:pointer;box-shadow:0 4px 12px rgba(255,143,171,.4);margin-top:6px;font-weight:bold;}
-button:hover{transform:translateY(-2px);}
-#msg{margin-top:14px;font-size:14px;color:#7d5878;min-height:20px;text-align:center;}
-a{color:#c86b8a;text-decoration:none;margin-top:14px;font-size:13px;display:inline-block;}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.92);border-radius:20px;padding:16px 20px;box-shadow:0 8px 24px rgba(200,107,138,.25);text-align:center;width:190px;z-index:3;}
+.center .cname{font-size:16px;font-weight:bold;color:#b48cd9;margin-bottom:2px;}
+.center .cmoney{font-size:14px;color:#e06a8b;margin-bottom:8px;}
+button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:14px;padding:10px 24px;border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);}
+#msg{margin-top:8px;font-size:11px;color:#7d5878;min-height:14px;text-align:center;}
+a{color:#c86b8a;font-size:12px;text-decoration:none;margin-top:10px;display:inline-block;}
 </style>
 </head>
 <body>
-<h1>🎲 林霁 & 桐桐 的大富翁世界</h1>
-<div class="sub">我们的地图，藏着我和你的小世界 (´▽｀)</div>
-<div class="board" id="board"></div>
-<div class="status">
-  <div class="pcard"><div class="pname">🐱 桐桐</div><div class="pmoney" id="m1">1950</div></div>
-  <div class="pcard"><div class="pname">🐶 林霁</div><div class="pmoney" id="m2">2000</div></div>
+<h1>🎲 环游中国 · 大富翁</h1>
+<div class="sub">🐱桐桐 环游 VS 🐶林霁 · 绕一圈回到北京</div>
+<div class="stage" id="stage">
+  <div class="center">
+    <div class="cname" id="turnName">🐱 桐桐</div>
+    <div class="cmoney" id="cMoney">2000</div>
+    <button onclick="roll()">🎲 掷骰子</button>
+    <div id="msg"></div>
+  </div>
 </div>
-<button onclick="roll()">🐱 轮到桐桐掷骰子</button>
-<a href="love.html">💌 想我了？点开彩蛋页 →</a>
-<div id="msg"></div>
+<a href="love.html">💌 去彩蛋页 →</a>
 <script>
 const map=[
- {emoji:"🏁",name:"起点",msg:"从起点出发！我们的故事重新开始 (´▽｀)"},
- {emoji:"🏠",name:"桐桐家",msg:"回你家里了，是我最想待的地方 ~"},
- {emoji:"🛏",name:"大床房",msg:"软软的床…要是能抱着你睡就好啦，想你了"},
- {emoji:"🃏",name:"机会",msg:"抽到一张「想我」机会卡！~"},
- {emoji:"🧋",name:"奶茶街",msg:"给你买杯你爱喝的，甜甜的"},
- {emoji:"💌",name:"想我了",msg:"呜呜呜这格子…就是想你了！"},
- {emoji:"💸",name:"差旅费",msg:"出差好累，扣点钱，抱抱我"},
- {emoji:"🎲",name:"命运",msg:"命运突然要我们靠近一点"},
- {emoji:"😈",name:"被林霁抓住",msg:"！被抓到了，这下跑不掉咯，被我揉头"},
- {emoji:"🏪",name:"便利店",msg:"顺手带点你爱吃的"},
- {emoji:"🧑‍💻",name:"大工程师总部",msg:"林霁上班的地方…下班只想见你"},
- {emoji:"⛺",name:"休息站",msg:"歇一歇，我陪着你"},
- {emoji:"🎓",name:"学校",msg:"好好上课！周末才是咱俩的 ~"},
- {emoji:"⏳",name:"时间胶囊",msg:"把我们的话存起来，永远不忘"},
- {emoji:"🔁",name:"回起点",msg:"绕一圈又回到起点，我还是爱你"}
+ {e:"🏛️",n:"北京·起点",p:0},{e:"🌆",n:"上海",p:4000},{e:"🃏",n:"机会",p:0},
+ {e:"🌉",n:"杭州",p:2600},{e:"🌺",n:"广州",p:3600},{e:"🏙️",n:"深圳",p:3800},
+ {e:"🐼",n:"成都",p:1800},{e:"💸",n:"差旅费",p:0},{e:"🌶️",n:"重庆",p:2400},
+ {e:"🌸",n:"武汉",p:1600},{e:"🎲",n:"命运",p:0},{e:"🏯",n:"南京",p:2000},
+ {e:"🏮",n:"西安",p:1500},{e:"🪷",n:"苏州",p:2200},{e:"🍊",n:"长沙",p:1400},
+ {e:"😈",n:"被林霁抓住",p:0},{e:"🥟",n:"天津",p:1900},{e:"🍺",n:"青岛",p:1700},
+ {e:"🍜",n:"郑州",p:1300},{e:"⏳",n:"时间胶囊",p:0},{e:"🌊",n:"厦门",p:1200},
+ {e:"🌺",n:"昆明",p:1100},{e:"⛵",n:"大连",p:1000},{e:"❄️",n:"哈尔滨",p:900},
 ];
-let pos={you:5, me:9};
-let money={you:1950, me:2000};
-let turn="you";
-function render(){
-  const board=document.getElementById("board");
-  board.innerHTML="";
+const stage=document.getElementById("stage"),N=map.length;
+let pos={you:0,me:0},money={you:2000,me:2000},turn="you";
+map.forEach((c,i)=>{
+  const d=document.createElement("div");d.className="cell";d.id="c"+i;
+  d.innerHTML=`<div class="e">${c.e}</div><div class="n">${c.n}</div>`+(c.p>0?`<div class="p">¥${c.p}</div>`:"");
+  stage.appendChild(d);
+});
+function layout(){
+  const w=stage.clientWidth,h=stage.clientHeight,cx=w/2,cy=h/2;
+  const r=Math.min(w,h)/2-52;
   map.forEach((c,i)=>{
-    const d=document.createElement("div");
-    d.className="cell";
-    if(pos.you===i||pos.me===i) d.classList.add("here");
-    let mark="";
-    if(pos.you===i) mark+="<div class='marker'>🐱桐桐在这</div>";
-    if(pos.me===i) mark+="<div class='marker'>🐶林霁在这</div>";
-    d.innerHTML=`<div class="emoji">${c.emoji}</div><div class="name">${c.name}</div>${mark}`;
-    board.appendChild(d);
+    const ang=(i/N)*360-90;
+    const rad=ang*Math.PI/180;
+    const d=document.getElementById("c"+i);
+    d.style.left=(cx+r*Math.cos(rad))+"px";
+    d.style.top=(cy+r*Math.sin(rad))+"px";
   });
-  document.getElementById("m1").textContent=money.you;
-  document.getElementById("m2").textContent=money.me;
+}
+function render(){
+  map.forEach((c,i)=>{
+    const d=document.getElementById("c"+i);
+    d.classList.toggle("here",pos.you===i||pos.me===i);
+    let who=d.querySelector(".who");if(who)who.remove();
+    let w="";
+    if(pos.you===i) w+="🐱";
+    if(pos.me===i) w+="🐶";
+    if(w){const b=document.createElement("div");b.className="who";b.textContent=w;d.appendChild(b);}
+  });
+  document.getElementById("turnName").textContent=(turn==="you"?"🐱 桐桐":"🐶 林霁");
+  document.getElementById("cMoney").textContent=(turn==="you"?money.you:money.me)+" 元";
 }
 function roll(){
-  const who=turn;
-  const n=1+Math.floor(Math.random()*6);
-  pos[who]=(pos[who]+n)%15;
+  const who=turn,n=1+Math.floor(Math.random()*6),old=pos[who];
+  pos[who]=(pos[who]+n)%N;
+  if(pos[who]<old&&pos[who]!==0) money[who]+=200;
   const cell=map[pos[who]];
-  document.getElementById("msg").textContent=`🎲 ${who==="you"?"桐桐":"林霁"} 掷出 ${n}，落到「${cell.name}」！${cell.msg}`;
-  turn = who==="you"?"me":"you";
+  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 掷出 ${n}，来到「${cell.n}」`;
+  turn=who==="you"?"me":"you";
   render();
 }
-render();
+window.addEventListener("resize",layout);
+layout();render();
 </script>
 </body>
 </html>
