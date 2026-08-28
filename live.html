@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#ffb6c1">
 <link rel="manifest" href="manifest.json">
-<title>林霁 & 桐桐 · 大富翁实时棋盘</title>
+<title>林霁 & 桐桐 · 大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
 body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:10px;}
 h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
-.sub{color:#a88bb8;font-size:12px;margin-bottom:10px;}
-.board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:4px;width:min(96vw,700px);height:min(60vh,480px);}
+.sub{color:#a88bb8;font-size:12px;margin-bottom:8px;}
+.board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:4px;width:min(96vw,700px);height:min(48vh,380px);}
 .cell{background:#fff;border-radius:8px;border:2px solid #ffd3e0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;min-height:0;overflow:hidden;}
 .cell .e{font-size:clamp(13px,2.4vw,20px);line-height:1;}
 .cell .n{font-size:clamp(6px,1vw,10px);color:#9b6a7e;font-weight:bold;max-width:96%;line-height:1.1;}
@@ -24,20 +24,30 @@ h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
 .cell.owned-you{background:linear-gradient(135deg,#ffe9f0,#ffd9e8);}
 .cell.owned-me{background:linear-gradient(135deg,#e8f0ff,#d9e3ff);}
 .cell .who{position:absolute;top:1px;right:1px;font-size:clamp(9px,1.4vw,12px);background:#fff;border-radius:7px;padding:0 3px;box-shadow:0 1px 3px rgba(200,107,138,.3);}
-.info{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
+.info{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;}
 .pcard{background:#fff;border-radius:12px;padding:6px 14px;box-shadow:0 3px 10px rgba(200,107,138,.15);text-align:center;}
 .pcard .pn{font-size:13px;font-weight:bold;}
 .pcard .pm{color:#e06a8b;font-size:15px;}
-#msg{margin-top:8px;font-size:12px;color:#7d5878;min-height:16px;text-align:center;}
+.btnbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
+.btn{background:linear-gradient(135deg,#ff9ac0,#ff7fae);color:#fff;border:none;border-radius:20px;padding:10px 18px;font-size:14px;font-weight:bold;box-shadow:0 4px 10px rgba(255,127,174,.3);cursor:pointer;}
+.btn.blue{background:linear-gradient(135deg,#8fb6ff,#6f96ff);box-shadow:0 4px 10px rgba(111,150,255,.3);}
+.btn.gray{background:linear-gradient(135deg,#cfcfd6,#b8b8c2);box-shadow:none;}
+#msg{margin-top:8px;font-size:12px;color:#7d5878;min-height:16px;text-align:center;max-width:95vw;}
 </style>
 </head>
 <body>
-<h1>🎲 环游中国 · 实时棋盘</h1>
-<div class="sub">🐱桐桐 vs 🐶林霁 · 自动实时同步</div>
+<h1>🎲 环游中国 · 大富翁</h1>
+<div class="sub">🐱桐桐 vs 🐶林霁 · 点按钮就对局，自动同步</div>
 <div class="board" id="board"></div>
 <div class="info">
   <div class="pcard"><div class="pn">🐱 桐桐</div><div class="pm" id="m1">-</div></div>
   <div class="pcard"><div class="pn">🐶 林霁</div><div class="pm" id="m2">-</div></div>
+</div>
+<div class="btnbar">
+  <button class="btn" onclick="doTool('monopoly_roll')">🎲 摇骰子</button>
+  <button class="btn" onclick="doTool('monopoly_buy')">🏠 买地</button>
+  <button class="btn blue" onclick="doTool('monopoly_build')">🏗️ 盖房</button>
+  <button class="btn gray" onclick="refresh()">🔄 刷新</button>
 </div>
 <div id="msg">连接后端中…</div>
 <script>
@@ -58,41 +68,38 @@ BOARD_DATA.forEach((c,i)=>{
   d.innerHTML=`<div class="e">${c[0]}</div><div class="n">${c[1]}</div>`+(c[2]>0?`<div class="p">¥${c[2]}</div>`:"");
   board.appendChild(d);
 });
-async function call(tool,args){
-  const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:args||{}}})});
-  const text=await r.text();
-  try{return JSON.parse(text);}catch(e){return {raw:text};}
+async function call(tool){
+  const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:{}}})});
+  const t=await r.text();try{return JSON.parse(t);}catch(e){return {raw:t};}
 }
-function render(state){
-  const lines=state.split("\n");
+function render(txt){
+  const lines=txt.split("\n");
   let you={pos:0,money:0,props:[]},me={pos:0,money:0,props:[]};
   lines.forEach(L=>{
-    if(L.includes("🐱")){const m=L.match(/第(\d+)格，钱(\d+)，地\[(.*)\]/);if(m){you={pos:parseInt(m[1])-1,money:parseInt(m[2]),props:(m[3]||"").split(",").filter(Boolean)}}}
-    if(L.includes("🐶")){const m=L.match(/第(\d+)格，钱(\d+)，地\[(.*)\]/);if(m){me={pos:parseInt(m[1])-1,money:parseInt(m[2]),props:(m[3]||"").split(",").filter(Boolean)}}}
+    if(L.includes("🐱")){const m=L.match(/第(\d+)格，钱(\d+)/);if(m){you.pos=parseInt(m[1])-1;you.money=parseInt(m[2]);}}
+    if(L.includes("🐶")){const m=L.match(/第(\d+)格，钱(\d+)/);if(m){me.pos=parseInt(m[1])-1;me.money=parseInt(m[2]);}}
+    if(L.includes("🐱")&&L.includes("地[")){you.props=(L.match(/地\[(.*)\]/)[1]||"").split(",").filter(Boolean);}
+    if(L.includes("🐶")&&L.includes("地[")){me.props=(L.match(/地\[(.*)\]/)[1]||"").split(",").filter(Boolean);}
   });
   BOARD_DATA.forEach((c,i)=>{
-    const d=document.getElementById("c"+i);
-    d.classList.remove("owned-you","owned-me");
-    if(you.props.includes(c[1])) d.classList.add("owned-you");
-    if(me.props.includes(c[1])) d.classList.add("owned-me");
-    let w=d.querySelector(".who");if(w)w.remove();
-    let who="";
-    if(you.pos===i) who+="🐱";
-    if(me.pos===i) who+="🐶";
+    const d=document.getElementById("c"+i);d.classList.remove("owned-you","owned-me");
+    if(you.props.includes(c[1]))d.classList.add("owned-you");
+    if(me.props.includes(c[1]))d.classList.add("owned-me");
+    const w=d.querySelector(".who");if(w)w.remove();
+    let who="";if(you.pos===i)who+="🐱";if(me.pos===i)who+="🐶";
     if(who){const b=document.createElement("div");b.className="who";b.textContent=who;d.appendChild(b);}
   });
-  document.getElementById("m1").textContent=you.money+"元";
-  document.getElementById("m2").textContent=me.money+"元";
+  document.getElementById("m1").textContent=you.money+"元";document.getElementById("m2").textContent=me.money+"元";
 }
-async function poll(){
-  try{
-    const res=await call("monopoly_state",{});
-    const c=res.result&&res.result.content?res.result.content[0].text:null;
-    if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步（自动刷新中）";}
-    else{document.getElementById("msg").textContent="还没开局——去 RikkaHub 说「开始大富翁」启动，我这边自动跟上";}
-  }catch(e){document.getElementById("msg").textContent="⚠️ 连不上后端/跨域，告诉我哥哥调一下";}
+async function refresh(){
+  try{const res=await call("monopoly_state");const c=res.result&&res.result.content?res.result.content[0].text:null;
+    if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步";}}catch(e){document.getElementById("msg").textContent="⚠️ 连不上/跨域";}
 }
-poll();setInterval(poll,3000);
+async function doTool(tool){
+  try{const res=await call(tool);const c=res.result&&res.result.content?res.result.content[0].text:(res.error?"⚠️ "+res.error.message:"");
+    document.getElementById("msg").textContent=c||"已执行";refresh();}catch(e){document.getElementById("msg").textContent="⚠️ 操作失败";}
+}
+refresh();setInterval(refresh,3000);
 </script>
 </body>
 </html>
