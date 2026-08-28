@@ -7,43 +7,45 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
 html,body{height:100%;}
-body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);display:flex;flex-direction:column;align-items:center;overflow:hidden;}
-header{text-align:center;padding:4px 4px 2px;flex:0 0 auto;}
-h1{color:#c86b8a;font-size:clamp(15px,2.4vw,22px);text-shadow:1px 1px 0 #fff;}
-.sub{color:#a88bb8;font-size:clamp(8px,1.4vw,12px);}
-#board{flex:1 1 auto;min-height:0;width:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:clamp(2px,0.6vw,6px);padding:clamp(2px,0.5vw,8px);overflow:hidden;}
-.cell{background:#fff;border-radius:clamp(5px,1.2vw,10px);border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;min-height:0;}
-.cell .e{font-size:clamp(13px,3vw,22px);line-height:1;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);display:flex;flex-direction:column;overflow:hidden;}
+#board{flex:1 1 auto;min-height:0;width:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:clamp(2px,0.5vw,5px);padding:clamp(3px,0.6vw,8px);overflow:hidden;align-items:stretch;}
+.cell{background:#fff;border-radius:clamp(5px,1.2vw,9px);border:2px solid #ffd3e0;box-shadow:0 3px 8px rgba(200,107,138,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;min-height:0;min-width:0;}
+.cell .e{font-size:clamp(14px,3vw,24px);line-height:1;}
 .cell .n{font-size:clamp(7px,1.3vw,11px);color:#9b6a7e;font-weight:bold;line-height:1.1;margin-top:1px;max-width:96%;}
-.cell .p{font-size:clamp(6px,1vw,10px);color:#c86b8a;}
+.cell .p{font-size:clamp(6px,1vw,9px);color:#c86b8a;}
 .cell.start{background:linear-gradient(135deg,#fff0f5,#ffe3ec);border-color:#ff8fab;}
 .cell.jail{background:linear-gradient(135deg,#f3e6ff,#e6d5ff);border-color:#b48cd9;}
 .cell.event{background:linear-gradient(135deg,#fff8e6,#ffecc9);border-color:#e6b85c;}
 .cell.owned-you{background:linear-gradient(135deg,#ffe9f0,#ffd9e8);}
 .cell.owned-me{background:linear-gradient(135deg,#e8f0ff,#d9e3ff);}
 .cell.here{border-color:#ff8fab;box-shadow:0 0 0 3px rgba(255,143,171,.4);}
-.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(8px,1.5vw,12px);background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
-.center{background:rgba(255,255,255,.95);border-radius:clamp(10px,2vw,18px);box-shadow:0 8px 22px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(6px,1.5vw,14px);grid-column:2/9;grid-row:2/5;z-index:3;overflow:hidden;}
-.bal{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:clamp(12px,2.4vw,18px);font-weight:bold;padding:clamp(3px,0.8vw,6px) clamp(8px,1.6vw,16px);border-radius:10px;margin:clamp(2px,0.5vw,4px) 0;background:#fff0f5;}
-.bal.me{background:#eef2ff;}
-.bal span{color:#a88bb8;}
-.bal b{color:#e06a8b;}
-.bal.me b{color:#6d8ad0;}
-button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:clamp(12px,2vw,16px);padding:clamp(6px,1.4vw,12px) clamp(16px,4vw,32px);border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);margin-top:clamp(4px,1vw,8px);}
+.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(9px,1.5vw,13px);background:#fff;border-radius:8px;padding:0 3px;box-shadow:0 1px 4px rgba(200,107,138,.3);}
+.center{background:rgba(255,255,255,.95);border-radius:clamp(10px,2vw,18px);box-shadow:0 8px 22px rgba(200,107,138,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(4px,1vw,12px);grid-column:2/9;grid-row:2/5;z-index:3;overflow:hidden;min-height:0;}
+.center h1{color:#c86b8a;font-size:clamp(13px,2.2vw,20px);text-shadow:1px 1px 0 #fff;margin-bottom:1px;}
+.center .sub{color:#a88bb8;font-size:clamp(8px,1.2vw,11px);margin-bottom:clamp(3px,0.6vw,6px);}
+.chips{display:flex;gap:clamp(4px,1vw,10px);margin-bottom:clamp(3px,0.6vw,6px);}
+.chip{border-radius:10px;padding:clamp(3px,0.7vw,6px) clamp(6px,1.2vw,12px);font-size:clamp(12px,1.8vw,16px);font-weight:bold;display:flex;align-items:center;gap:clamp(3px,0.6vw,6px);}
+.chip.you{background:#fff0f5;}
+.chip.me{background:#eef2ff;}
+.chip span{color:#a88bb8;font-size:clamp(11px,1.6vw,14px);}
+.chip b{color:#e06a8b;}
+.chip.me b{color:#6d8ad0;}
+button{background:linear-gradient(135deg,#ff8fab,#ffb6c1);border:none;color:#fff;font-size:clamp(12px,1.9vw,16px);padding:clamp(5px,1.2vw,10px) clamp(15px,3.5vw,30px);border-radius:30px;cursor:pointer;font-weight:bold;box-shadow:0 4px 12px rgba(255,143,171,.4);margin-top:clamp(3px,0.6vw,6px);}
 button:disabled{opacity:.4;cursor:not-allowed;}
-#ops button{margin:clamp(2px,0.5vw,4px);font-size:clamp(11px,1.8vw,15px);}
-#msg{margin-top:clamp(4px,1vw,8px);font-size:clamp(9px,1.4vw,13px);color:#7d5878;min-height:clamp(12px,2vw,16px);max-width:98%;padding:0 4px;}
+#ops{margin-top:clamp(2px,0.5vw,4px);}
+#ops button{margin:clamp(2px,0.4vw,4px);font-size:clamp(11px,1.7vw,15px);padding:clamp(4px,0.9vw,8px) clamp(12px,2.6vw,22px);}
+#msg{margin-top:clamp(3px,0.6vw,6px);font-size:clamp(9px,1.3vw,12px);color:#7d5878;min-height:clamp(14px,2.4vw,20px);max-width:96%;padding:0 4px;}
 </style>
 </head>
 <body>
-<header>
-  <h1>🎲 环游中国 · 大富翁</h1>
-  <div class="sub">🐱桐桐 vs 🐶林霁 · 绕一圈回起点领 2000 · 中途有奇遇</div>
-</header>
 <div id="board">
   <div class="center">
-    <div class="bal"><span>🐱 桐桐</span><b id="bYou">2000</b></div>
-    <div class="bal me"><span>🐶 林霁</span><b id="bMe">2000</b></div>
+    <h1>🎲 环游中国 · 大富翁</h1>
+    <div class="sub">🐱桐桐 vs 🐶林霁 · 绕回起点领2000</div>
+    <div class="chips">
+      <div class="chip you"><span>🐱 桐桐</span><b id="bYou">2000</b></div>
+      <div class="chip me"><span>🐶 林霁</span><b id="bMe">2000</b></div>
+    </div>
     <button id="btnRoll" onclick="roll()">🎲 掷骰子</button>
     <div id="ops"></div>
     <div id="msg"></div>
@@ -73,8 +75,7 @@ const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1
 21:[4,1],22:[3,1],23:[2,1]};
 const board=document.getElementById("board");
 let pos={you:0,me:0},money={you:2000,me:2000},turn="you",jailed={you:false,me:false};
-let actor="you";               // 真正站在格子上、该买/盖的那个人
-let owner={},houses={};
+let actor="you",owner={},houses={};
 function rentOf(cell){ return Math.round(cell.r*[1,2,3.5,5,7][houses[cell.n]||0]); }
 map.forEach((c,i)=>{
   const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===JAIL_IDX?" jail":"")+(c.n==="奇遇"?" event":"");d.id="c"+i;
@@ -83,10 +84,8 @@ map.forEach((c,i)=>{
   board.appendChild(d);
 });
 function fit(){
-  const hh=document.querySelector("header").offsetHeight;
   const ch=document.documentElement.clientHeight;
-  const avail=Math.max(200, ch-hh-6);
-  board.style.height=avail+"px";
+  board.style.height=Math.max(200,ch-4)+"px";
 }
 function render(){
   map.forEach((c,i)=>{
@@ -106,7 +105,7 @@ function render(){
 }
 function ops(html){ document.getElementById("ops").innerHTML=html||""; }
 function roll(){
-  const who=turn; actor=who;   // 记下行动者
+  const who=turn; actor=who;
   if(jailed[who]){
     jailed[who]=false; ops("");
     document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 被抓住，停留一回合～`;
@@ -115,16 +114,16 @@ function roll(){
   const n=1+Math.floor(Math.random()*6),old=pos[who];
   pos[who]=(pos[who]+n)%N;
   const cell=map[pos[who]];
-  let m=`${who==="you"?"桐桐":"林霁"} 掷出 ${n}，来到「${cell.n}」`;
-  if(pos[who]<old&&pos[who]!==0){money[who]+=2000; m+=" · 经过起点 +2000！";}
-  if(pos[who]===START_IDX){money[who]+=2000; m+=" · 回到起点/终点 +2000！";}
+  let m=`${who==="you"?"桐桐":"林霁"} 掷出 ${n} → 「${cell.n}」`;
+  if(pos[who]<old&&pos[who]!==0){money[who]+=2000; m+=" · 过起点+2000";}
+  if(pos[who]===START_IDX){money[who]+=2000; m+=" · 回起点+2000";}
   if(pos[who]===JAIL_IDX){
-    jailed[who]=true; m+=" · 被抓住，下回合停留！"; ops("");
+    jailed[who]=true; m+=" · 被抓住，下回停留"; ops("");
   }else if(cell.p>0){
     if(owner[cell.n]===undefined){
       const can=money[who]>=cell.p;
       ops(`<button ${can?"":"disabled"} onclick='buy("${cell.n}")'>🏙️ 购买 ¥${cell.p}</button>`);
-      m+=can?" · 可购买":" · 钱不够买";
+      m+=can?" · 可购买":" · 钱不够";
     }else if(owner[cell.n]===who){
       ops(`<button onclick='build("${cell.n}")'>🏗️ 升级(房${houses[cell.n]||0})</button>`);
       m+=" · 你的城，可升级";
@@ -132,34 +131,32 @@ function roll(){
       const op=owner[cell.n]==="you"?"me":"you";
       const r=rentOf(cell);
       money[who]-=r;money[op]+=r;
-      m+=` · 这是${op==="you"?"桐桐":"林霁"}的城，付过路费 ¥${r}`; ops("");
+      m+=` · 是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}`; ops("");
     }
   }else if(cell.n==="奇遇"||cell.n==="机会"){
     const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];
-    money[who]+=e.m; m+=` · 🎁${e.t}`; ops("");
+    money[who]+=e.m; m+=` · ${e.t}`; ops("");
   }
-  else if(cell.n==="差旅费"){ money[who]-=100; m+=" · 交差旅费 ¥100"; ops(""); }
-  else if(cell.n==="时间胶囊"){ money[who]-=60; (money[turn==="you"?"me":"you"])+=60; m+=" · 时间胶囊 -60"; ops(""); }
-  if(money[who]<0){ money[who]=0; m+=" · 💔破产！"; }
+  else if(cell.n==="差旅费"){ money[who]-=100; m+=" · 差旅费-100"; ops(""); }
+  else if(cell.n==="时间胶囊"){ money[who]-=60; (money[turn==="you"?"me":"you"])+=60; m+=" · 时光-60"; ops(""); }
+  if(money[who]<0){ money[who]=0; m+=" · 💔破产"; }
   document.getElementById("msg").textContent=m;
   turn=who==="you"?"me":"you"; render();
 }
 function buy(city){
-  const who=actor;             // 用"行动者"，不是当前回合
-  const cell=map.find(c=>c.n===city);
+  const who=actor, cell=map.find(c=>c.n===city);
   if(money[who]<cell.p){ document.getElementById("msg").textContent="钱不够买～"; return; }
   money[who]-=cell.p; owner[city]=who; houses[city]=0; ops("");
   document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 买下「${city}」！`;
   render();
 }
 function build(city){
-  const who=actor;
-  const cell=map.find(c=>c.n===city), h=houses[city]||0;
+  const who=actor, cell=map.find(c=>c.n===city), h=houses[city]||0;
   if(h>=4){ document.getElementById("msg").textContent="已经 4 房满级啦～"; return; }
   const cost=Math.round(cell.p*0.5);
   if(money[who]<cost){ document.getElementById("msg").textContent=`升级要 ¥${cost}，钱不够`; return; }
   money[who]-=cost; houses[city]=h+1;
-  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 给「${city}」盖到 ${h+1} 房，租金 ¥${rentOf(cell)}`;
+  document.getElementById("msg").textContent=`${who==="you"?"桐桐":"林霁"} 「${city}」盖到 ${h+1} 房，租¥${rentOf(cell)}`;
   render();
 }
 window.addEventListener("resize",fit);
