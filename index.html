@@ -83,7 +83,7 @@ const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1
 const board=document.getElementById("board"),msgEl=document.getElementById("msg");
 let pos={you:0,me:0},money={you:2000,me:2000},turn="you",jailed={you:false,me:false};
 let actor="you",owner={},houses={},over=false;
-function rentOf(cell){ const h=houses[cell.n]||0; return Math.round(cell.p*0.4*(1+0.5*h)); }
+function rentOf(cell){ const h=houses[cell.n]||0; return Math.round(cell.p*(0.20+0.15*h)); }
 function say(t){ msgEl.textContent=t; }
 map.forEach((c,i)=>{
   const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===JAIL_IDX?" jail":"")+(c.n==="奇遇"?" event":"");d.id="c"+i;
@@ -136,16 +136,14 @@ function roll(){
       ops(`<button ${can?"":"disabled"} onclick='buy("${cell.n}")'>🏙️ 购买 ¥${cell.p}</button>`);
       m+=can?" · 可购买":" · 钱不够";
     }else if(owner[cell.n]===who){
-      // 自己的城：免费，只有升级/继续摇
       const h=houses[cell.n]||0;
       ops(h>=MAXH ? "" : `<button onclick='build("${cell.n}")'>🏗️ 升级(房${h}/${MAXH}) · ¥${Math.round(cell.p*0.5)}</button>`);
       m+= (h>=MAXH) ? " · 你的城，已满级，免费歇脚" : " · 你的城，不收费，可升级或继续摇";
     }else{
-      // 别人的城：收租方 = 城主人
       const op=owner[cell.n];
       const r=rentOf(cell);
       money[who]-=r;money[op]+=r;
-      m+=` · 这是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}（买价40%×房）`; ops("");
+      m+=` · 这是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}`; ops("");
     }
   }else if(cell.n==="奇遇"||cell.n==="机会"){
     const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];
