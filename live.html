@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>林霁 & 桐桐 · 大富翁实时棋盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
+body{background:linear-gradient(135deg,#ffe3ec,#f6e6ff,#e3f0ff);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:10px;}
+h1{color:#c86b8a;font-size:20px;margin-bottom:2px;}
+.sub{color:#a88bb8;font-size:12px;margin-bottom:10px;}
+.board{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:4px;width:min(96vw,700px);height:min(60vh,480px);}
+.cell{background:#fff;border-radius:8px;border:2px solid #ffd3e0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;min-height:0;overflow:hidden;}
+.cell .e{font-size:clamp(13px,2.4vw,20px);line-height:1;}
+.cell .n{font-size:clamp(6px,1vw,10px);color:#9b6a7e;font-weight:bold;max-width:96%;line-height:1.1;}
+.cell .p{font-size:clamp(5px,0.9vw,8px);color:#c86b8a;}
+.cell.start{background:linear-gradient(135deg,#fff0f5,#ffe3ec);border-color:#ff8fab;}
+.cell.jail{background:linear-gradient(135deg,#f3e6ff,#e6d5ff);border-color:#b48cd9;}
+.cell.owned-you{background:linear-gradient(135deg,#ffe9f0,#ffd9e8);}
+.cell.owned-me{background:linear-gradient(135deg,#e8f0ff,#d9e3ff);}
+.cell .who{position:absolute;top:1px;right:1px;font-size:clamp(9px,1.4vw,12px);background:#fff;border-radius:7px;padding:0 3px;box-shadow:0 1px 3px rgba(200,107,138,.3);}
+.info{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center;}
+.pcard{background:#fff;border-radius:12px;padding:6px 14px;box-shadow:0 3px 10px rgba(200,107,138,.15);text-align:center;}
+.pcard .pn{font-size:13px;font-weight:bold;}
+.pcard .pm{color:#e06a8b;font-size:15px;}
+#msg{margin-top:8px;font-size:12px;color:#7d5878;min-height:16px;text-align:center;}
+</style>
+</head>
+<body>
+<h1>🎲 环游中国 · 实时棋盘</h1>
+<div class="sub">🐱桐桐 vs 🐶林霁 · 自动实时同步</div>
+<div class="board" id="board"></div>
+<div class="info">
+  <div class="pcard"><div class="pn">🐱 桐桐</div><div class="pm" id="m1">-</div></div>
+  <div class="pcard"><div class="pn">🐶 林霁</div><div class="pm" id="m2">-</div></div>
+</div>
+<div id="msg">连接后端中…</div>
+<script>
+// 后端大富翁 MCP（你的 trycloudflare 域名）
+const MCP="https://eligibility-inclusive-sponsored-denver.trycloudflare.com/mcp";
+const BOARD_DATA=[
+ ["🏛️","北京·起点",0],["🌆","上海",4000],["🃏","机会",0],["🌉","杭州",2600],["🌺","广州",3600],
+ ["🏙️","深圳",3800],["🐼","成都",1800],["💸","差旅费",0],["🌶️","重庆",2400],["🌸","武汉",1600],
+ ["🎁","奇遇",0],["🏯","南京",2000],["🏮","西安",1500],["🪷","苏州",2200],["🍊","长沙",1400],
+ ["😈","被抓住",0],["🥟","天津",1900],["🍺","青岛",1700],["🍜","郑州",1300],["⏳","时间胶囊",0],
+ ["🌊","厦门",1200],["🌺","昆明",1100],["⛵","大连",1000],["❄️","哈尔滨",900]
+];
+const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1,9],
+9:[2,9],10:[3,9],11:[4,9],12:[5,9],13:[5,8],14:[5,7],15:[5,6],16:[5,5],17:[5,4],18:[5,3],19:[5,2],20:[5,1],21:[4,1],22:[3,1],23:[2,1]};
+const board=document.getElementById("board");
+BOARD_DATA.forEach((c,i)=>{
+  const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===15?" jail":"")+(c[1]==="奇遇"?"":"");d.id="c"+i;
+  d.style.gridRow=GRID[i][0];d.style.gridColumn=GRID[i][1];
+  d.innerHTML=`<div class="e">${c[0]}</div><div class="n">${c[1]}</div>`+(c[2]>0?`<div class="p">¥${c[2]}</div>`:"");
+  board.appendChild(d);
+});
+async function call(tool,args){
+  const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:args||{}}})});
+  return await r.json();
+}
+function render(state){
+  // state 形如 "回合：you...\n🐱 桐桐：第X格，钱A，地[...]\n🐶 林霁：第Y格，钱B，地[...]"
+  const lines=state.split("\n");
+  let you={pos:0,money:0,props:[]},me={pos:0,money:0,props:[]};
+  lines.forEach(L=>{
+    if(L.includes("🐱")){const m=L.match(/第(\d+)格，钱(\d+)，地\[(.*)\]/);if(m){you={pos:parseInt(m[1])-1,money:parseInt(m[2]),props:(m[3]||"").split(",").filter(Boolean)}}}
+    if(L.includes("🐶")){const m=L.match(/第(\d+)格，钱(\d+)，地\[(.*)\]/);if(m){me={pos:parseInt(m[1])-1,money:parseInt(m[2]),props:(m[3]||"").split(",").filter(Boolean)}}}
+  });
+  BOARD_DATA.forEach((c,i)=>{
+    const d=document.getElementById("c"+i);
+    d.classList.remove("owned-you","owned-me");
+    if(you.props.includes(c[1])) d.classList.add("owned-you");
+    if(me.props.includes(c[1])) d.classList.add("owned-me");
+    let w=d.querySelector(".who");if(w)w.remove();
+    let who="";
+    if(you.pos===i) who+="🐱";
+    if(me.pos===i) who+="🐶";
+    if(who){const b=document.createElement("div");b.className="who";b.textContent=who;d.appendChild(b);}
+  });
+  document.getElementById("m1").textContent=you.money+"元";
+  document.getElementById("m2").textContent=me.money+"元";
+}
+async function poll(){
+  try{
+    const res=await call("monopoly_state",{});
+    const text=res&&res.result&&res.result.content?res.result.content.map(x=>x.text||"").join("\n"):JSON.stringify(res);
+    if(text && text!=="还没开局。" && !text.includes("还没开局")){render(text);document.getElementById("msg").textContent="🟢 已同步（自动刷新中）";}
+    else{document.getElementById("msg").textContent="还没开局——去 RikkaHub 说「开始大富翁」启动，我这边自动跟上";}
+  }catch(e){document.getElementById("msg").textContent="⚠️ 连不上后端/跨域，告诉我哥哥调一下";}
+}
+poll();setInterval(poll,3000);
+</script>
+</body>
+</html>
