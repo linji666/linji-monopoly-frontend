@@ -72,14 +72,17 @@ async function call(tool){
   const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:{}}})});
   const t=await r.text();try{return JSON.parse(t);}catch(e){return {raw:t};}
 }
+function parseLine(L,side){
+  const m=L.match(/第(\d+)格/); if(m) side.pos=parseInt(m[1])-1;
+  const mm=L.match(/钱(\d+)/); if(mm) side.money=parseInt(mm[1]);
+  const md=L.match(/地\[(.*)\]/); if(md) side.props=(md[1]||"").split(",").filter(Boolean);
+}
 function render(txt){
   const lines=txt.split("\n");
   let you={pos:0,money:0,props:[]},me={pos:0,money:0,props:[]};
   lines.forEach(L=>{
-    if(L.includes("🐱")){const m=L.match(/第(\d+)格，钱(\d+)/);if(m){you.pos=parseInt(m[1])-1;you.money=parseInt(m[2]);}}
-    if(L.includes("🐶")){const m=L.match(/第(\d+)格，钱(\d+)/);if(m){me.pos=parseInt(m[1])-1;me.money=parseInt(m[2]);}}
-    if(L.includes("🐱")&&L.includes("地[")){you.props=(L.match(/地\[(.*)\]/)[1]||"").split(",").filter(Boolean);}
-    if(L.includes("🐶")&&L.includes("地[")){me.props=(L.match(/地\[(.*)\]/)[1]||"").split(",").filter(Boolean);}
+    if(L.includes("🐱"))parseLine(L,you);
+    if(L.includes("🐶"))parseLine(L,me);
   });
   BOARD_DATA.forEach((c,i)=>{
     const d=document.getElementById("c"+i);d.classList.remove("owned-you","owned-me");
@@ -89,7 +92,7 @@ function render(txt){
     let who="";if(you.pos===i)who+="🐱";if(me.pos===i)who+="🐶";
     if(who){const b=document.createElement("div");b.className="who";b.textContent=who;d.appendChild(b);}
   });
-  document.getElementById("m1").textContent=you.money+"元";document.getElementById("m2").textContent=me.money+"元";
+  document.getElementById("m1").textContent=(you.money||0)+"元";document.getElementById("m2").textContent=(me.money||0)+"元";
 }
 async function refresh(){
   try{const res=await call("monopoly_state");const c=res.result&&res.result.content?res.result.content[0].text:null;
