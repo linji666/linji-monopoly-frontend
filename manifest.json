@@ -1,0 +1,11 @@
+{
+  "name": "环游中国大富翁",
+  "short_name": "大富翁",
+  "description": "林霁 & 桐桐 · 环游中国大富翁",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#ffe3ec",
+  "theme_color": "#ffb6c1",
+  "icons": []
+}
