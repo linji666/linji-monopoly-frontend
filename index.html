@@ -60,14 +60,14 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 <div id="msg">🎲 点掷骰子开始</div>
 <script>
 const map=[
- {e:"🏛️",n:"北京·起点/终点",p:0,r:0},{e:"🌆",n:"上海",p:4000,r:130},{e:"🃏",n:"机会",p:0,r:0},
- {e:"🌉",n:"杭州",p:2600,r:80},{e:"🌺",n:"广州",p:3600,r:115},{e:"🏙️",n:"深圳",p:3800,r:120},
- {e:"🐼",n:"成都",p:1800,r:60},{e:"💸",n:"差旅费",p:0,r:100},{e:"🌶️",n:"重庆",p:2400,r:75},
- {e:"🌸",n:"武汉",p:1600,r:55},{e:"🎁",n:"奇遇",p:0,r:0},{e:"🏯",n:"南京",p:2000,r:65},
- {e:"🏮",n:"西安",p:1500,r:50},{e:"🪷",n:"苏州",p:2200,r:70},{e:"🍊",n:"长沙",p:1400,r:45},
- {e:"😈",n:"被林霁抓住",p:0,r:0},{e:"🥟",n:"天津",p:1900,r:62},{e:"🍺",n:"青岛",p:1700,r:58},
- {e:"🍜",n:"郑州",p:1300,r:42},{e:"⏳",n:"时间胶囊",p:0,r:0},{e:"🌊",n:"厦门",p:1200,r:38},
- {e:"🌺",n:"昆明",p:1100,r:35},{e:"⛵",n:"大连",p:1000,r:32},{e:"❄️",n:"哈尔滨",p:900,r:28},
+ {e:"🏛️",n:"北京·起点/终点",p:0,r:0},{e:"🌆",n:"上海",p:4000,r:0},{e:"🃏",n:"机会",p:0,r:0},
+ {e:"🌉",n:"杭州",p:2600,r:0},{e:"🌺",n:"广州",p:3600,r:0},{e:"🏙️",n:"深圳",p:3800,r:0},
+ {e:"🐼",n:"成都",p:1800,r:0},{e:"💸",n:"差旅费",p:0,r:100},{e:"🌶️",n:"重庆",p:2400,r:0},
+ {e:"🌸",n:"武汉",p:1600,r:0},{e:"🎁",n:"奇遇",p:0,r:0},{e:"🏯",n:"南京",p:2000,r:0},
+ {e:"🏮",n:"西安",p:1500,r:0},{e:"🪷",n:"苏州",p:2200,r:0},{e:"🍊",n:"长沙",p:1400,r:0},
+ {e:"😈",n:"被林霁抓住",p:0,r:0},{e:"🥟",n:"天津",p:1900,r:0},{e:"🍺",n:"青岛",p:1700,r:0},
+ {e:"🍜",n:"郑州",p:1300,r:0},{e:"⏳",n:"时间胶囊",p:0,r:0},{e:"🌊",n:"厦门",p:1200,r:0},
+ {e:"🌺",n:"昆明",p:1100,r:0},{e:"⛵",n:"大连",p:1000,r:0},{e:"❄️",n:"哈尔滨",p:900,r:0},
 ];
 const EVENTS=[
  {t:"遇到好心人请喝奶茶，+80",m:80},{t:"考试超常发挥，+150",m:150},
@@ -83,7 +83,7 @@ const GRID={0:[1,1],1:[1,2],2:[1,3],3:[1,4],4:[1,5],5:[1,6],6:[1,7],7:[1,8],8:[1
 const board=document.getElementById("board"),msgEl=document.getElementById("msg");
 let pos={you:0,me:0},money={you:2000,me:2000},turn="you",jailed={you:false,me:false};
 let actor="you",owner={},houses={},over=false;
-function rentOf(cell){ return Math.round(cell.r*[1,2,3.5,5,7][houses[cell.n]||0]); }
+function rentOf(cell){ const h=houses[cell.n]||0; return Math.round(cell.p*0.4*(1+0.5*h)); }
 function say(t){ msgEl.textContent=t; }
 map.forEach((c,i)=>{
   const d=document.createElement("div");d.className="cell"+(i===0?" start":"")+(i===JAIL_IDX?" jail":"")+(c.n==="奇遇"?" event":"");d.id="c"+i;
@@ -138,12 +138,12 @@ function roll(){
     }else if(owner[cell.n]===who){
       const cost=Math.round(cell.p*0.5);
       ops(`<button onclick='build("${cell.n}")'>🏗️ 升级(房${houses[cell.n]||0}) · ¥${cost}</button>`);
-      m+=" · 你的城，可升级(要钱)";
+      m+=" · 你的城，可升级";
     }else{
       const op=owner[cell.n]==="you"?"me":"you";
       const r=rentOf(cell);
       money[who]-=r;money[op]+=r;
-      m+=` · 是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}`; ops("");
+      m+=` · 是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}（买价40%×房）`; ops("");
     }
   }else if(cell.n==="奇遇"||cell.n==="机会"){
     const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];
