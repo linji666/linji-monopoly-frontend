@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ffb6c1">
+<link rel="manifest" href="manifest.json">
 <title>林霁 & 桐桐 · 环游中国大富翁</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Comic Sans MS','PingFang SC',sans-serif;}
@@ -35,7 +40,6 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 #ops{margin-top:clamp(2px,0.5vw,4px);}
 #ops button{margin:clamp(2px,0.4vw,4px);font-size:clamp(11px,1.7vw,15px);padding:clamp(4px,0.9vw,8px) clamp(12px,2.6vw,22px);}
 .goal{color:#b48cd9;font-size:clamp(9px,1.4vw,12px);margin-top:clamp(3px,0.6vw,6px);}
-/* 顶部浮动消息条：永远不被遮 */
 #msg{position:fixed;top:clamp(6px,1.4vw,12px);left:50%;transform:translateX(-50%);z-index:99;background:rgba(255,255,255,.96);border:2px solid #ffb6c1;border-radius:24px;padding:clamp(5px,1vw,9px) clamp(14px,3vw,26px);font-size:clamp(11px,1.8vw,15px);color:#8a5a72;font-weight:bold;box-shadow:0 6px 18px rgba(200,107,138,.3);text-align:center;max-width:94vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;}
 </style>
 </head>
@@ -132,8 +136,9 @@ function roll(){
       ops(`<button ${can?"":"disabled"} onclick='buy("${cell.n}")'>🏙️ 购买 ¥${cell.p}</button>`);
       m+=can?" · 可购买":" · 钱不够";
     }else if(owner[cell.n]===who){
-      ops(`<button onclick='build("${cell.n}")'>🏗️ 升级(房${houses[cell.n]||0})</button>`);
-      m+=" · 你的城，可升级";
+      const cost=Math.round(cell.p*0.5);
+      ops(`<button onclick='build("${cell.n}")'>🏗️ 升级(房${houses[cell.n]||0}) · ¥${cost}</button>`);
+      m+=" · 你的城，可升级(要钱)";
     }else{
       const op=owner[cell.n]==="you"?"me":"you";
       const r=rentOf(cell);
@@ -146,13 +151,8 @@ function roll(){
   }
   else if(cell.n==="差旅费"){ money[who]-=100; m+=" · 差旅费-100"; ops(""); }
   else if(cell.n==="时间胶囊"){ money[who]-=60; (money[turn==="you"?"me":"you"])+=60; m+=" · 时光-60"; ops(""); }
-  // 获胜判定
-  if(money[who]>=TARGET){
-    over=true; m=`🏆 ${who==="you"?"桐桐":"林霁"} 攒到¥${money[who]}，赢啦！`;
-  }else if(money[who]<=0){
-    money[who]=0; over=true;
-    m=`💔 ${who==="you"?"桐桐":"林霁"} 破产，${(who==="you"?"林霁":"桐桐")} 获胜！`;
-  }
+  if(money[who]>=TARGET){ over=true; m=`🏆 ${who==="you"?"桐桐":"林霁"} 攒到¥${money[who]}，赢啦！`; }
+  else if(money[who]<=0){ money[who]=0; over=true; m=`💔 ${who==="you"?"桐桐":"林霁"} 破产，${(who==="you"?"林霁":"桐桐")} 获胜！`; }
   say(m);
   turn=who==="you"?"me":"you"; render();
 }
