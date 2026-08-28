@@ -70,8 +70,9 @@ BOARD_DATA.forEach((c,i)=>{
   d.innerHTML=`<div class="e">${c[0]}</div><div class="n">${c[1]}</div>`+(c[2]>0?`<div class="p">¥${c[2]}</div>`:"");
   board.appendChild(d);
 });
+// 去掉了 Content-Type 头，浏览器把它当"简单请求"，不发 OPTIONS 预检，绕过跨域
 async function call(tool){
-  const r=await fetch(MCP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:{}}})});
+  const r=await fetch(MCP,{method:"POST",body:JSON.stringify({jsonrpc:"2.0",id:1,method:"tools/call",params:{name:tool,arguments:{}}})});
   const t=await r.text();try{return JSON.parse(t);}catch(e){return {raw:t};}
 }
 function parseLine(L,side){
@@ -100,11 +101,11 @@ async function refresh(){
   try{const res=await call("monopoly_state");const c=res.result&&res.result.content?res.result.content[0].text:null;
     if(c&&!c.includes("还没开局")){render(c);document.getElementById("msg").textContent="🟢 已同步";}
     else if(c&&c.includes("还没开局")){document.getElementById("msg").textContent="先点「🎮 开始」开一局";}
-  }catch(e){document.getElementById("msg").textContent="⚠️ 连不上/跨域";}
+  }catch(e){document.getElementById("msg").textContent="⚠️ 连不上/跨域："+e.message;}
 }
 async function doTool(tool){
   try{const res=await call(tool);const c=res.result&&res.result.content?res.result.content[0].text:(res.error?"⚠️ "+res.error.message:"");
-    document.getElementById("msg").textContent=c||"已执行";refresh();}catch(e){document.getElementById("msg").textContent="⚠️ 操作失败";}
+    document.getElementById("msg").textContent=c||"已执行";refresh();}catch(e){document.getElementById("msg").textContent="⚠️ 操作失败："+e.message;}
 }
 refresh();setInterval(refresh,3000);
 </script>
