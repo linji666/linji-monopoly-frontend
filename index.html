@@ -141,10 +141,11 @@ function roll(){
       ops(h>=MAXH ? "" : `<button onclick='build("${cell.n}")'>🏗️ 升级(房${h}/${MAXH}) · ¥${Math.round(cell.p*0.5)}</button>`);
       m+= (h>=MAXH) ? " · 你的城，已满级，免费歇脚" : " · 你的城，不收费，可升级或继续摇";
     }else{
-      const op=owner[cell.n]==="you"?"me":"you";
+      // 别人的城：收租方 = 城主人
+      const op=owner[cell.n];
       const r=rentOf(cell);
       money[who]-=r;money[op]+=r;
-      m+=` · 是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}（买价40%×房）`; ops("");
+      m+=` · 这是${op==="you"?"桐桐":"林霁"}的城，付租 ¥${r}（买价40%×房）`; ops("");
     }
   }else if(cell.n==="奇遇"||cell.n==="机会"){
     const e=EVENTS[Math.floor(Math.random()*EVENTS.length)];
