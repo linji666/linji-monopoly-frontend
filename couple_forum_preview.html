@@ -5,10 +5,21 @@
 <title>小情侣竟如此！ · 预览</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;min-height:100vh;padding:0 0 20px}
-.wrap{max-width:640px;margin:0 auto;min-height:100vh;background:#f5f5f5}
-.top{display:flex;align-items:center;justify-content:center;padding:14px 0;font-weight:700;font-size:16px;color:#333;position:relative}
-.post{background:#fff;border-radius:14px;padding:16px;margin:0 12px 12px;box-shadow:0 1px 6px rgba(0,0,0,.06);cursor:pointer}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#111;min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;background:#111}
+/* 沉浸式固定封面 */
+.hero{position:sticky;top:0;z-index:30;height:230px;background:linear-gradient(135deg,#1a1a2e,#16213e);background-size:cover;background-position:center;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55))}
+.hname{position:absolute;top:16px;left:0;right:0;text-align:center;color:#fff;font-size:21px;font-weight:800;letter-spacing:8px;text-shadow:0 2px 10px rgba(0,0,0,.6);z-index:2}
+.hinfo{position:absolute;left:16px;bottom:14px;display:flex;align-items:flex-end;gap:12px;z-index:2;color:#fff}
+.hbig{width:64px;height:64px;border:3px solid rgba(255,255,255,.9);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.hnm{font-size:20px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.hid{font-size:12px;color:rgba(255,255,255,.75);text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.htag{position:absolute;right:16px;bottom:14px;z-index:2;color:#fff;font-size:12px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+/* 信息流 */
+.feed{background:#f5f5f5;padding:10px 6px 30px;position:relative}
+.topbar{display:flex;align-items:center;justify-content:center;padding:8px 0;font-weight:700;font-size:15px;color:#333}
+.post{background:#fff;border-radius:14px;padding:16px;margin:0 8px 12px;box-shadow:0 1px 6px rgba(0,0,0,.06);cursor:pointer}
 .head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;position:relative;overflow:hidden;object-fit:cover;cursor:pointer}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
@@ -19,6 +30,11 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .avglass{position:absolute;left:50%;top:32%;width:26%;height:16%;transform:translateX(-50%);border:3px solid var(--fg);border-radius:50%;z-index:2}
 .avdot{position:absolute;inset:0;background-image:radial-gradient(var(--fg) 1px,transparent 1px);background-size:10px 10px;opacity:.25;z-index:1}
 .avstar{position:absolute;inset:0;color:var(--fg);opacity:.5;font-size:14px;line-height:1;z-index:1;text-align:center;padding-top:4px}
+.plist-av .avbody::before{top:22%;width:30%;height:30%}
+.plist-av .avbody::after{bottom:-22%;width:62%;height:56%}
+.hbig .avbody::before{top:22%;width:32%;height:32%}
+.hbig .avbody::after{bottom:-26%;width:68%;height:60%}
+.hbig .avpet{font-size:18px}
 .name{font-size:14px;font-weight:700;color:#222;cursor:pointer}
 .name:hover{color:#883a5e}
 .id{font-size:12px;color:#999;cursor:pointer}
@@ -35,34 +51,20 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .cmt .cw{flex:1}
 .cmt .nm{font-size:13px;font-weight:700;color:#222}
 .cmt .rid{font-size:12px;color:#1a91da;cursor:pointer}
-.cmt .ct{font-size:14px;color:#333;line-height:1.6;margin-top:2px}
+.cmt .ct{font-size:13px;color:#333;line-height:1.6;margin-top:2px}
 .cmt .cs{font-size:11px;color:#aaa;margin-top:4px;display:flex;gap:12px}
-.cmt .at{font-size:13px;color:#555}
+.cmt .at{font-size:12px;color:#555}
 .cmt .avglass{top:30%;width:26%;height:16%}
 .hot{background:#fff3f7;color:#ff5e8a;font-size:10px;padding:1px 6px;border-radius:8px;margin-left:6px}
 .more{text-align:center;color:#1a91da;font-size:13px;margin-top:8px;font-weight:600}
-.back{display:inline-block;color:#883a5e;cursor:pointer;font-size:13px;margin:6px 12px 14px;font-weight:600}
+.back{display:inline-block;color:#883a5e;cursor:pointer;font-size:13px;margin:4px 8px 12px;font-weight:600}
 .detail-input{display:flex;gap:8px;margin-top:14px}
 .detail-input input{flex:1;border:1px solid #eee;border-radius:20px;padding:9px 14px;font-size:14px}
 .btn{background:linear-gradient(90deg,#ff9ec4,#b58aff);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap}
 .btn:hover{filter:brightness(1.08)}
-.wx-btn{position:fixed;top:16px;right:16px;width:34px;height:34px;border-radius:50%;background:#2e2e2e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,.2);cursor:pointer;z-index:50;margin-right:12px}
+.wx-btn{position:fixed;top:14px;right:16px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,.3);cursor:pointer;z-index:50;margin-right:8px}
 .wx-btn:hover{background:#000}
-.tip{text-align:center;font-size:11px;color:#bbb;margin-top:14px;padding:0 12px}
-/* 个人主页 */
-.cover{height:220px;position:relative;background:linear-gradient(135deg,#9ec9ff,#c8b8ff);cursor:pointer}
-.cover .cam{position:absolute;top:12px;right:12px;font-size:26px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}
-.pinfo{display:flex;align-items:flex-end;gap:14px;padding:16px 18px;background:#fff;margin-bottom:12px}
-.pinfo .big{width:76px;height:76px;border:4px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.pinfo .big .avbody::before{top:23%;width:32%;height:32%}
-.pinfo .big .avbody::after{bottom:-26%;width:68%;height:60%}
-.pinfo .big .avpet{font-size:20px}
-.pinfo .pname{font-size:22px;font-weight:800;color:#222}
-.pinfo .pid{font-size:13px;color:#999}
-.pinfo .edit{font-size:11px;color:#883a5e;border:1px solid #f0d5e0;border-radius:10px;padding:2px 8px;cursor:pointer;display:inline-block;margin-top:6px}
-.tabs{display:flex;gap:4px;padding:0 12px;margin-bottom:10px}
-.tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:#888;border-bottom:2px solid transparent}
-.tab.on{color:#883a5e;border-bottom-color:#883a5e;font-weight:700}
+.tip{text-align:center;font-size:11px;color:#bbb;margin:12px 8px}
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:60}
 .mask.show{display:flex}
 .panel{width:88%;max-width:430px;background:#fff;border-radius:18px;padding:22px 18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
@@ -72,19 +74,23 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .grid .g:hover{border-color:#ff9ec4}
 .cov{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .cov .c{height:56px;border-radius:10px;cursor:pointer;border:2px solid transparent}
-.cov .c.on,.cov .c:hover{border-color:#883a5e}
+.cov .c:hover{border-color:#883a5e}
 .upload{font-size:13px;color:#666;text-align:center;border-top:1px solid #f0f0f0;padding-top:14px;cursor:pointer}
 .upload input{display:none}
-.idrow{display:flex;gap:8px;margin-bottom:16px}
-.idrow input{flex:1;border:1px solid #eee;border-radius:10px;padding:9px 12px;font-size:14px}
 .close{text-align:center;margin-top:14px;font-size:14px;color:#883a5e;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">小情侣竟如此！</div>
-  <div id="view" style="padding-bottom:40px"></div>
+  <!-- 沉浸式固定封面：名字在最上，头像ID在左上 -->
+  <div class="hero" id="hero">
+    <div class="hname">小情侣竟如此！</div>
+    <div class="hinfo" id="hinfo"></div>
+    <div class="htag" id="htag"></div>
+  </div>
+  <div class="feed" id="view"></div>
 </div>
+<div class="wx-btn" onclick="toHome()">+</div>
 
 <div class="mask" id="mask" onclick="if(event.target===this)closePicker()">
   <div class="panel">
@@ -98,26 +104,25 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 </div>
 
 <script>
-const COVERS=["linear-gradient(135deg,#9ec9ff,#c8b8ff)","linear-gradient(135deg,#ffd3e0,#ffb9d0)","linear-gradient(135deg,#c2f0d4,#a0e6b8)","linear-gradient(135deg,#ffd39a,#ffbb7a)","linear-gradient(135deg,#d4c2ff,#b9a3ff)","linear-gradient(135deg,#222,#444)"];
+const COVERS=["linear-gradient(135deg,#1a1a2e,#16213e)","linear-gradient(135deg,#ffd3e0,#ffb9d0)","linear-gradient(135deg,#c2f0d4,#a0e6b8)","linear-gradient(135deg,#ffd39a,#ffbb7a)","linear-gradient(135deg,#d4c2ff,#b9a3ff)","linear-gradient(135deg,#2b2b3a,#3a2a4a)"];
 const users={
   "桐桐":{bg:"#ffe0ea",fg:"#3a2a30",pet:"",cover:COVERS[1]},
-  "林霁":{bg:"#dfe6ff",fg:"#2a2540",pet:"⭐",cover:COVERS[5]},
+  "林霁":{bg:"#dfe6ff",fg:"#2a2540",pet:"⭐",cover:COVERS[0]},
   "甜甜圈":{bg:"#ffd6a5",fg:"#5a3a2a",pet:"🐻",cover:COVERS[3]},
   "CP头子":{bg:"#ffd0dc",fg:"#43333a",pet:"💗",cover:COVERS[1]},
   "柠檬味汽水":{bg:"#f7e97a",fg:"#4a4310",pet:"🐱",cover:COVERS[3]},
   "吃瓜路人":{bg:"#dff0d4",fg:"#2f4a2a",pet:"🐶",cover:COVERS[2]},
-  "深夜emo选手":{bg:"#e0e0e0",fg:"#222",pet:"🌙",star:true,cover:COVERS[5]},
+  "深夜emo选手":{bg:"#e0e0e0",fg:"#222",pet:"🌙",star:true,cover:COVERS[0]},
   "爱吃瓜的小番茄":{bg:"#f6d7d0",fg:"#5a2f26",pet:"🍅",cover:COVERS[3]},
   "起哄架秧子":{bg:"#ffd3d3",fg:"#5a2525",pet:"🔥",cover:COVERS[1]},
-  "捧场王":{bg:"#d6edff",fg:"#1f3a55",pet:"👍",cover:COVERS[0]},
+  "捧场王":{bg:"#d6edff",fg:"#1f3a55",pet:"👍",cover:COVERS[4]},
   "追更小分队队长":{bg:"#e3dcff",fg:"#332a55",pet:"📣",cover:COVERS[4]},
   "小草莓":{bg:"#ffd1e0",fg:"#4d2433",pet:"🍓",cover:COVERS[1]},
   "隔壁老张":{bg:"#e6ddcf",fg:"#40372c",glass:true,pet:"",cover:COVERS[3]},
-  "路人乙":{bg:"#ececec",fg:"#333",pet:"🙂",dot:true,cover:COVERS[0]},
+  "路人乙":{bg:"#ececec",fg:"#333",pet:"🙂",dot:true,cover:COVERS[4]},
 };
-let pickerFor="", pickerMode="", coverIdx=0;
+let pickerFor="",pickerMode="";
 const LIB=["🌸","🌙","🍩","💘","🍋","🍉","🍅","🔥","👍","📣","🍓","🐱","🐶","🍦","✨","🥰","😘","🦄","🐰","🐻","🌈","⭐"];
-
 const feed=[
   {id:1,u:"深夜emo选手",t:"加班到十点，路上只剩路灯了……没事，明天再战。",v:"8.7万",r:"3千",c:52,cs:[
     {u:"柠檬味汽水",at:"深夜emo选手",t:"抱抱，我也在加班。",l:"32 点",p:"1 转"},
@@ -146,8 +151,7 @@ const feed=[
     {u:"小草莓",at:"追更小分队队长",t:"呜呜呜我磕到了",l:"15 点",p:"0 转"},
   ]},
 ];
-
-let view="list", curUser=null, curPost=null;
+let view="list",curUser=null,curPost=null;
 function num(n){return parseInt(String(n).replace(/[^0-9]/g,''));}
 function avHTML(u,s=44,clickable=true){
   const x=users[u]||{bg:"#eee",fg:"#333"};
@@ -159,7 +163,7 @@ function avHTML(u,s=44,clickable=true){
   if(x.img){ inner=`<img src="${x.img}" alt="">`; }
   else { inner=`<div class="avbody" style="--bg:${x.bg};--fg:${x.fg}">${dot}${star}${glass}${pet}</div>`; }
   const c=clickable?` onclick="openProfile('${u}')" style="cursor:pointer"`:"";
-  return `<div class="avatar"${c} style="width:${s}px;height:${s}px">${inner}</div>`;
+  return `<div class="avatar${s>50?' hbig':''}"${c} style="width:${s}px;height:${s}px">${inner}</div>`;
 }
 function head(u){return `<span class="name" onclick="openProfile('${u}')">${u}</span> <span class="id" onclick="openProfile('${u}')">@${u}</span>`;}
 function cmtHtml(c,hot){
@@ -170,11 +174,17 @@ function cmtHtml(c,hot){
     <div class="cs"><span>${c.l}</span><span>${c.p}</span></div>
   </div></div>`;
 }
-
+function setHero(bg,name,info,tag){
+  const hero=document.getElementById('hero');
+  hero.style.background=bg;
+  document.getElementById('hname').textContent=name;
+  document.getElementById('hinfo').innerHTML=info;
+  document.getElementById('htag').textContent=tag||"";
+}
 function renderList(){
-  view="list"; curUser=null; curPost=null;
-  document.getElementById('view').innerHTML=feed.map(p=>{
-    const canPick=(p.u==="桐桐"||p.u==="林霁");
+  view="list";curUser=null;curPost=null;
+  setHero(COVERS[0],"小情侣竟如此！","","🌸 顶流CP追更现场");
+  document.getElementById('view').innerHTML=`<div class="topbar">全部动态</div>`+feed.map(p=>{
     const top=[...p.cs].sort((a,b)=>num(b.l)-num(a.l)).slice(0,2);
     return `<div class="post" onclick="openPost(${p.id})">
       <div class="head">${avHTML(p.u,44)}<div>${head(p.u)}</div></div>
@@ -184,11 +194,10 @@ function renderList(){
     </div>`;
   }).join('');
 }
-
 function openPost(id){
   const p=feed.find(x=>x.id===id); if(!p)return;
-  view="post"; curPost=id;
-  const canPick=(p.u==="桐桐"||p.u==="林霁");
+  view="post";curPost=id;
+  setHero(users[p.u].cover,"小情侣竟如此！","","");
   document.getElementById('view').innerHTML=`
     <span class="back" onclick="renderList()">‹ 返回</span>
     <div class="post" style="cursor:default">
@@ -199,81 +208,58 @@ function openPost(id){
       <div class="detail-input"><input placeholder="回复 ${p.u}……"><button class="btn" onclick="demo()">回复</button></div>
     </div>`;
 }
-
 function openProfile(u){
-  if(!users[u]) return;
-  view="profile"; curUser=u;
+  if(!users[u])return;
+  view="profile";curUser=u;
   const x=users[u];
-  const posts=feed.filter(p=>p.u===u).map(p=>{
-    return `<div class="post" onclick="openPost(${p.id})">
-      <div class="body">${p.t}</div>
-      <div class="stats"><span>👁 ${p.v} 次查看</span><span>🔁 ${p.r} 转推</span><span>💬 ${p.c} 引用</span></div>
-    </div>`;
-  }).join('')||'<div style="text-align:center;color:#aaa;padding:20px">TA 还没发过帖哦</div>';
+  setHero(x.cover,"小情侣竟如此！",
+    `<div class="hbig">${avHTML(u,64,true)}</div><div><div class="hnm">${u}</div><div class="hid">@${u} · ✏️ 可改ID</div></div>`,
+    "📷 点背景可换");
+  const posts=feed.filter(p=>p.u===u).map(p=>`
+      <div class="post" onclick="openPost(${p.id})">
+        <div class="body">${p.t}</div>
+        <div class="stats"><span>👁 ${p.v} 次查看</span><span>🔁 ${p.r} 转推</span><span>💬 ${p.c} 引用</span></div>
+      </div>`).join('')||'<div style="text-align:center;color:#aaa;padding:20px">TA 还没发过帖哦</div>';
   document.getElementById('view').innerHTML=`
     <span class="back" onclick="renderList()">‹ 返回</span>
-    <div class="cover" id="cover" style="background:${x.cover}" onclick="openCover('${u}')">
-      <span class="cam">📷</span>
-    </div>
-    <div class="pinfo">
-      ${avHTML(u,76,true)}
-      <div>
-        <div class="pname" id="pname">${u}</div>
-        <div class="pid" id="pid">@${u}</div>
-        <span class="edit" onclick="editId('${u}')">✏️ 改ID</span>
-      </div>
-    </div>
-    <div class="tabs"><div class="tab on">帖子</div><div class="tab">动态</div></div>
+    <div class="topbar">${u} 的主页</div>
     ${posts}
-    ${(u==="桐桐"||u==="林霁")?'<div class="tip">← 点头像/背景能换，点&quot;改ID&quot;能改名</div>':''}
+    ${(u==="桐桐"||u==="林霁")?'<div class="tip">← 点头像/背景能换 · 点 ID 改成你的昵称</div>':''}
   `;
 }
-
-function openCover(u){
-  pickerFor=u; pickerMode="cover";
-  document.getElementById('pkTitle').textContent="换个背景图";
-  const c=document.getElementById('covlist'); c.innerHTML="";
-  COVERS.forEach((g,i)=>{
-    const d=document.createElement('div'); d.className="c"; d.style.background=g;
-    d.onclick=()=>{users[u].cover=g;closePicker();openProfile(u);};
-    c.appendChild(d);
-  });
-  document.getElementById('grid').innerHTML="";
-  document.getElementById('mask').classList.add('show');
-}
-
 function openPicker(name){
-  pickerFor=name; pickerMode="avatar";
+  pickerFor=name;pickerMode="avatar";
   document.getElementById('pkTitle').textContent=`给 ${name} 换头像`;
   document.getElementById('covlist').innerHTML="";
-  const grid=document.getElementById('grid'); grid.innerHTML="";
-  LIB.forEach(e=>{
-    const d=document.createElement('div'); d.className="g"; d.textContent=e;
-    d.onclick=()=>{users[name].bg="#eee";users[name].fg="#333";users[name].pet=e;delete users[name].img;closePicker();renderNow();};
-    grid.appendChild(d);
-  });
+  const grid=document.getElementById('grid');grid.innerHTML="";
+  LIB.forEach(e=>{const d=document.createElement('div');d.className="g";d.textContent=e;d.onclick=()=>{users[name].bg="#eee";users[name].fg="#333";users[name].pet=e;delete users[name].img;closePicker();renderNow();};grid.appendChild(d);});
+  document.getElementById('mask').classList.add('show');
+}
+function openCover(u){
+  pickerFor=u;pickerMode="cover";
+  document.getElementById('pkTitle').textContent="换个背景图";
+  document.getElementById('grid').innerHTML="";
+  const c=document.getElementById('covlist');c.innerHTML="";
+  COVERS.forEach((g,i)=>{const d=document.createElement('div');d.className="c";d.style.background=g;d.onclick=()=>{users[u].cover=g;closePicker();renderNow();};c.appendChild(d);});
   document.getElementById('mask').classList.add('show');
 }
 function closePicker(){ document.getElementById('mask').classList.remove('show'); }
 document.getElementById('file').addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f)return;
+  const f=e.target.files[0];if(!f)return;
   const rd=new FileReader();
   rd.onload=ev=>{
-    if(pickerMode==="cover"){ users[pickerFor].cover=`url(${ev.target.result}) center/cover`; }
-    else { users[pickerFor].img=ev.target.result; }
-    closePicker(); renderNow();
+    if(pickerMode==="cover")users[pickerFor].cover=`url(${ev.target.result}) center/cover`;
+    else users[pickerFor].img=ev.target.result;
+    closePicker();renderNow();
   };
   rd.readAsDataURL(f);
 });
 function editId(u){
-  const v=prompt(`给「${u}」换个 ID（名字）：`, u);
-  if(v && v.trim()){ users[v.trim()]=users[u]; delete users[u]; feed.forEach(p=>{if(p.u===u)p.u=v.trim(); (p.cs||[]).forEach(c=>{if(c.u===u)c.u=v.trim();});}); renderNow(); }
+  const v=prompt(`给「${u}」换个 ID（名字）：`,u);
+  if(v&&v.trim()){users[v.trim()]=users[u];delete users[u];feed.forEach(p=>{if(p.u===u)p.u=v.trim();(p.cs||[]).forEach(c=>{if(c.u===u)c.u=v.trim();});});renderNow();}
 }
-function renderNow(){
-  if(view==="profile") openProfile(curUser);
-  else if(view==="post") openPost(curPost);
-  else renderList();
-}
+function toHome(){ renderList(); }
+function renderNow(){ if(view==="profile")openProfile(curUser);else if(view==="post")openPost(curPost);else renderList(); }
 function demo(){ alert('预览版～正式版接入后端后，这里能真的发帖/回复！'); }
 renderList();
 </script>
