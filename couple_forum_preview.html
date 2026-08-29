@@ -10,7 +10,15 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .top{display:flex;align-items:center;justify-content:center;padding:12px 0;font-weight:700;font-size:16px;color:#333}
 .post{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;object-fit:cover;cursor:pointer}
+.avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;position:relative;overflow:hidden;object-fit:cover;cursor:pointer}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avbody{width:100%;height:100%;position:relative;background:var(--bg)}
+.avbody::before{content:"";position:absolute;left:50%;top:24%;width:30%;height:30%;background:var(--fg);border-radius:50%;transform:translateX(-50%)}
+.avbody::after{content:"";position:absolute;left:50%;bottom:-24%;width:66%;height:58%;background:var(--fg);border-radius:50% 50% 0 0;transform:translateX(-50%)}
+.avpet{position:absolute;font-size:13px;right:2px;bottom:-2px;z-index:2}
+.avglass{position:absolute;left:50%;top:32%;width:26%;height:16%;transform:translateX(-50%);border:3px solid var(--fg);border-radius:50%;z-index:2}
+.avdot{position:absolute;inset:0;background-image:radial-gradient(var(--fg) 1px,transparent 1px);background-size:10px 10px;opacity:.25;z-index:1}
+.avstar{position:absolute;inset:0;color:var(--fg);opacity:.5;font-size:14px;line-height:1;z-index:1;text-align:center;padding-top:4px}
 .name{font-size:14px;font-weight:700;color:#222}
 .id{font-size:12px;color:#999}
 .body{font-size:15px;color:#222;line-height:1.8;margin:6px 0 10px;white-space:pre-wrap}
@@ -18,20 +26,23 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .cmts{margin-top:12px;border-top:1px solid #f0f0f0;padding-top:8px}
 .cmt{display:flex;gap:8px;padding:8px 0;border-top:1px dashed #f3f3f3}
 .cmt:first-child{border-top:none}
-.cmt .avatar{width:30px;height:30px;font-size:15px;cursor:default}
+.cmt .avatar{width:30px;height:30px;cursor:default}
+.cmt .avbody::before{top:22%;width:30%;height:30%}
+.cmt .avbody::after{bottom:-22%;width:64%;height:56%}
+.cmt .avpet{font-size:10px}
 .cmt .cw{flex:1}
 .cmt .nm{font-size:13px;font-weight:700;color:#222}
 .cmt .rid{font-size:12px;color:#1a91da}
 .cmt .ct{font-size:14px;color:#333;line-height:1.6;margin-top:2px}
 .cmt .cs{font-size:11px;color:#aaa;margin-top:4px;display:flex;gap:12px}
 .cmt .at{font-size:13px;color:#555}
+.cmt .avglass{top:30%;width:26%;height:16%}
 .wx-btn{position:fixed;top:16px;right:16px;width:34px;height:34px;border-radius:50%;background:#2e2e2e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 10px rgba(0,0,0,.2);cursor:pointer;z-index:50}
 .wx-btn:hover{background:#000}
 .tip{text-align:center;font-size:11px;color:#bbb;margin-top:18px}
-/* 头像选择面板 */
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:60}
 .mask.show{display:flex}
-.panel{width:88%;max-width:420px;background:#fff;border-radius:18px;padding:22px 18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.panel{width:88%;max-width:430px;background:#fff;border-radius:18px;padding:22px 18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .panel h3{font-size:15px;color:#333;margin-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
 .grid .g{width:44px;height:44px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid transparent}
@@ -46,12 +57,12 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
   <div class="top">小情侣竟如此！</div>
   <div class="wx-btn" onclick="demo()">+</div>
   <div id="feed"></div>
-  <div class="tip">预览版 · 点头像能换（头像库 or 上传自己的图）· 点右上角 + 发帖</div>
+  <div class="tip">预览版 · ins风原始头像 · 点头像能换（头像库 or 上传自己的图）· 点 + 发帖</div>
 </div>
 
 <div class="mask" id="mask" onclick="if(event.target===this)closePicker()">
-  <div class="panel" id="panel">
-    <h3>给 <span id="pkName"></span> 换个头像</h3>
+  <div class="panel">
+    <h3>给 <span id="pkName"></span> 换头像</h3>
     <div class="grid" id="grid"></div>
     <div class="upload" onclick="document.getElementById('file').click()">📷 上传自己的图片当头像</div>
     <input type="file" id="file" accept="image/*">
@@ -60,31 +71,40 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 </div>
 
 <script>
+// 用 Apple ID 原始头像风格：--bg 背景, --fg 剪影, pet 小动物, glass 眼镜, dot 波点, star 星星
 const users = {
-  "桐桐":{a:"🌸",c:"#ff9ec4"},
-  "林霁":{a:"🌙",c:"#8a7bff"},
-  "甜甜圈":{a:"🍩",c:"#ffb26b"},
-  "CP头子":{a:"💘",c:"#ff6b9d"},
-  "柠檬味汽水":{a:"🍋",c:"#f7d154"},
-  "吃瓜路人":{a:"🍉",c:"#7ec850"},
-  "深夜emo选手":{a:"🌙",c:"#8a8a8a"},
-  "爱吃瓜的小番茄":{a:"🍅",c:"#ff7d5a"},
-  "起哄架秧子":{a:"🔥",c:"#ff5e5e"},
-  "捧场王":{a:"👍",c:"#4fb3ff"},
-  "追更小分队队长":{a:"📣",c:"#b58aff"},
-  "小草莓":{a:"🍓",c:"#ff4d88"},
-  "隔壁老张":{a:"🧔",c:"#a07a5b"},
-  "路人乙":{a:"🙂",c:"#9aa0a6"},
+  "桐桐":        {bg:"#ffe0ea", fg:"#3a2a30", pet:""},
+  "林霁":        {bg:"#dfe6ff", fg:"#2a2540", pet:"⭐"},
+  "甜甜圈":      {bg:"#ffd6a5", fg:"#5a3a2a", pet:"🐻"},
+  "CP头子":      {bg:"#ffd0dc", fg:"#43333a", pet:"💗"},
+  "柠檬味汽水":  {bg:"#f7e97a", fg:"#4a4310", pet:"🐱"},
+  "吃瓜路人":    {bg:"#dff0d4", fg:"#2f4a2a", pet:"🐶"},
+  "深夜emo选手": {bg:"#e0e0e0", fg:"#222", pet:"🌙", star:true},
+  "爱吃瓜的小番茄":{bg:"#f6d7d0", fg:"#5a2f26", pet:"🍅"},
+  "起哄架秧子":  {bg:"#ffd3d3", fg:"#5a2525", pet:"🔥"},
+  "捧场王":      {bg:"#d6edff", fg:"#1f3a55", pet:"👍"},
+  "追更小分队队长":{bg:"#e3dcff", fg:"#332a55", pet:"📣"},
+  "小草莓":      {bg:"#ffd1e0", fg:"#4d2433", pet:"🍓"},
+  "隔壁老张":    {bg:"#e6ddcf", fg:"#40372c", glass:true, pet:""},
+  "路人乙":      {bg:"#ececec", fg:"#333", pet:"🙂", dot:true},
 };
 let pickerFor = "";
-const LIB = ["🌸","🌙","🍩","💘","🍋","🍉","🍅","🔥","👍","📣","🍓","🐱","🐶","🍦","✨","🥰","😘","🦄","🍓","🌈","🐰","🐻"];
+const LIB = ["🌸","🌙","🍩","💘","🍋","🍉","🍅","🔥","👍","📣","🍓","🐱","🐶","🍦","✨","🥰","😘","🦄","🐰","🐻","🌈","⭐"];
 
-function av(u,s=44,canPick=false){
-  const x=users[u]||{a:"🙂",c:"#999"};
-  const cur = x.img ? `<img class="avatar" src="${x.img}" style="width:${s}px;height:${s}px">` :
-    `<div class="avatar" style="width:${s}px;height:${s}px;background:${x.c};font-size:${s*0.46}px">${x.a}</div>`;
-  if(canPick){ return `<div onclick="openPicker('${u}')" style="display:inline-block;cursor:pointer">${cur}</div>`; }
-  return cur;
+function avHTML(u,s=44,canPick=false){
+  const x=users[u]||{bg:"#eee",fg:"#333"};
+  const pet = x.pet?`<span class="avpet">${x.pet}</span>`:"";
+  const glass = x.glass?`<span class="avglass"></span>`:"";
+  const dot = x.dot?`<span class="avdot"></span>`:"";
+  const star = x.star?`<span class="avstar">★ · ★ · ★</span>`:"";
+  let inner;
+  if(x.img){
+    inner = `<img src="${x.img}" alt="">`;
+  } else {
+    inner = `<div class="avbody" style="--bg:${x.bg};--fg:${x.fg}">${dot}${star}${glass}${pet}</div>`;
+  }
+  const click = canPick ? ` onclick="openPicker('${u}')" style="cursor:pointer"` : "";
+  return `<div class="avatar"${click} style="width:${s}px;height:${s}px">${inner}</div>`;
 }
 function head(u){return `<span class="name">${u}</span> <span class="id">@${u}</span>`;}
 
@@ -118,11 +138,11 @@ function render(){
   feedEl.innerHTML = feed.map(p=>{
     const canPick = (p.u==="桐桐"||p.u==="林霁");
     return `<div class="post">
-      <div class="head">${av(p.u,44,canPick)}<div>${head(p.u)}</div></div>
+      <div class="head">${avHTML(p.u,44,canPick)}<div>${head(p.u)}</div></div>
       <div class="body">${p.t}</div>
       <div class="stats"><span>👁 ${p.v} 次查看</span><span>🔁 ${p.r} 转推</span><span>💬 ${p.c} 引用</span></div>
       <div class="cmts">${(p.cs||[]).map(c=>`
-        <div class="cmt">${av(c.u,30)}<div class="cw">
+        <div class="cmt">${avHTML(c.u,30)}<div class="cw">
           <div class="nm">${c.u} <span class="rid">@${c.u}</span></div>
           <div class="ct"><span class="at">回复 @${c.at}：</span>${c.t}</div>
           <div class="cs"><span>${c.l}</span><span>${c.p}</span></div>
@@ -137,7 +157,7 @@ function openPicker(name){
   LIB.forEach(e=>{
     const d = document.createElement('div');
     d.className="g"; d.textContent=e;
-    d.onclick=()=>{ users[name].a=e; delete users[name].img; closePicker(); render(); };
+    d.onclick=()=>{ users[name].a=e; users[name].bg="#eee"; users[name].fg="#333"; users[name].pet=e; delete users[name].img; closePicker(); render(); };
     grid.appendChild(d);
   });
   document.getElementById('mask').classList.add('show');
