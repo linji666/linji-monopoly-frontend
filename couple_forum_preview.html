@@ -16,7 +16,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .big-wrap .avbody::before{top:22%;width:32%;height:32%}
 .big-wrap .avbody::after{bottom:-26%;width:64%;height:56%}
 .big-wrap .avpet{font-size:20px}
-.idmsg{position:absolute;left:116px;bottom:40px;pointer-events:auto;color:#fff}
+.idmsg{position:absolute;left:116px;bottom:6px;pointer-events:auto;color:#fff}
 .hnm{font-size:22px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .hbio{font-size:13px;color:rgba(255,255,255,.9);margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
 .feed{background:#f5f5f5;padding:2px 6px 30px}
@@ -74,7 +74,6 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .upload{font-size:13px;color:#666;text-align:center;border-top:1px solid #f0f0f0;padding-top:14px;cursor:pointer}
 .upload input{display:none}
 .close{text-align:center;margin-top:14px;font-size:14px;color:#883a5e;cursor:pointer}
-/* 发帖面板 */
 .postbox label{display:block;font-size:12px;color:#999;margin:8px 0 4px}
 .postbox select,.postbox input,.postbox textarea{width:100%;border:1px solid #eee;border-radius:10px;padding:9px 12px;font-size:14px;margin-bottom:6px;font-family:inherit}
 .postbox textarea{min-height:60px;resize:vertical}
@@ -162,7 +161,6 @@ var feed=[
 ];
 var view="list",curUser=null,curPost=null,heroUser="桐桐";
 function num(n){return parseInt(String(n).replace(/[^0-9]/g,""))||0;}
-function pickUser(list){for(var k in users){if(k===list)return users[list];}return users["桐桐"];}
 function avatarData(u){
   var x=users[u]||{bg:"#eee",fg:"#333"};
   var pet=x.pet?'<span class="avpet">'+x.pet+'</span>':"";
