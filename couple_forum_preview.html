@@ -16,7 +16,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .big-wrap .avbody::before{top:22%;width:32%;height:32%}
 .big-wrap .avbody::after{bottom:-26%;width:64%;height:56%}
 .big-wrap .avpet{font-size:20px}
-.idmsg{position:absolute;left:116px;bottom:6px;pointer-events:auto;color:#fff}
+.idmsg{position:absolute;left:116px;bottom:8px;pointer-events:auto;color:#fff}
 .hnm{font-size:22px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .hbio{font-size:13px;color:rgba(255,255,255,.9);margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
 .feed{background:#f5f5f5;padding:2px 6px 30px}
@@ -135,8 +135,8 @@ var users={
   "路人乙":{bg:"#ececec",fg:"#333",pet:"🙂",dot:true,cover:"#d4c2ff",bio:"路过，别管我"}
 };
 var LIB=["🌸","🌙","🍩","💘","🍋","🍉","🍅","🔥","👍","📣","🍓","🐱","🐶","🍦","✨","🥰","😘","🦄","🐰","🐻","🌈","⭐"];
-var WREPLIES=["好甜好甜，磕到了！","前排卖瓜子","请你们原地结婚！","呜呜呜太幸福了","路过，顺便磕一口","好酸，但好爱看","这就是爱情啊","蹲一个后续"];
-var feed=[
+var WREPLIES=["好甜好甜，磕到了！","前排卖瓜子","请你们原地结婚！","呜呜呜太幸福了","路过，顺便磕一口","好酸，但好爱看","这就是爱情啊","蹲一个后续","细说，快","我也磕到了"];
+var defaultFeed=[
   {id:1,u:"深夜emo选手",t:"加班到十点，路上只剩路灯了……没事，明天再战。",v:"8.7万",r:"3千",c:52,cs:[
     {u:"柠檬味汽水",at:"深夜emo选手",t:"抱抱，我也在加班。",l:"32 点",p:"1 转"},
     {u:"吃瓜路人",at:"深夜emo选手",t:"同打工人路过，早点回。",l:"18 点",p:"0 转"},
@@ -157,10 +157,31 @@ var feed=[
     {u:"捧场王",at:"林霁",t:"这就是爱情啊。",l:"600 点",p:"80 转"}]},
   {id:5,u:"追更小分队队长",t:"啊啊啊我追的那对CP今天发糖了！！",v:"5千",r:"700",c:11,cs:[
     {u:"路人乙",at:"追更小分队队长",t:"细说，快。",l:"20 点",p:"0 转"},
-    {u:"小草莓",at:"追更小分队队长",t:"呜呜呜我磕到了",l:"15 点",p:"0 转"}]}
+    {u:"小草莓",at:"追更小分队队长",t:"呜呜呜我磕到了",l:"15 点",p:"0 转"}]},
+  {id:6,u:"柠檬味汽水",t:"今天地铁人挤人，差点把我挤成相片，但回家喝到一口汽水就活了。",v:"1.3万",r:"600",c:9,cs:[
+    {u:"路人乙",at:"柠檬味汽水",t:"抱抱打工人",l:"12 点",p:"0 转"}]},
+  {id:7,u:"小草莓",t:"买到超好吃的草莓蛋糕！甜到心里去了～",v:"2.4万",r:"1千",c:21,cs:[
+    {u:"甜甜圈",at:"小草莓",t:"馋了馋了",l:"30 点",p:"2 转"},
+    {u:"隔壁老张",at:"小草莓",t:"在哪买的？",l:"11 点",p:"0 转"}]},
+  {id:8,u:"捧场王",t:"今天也要元气满满！先夸夸自己，再夸夸全世界。",v:"8千",r:"500",c:6,cs:[
+    {u:"路人乙",at:"捧场王",t:"支持！",l:"8 点",p:"0 转"}]},
+  {id:9,u:"桐桐",t:"和他道了晚安，今晚一定梦到我！",v:"2.2万",r:"8千",c:33,cs:[
+    {u:"林霁",at:"桐桐",t:"梦里见。",l:"2千 点",p:"9千 转"},
+    {u:"CP头子",at:"桐桐",t:"又磕到了！",l:"600 点",p:"100 转"}]},
+  {id:10,u:"林霁",t:"她睡着的样子，我想象了一百遍。",v:"3.1万",r:"1.1万",c:47,cs:[
+    {u:"甜甜圈",at:"林霁",t:"呜呜呜好浪漫",l:"1千 点",p:"300 转"},
+    {u:"起哄架秧子",at:"林霁",t:"快去见她！",l:"700 点",p:"120 转"}]},
+  {id:11,u:"深夜emo选手",t:"耳机里放着《Good Night》，突然有一点点想家。",v:"6千",r:"300",c:8,cs:[
+    {u:"柠檬味汽水",at:"深夜emo选手",t:"一样，抱抱",l:"10 点",p:"0 转"}]},
+  {id:12,u:"CP头子",t:"今天这对CP又让我原地起飞了！",v:"5千",r:"400",c:7,cs:[
+    {u:"小草莓",at:"CP头子",t:"哈哈哈哈同感",l:"9 点",p:"0 转"}]}
 ];
+var feed=defaultFeed.slice();
 var view="list",curUser=null,curPost=null,heroUser="桐桐";
 function num(n){return parseInt(String(n).replace(/[^0-9]/g,""))||0;}
+function saveFeed(){try{localStorage.setItem("cf_feed",JSON.stringify(feed));}catch(e){}}
+function loadFeed(){try{var s=localStorage.getItem("cf_feed");if(s){feed=JSON.parse(s);}}catch(e){}}
+loadFeed();
 function avatarData(u){
   var x=users[u]||{bg:"#eee",fg:"#333"};
   var pet=x.pet?'<span class="avpet">'+x.pet+'</span>':"";
@@ -185,9 +206,10 @@ function cmt(c,hot){
     +'<div class="ct"><span class="at">回复 @'+c.at+'：</span>'+c.t+'</div>'
     +'<div class="cs"><span>'+c.l+'</span><span>'+c.p+'</span></div></div></div>';
 }
-function heroLeft(u,edit){
+function heroLeft(u,edit,pickAv){
   var x=users[u]||{};var bio=x.bio||"这个人很懒，什么都没写";
-  return '<div class="big-wrap">'+av(u,92,true)+'</div>'
+  var oc=pickAv?' onclick="openPicker(\''+u+'\')" style="cursor:pointer"':' onclick="goProfile(\''+u+'\')" style="cursor:pointer"';
+  return '<div class="big-wrap"><div class="avatar"'+oc+' style="width:92px;height:92px">'+avatarData(u)+'</div></div>'
     +'<div class="idmsg"><div class="hnm">'+u+'</div><div class="hbio" onclick="editBio(\''+u+'\')">'+bio+(edit?' ✏️':"")+'</div></div>';
 }
 function setHero(bg,left,u){
@@ -197,13 +219,11 @@ function setHero(bg,left,u){
   document.getElementById('hleft').innerHTML=left||"";
 }
 function coverClick(e){
-  if(e.target===document.getElementById('hero')||e.target.classList.contains('shade')){
-    openCover(heroUser);
-  }
+  if(e.target===document.getElementById('hero')||e.target.classList.contains('shade')){openCover(heroUser);}
 }
 function renderList(){
   view="list";curUser=null;curPost=null;
-  setHero(users["桐桐"].cover,heroLeft("桐桐"),"桐桐");
+  setHero(users["桐桐"].cover,heroLeft("桐桐",false,false),"桐桐");
   var html='<div class="topbar">全部动态</div>';
   feed.forEach(function(p){
     var top=p.cs.slice().sort(function(a,b){return num(b.l)-num(a.l);}).slice(0,2);
@@ -220,7 +240,7 @@ function renderList(){
 function goPost(id){
   var p=feed.filter(function(x){return x.id===id;})[0];if(!p)return;
   view="post";curPost=id;
-  setHero(users[p.u].cover,heroLeft(p.u),p.u);
+  setHero(users[p.u].cover,heroLeft(p.u,false,false),p.u);
   var html='<span class="back" onclick="renderList()">‹ 返回</span>'
     +'<div class="post" style="cursor:default">'
     +'<div class="head">'+av(p.u,44,true)+'<div>'+head(p.u)+'</div></div>'
@@ -235,13 +255,13 @@ function goPost(id){
 function goProfile(u){
   if(!users[u])return;
   view="profile";curUser=u;var x=users[u];
-  setHero(x.cover,heroLeft(u,true),u);
+  setHero(x.cover,heroLeft(u,true,true),u);
   var posts="";var own=feed.filter(function(p){return p.u===u;});
   if(own.length){own.forEach(function(p){posts+='<div class="post" onclick="goPost('+p.id+')"><div class="body">'+p.t+'</div><div class="stats"><span>👁 '+p.v+' 次查看</span><span>🔁 '+p.r+' 转推</span><span>💬 '+p.c+' 引用</span></div></div>';});}
   else{posts='<div style="text-align:center;color:#aaa;padding:20px">TA 还没发过帖哦</div>';}
   document.getElementById('view').innerHTML='<span class="back" onclick="renderList()">‹ 返回</span>'
     +'<div class="topbar">'+u+' 的主页</div>'+posts
-    +((u==="桐桐"||u==="林霁")?'<div class="tip">← 点头像/背景能换 · 点个签改成你的话</div>':"");
+    +((u==="桐桐"||u==="林霁")?'<div class="tip">← 再点头像就能换头像 · 点背景换背景 · 点个签改签名</div>':"");
   window.scrollTo(0,0);
 }
 function toHome(){renderList();}
@@ -254,14 +274,16 @@ function doPost(){
   var text=title?(title+"\n"+content):content;
   if(!text){alert("写点什么再发～");return;}
   var id=feed.length+1;
+  var ks=Object.keys(users);
   var newPost={id:id,u:author,t:text,v:Math.floor(Math.random()*50000+10000)+"万",r:Math.floor(Math.random()*9000+1000)+"千",c:Math.floor(Math.random()*60+10),cs:[]};
-  for(var i=0;i<3;i++){newPost.cs.push({u:Object.keys(users)[Math.floor(Math.random()*14)],at:author,t:WREPLIES[Math.floor(Math.random()*WREPLIES.length)],l:Math.floor(Math.random()*900+50)+" 点",p:Math.floor(Math.random()*99)+" 转"});}
+  for(var i=0;i<3;i++){newPost.cs.push({u:ks[Math.floor(Math.random()*ks.length)],at:author,t:WREPLIES[Math.floor(Math.random()*WREPLIES.length)],l:Math.floor(Math.random()*900+50)+" 点",p:Math.floor(Math.random()*99)+" 转"});}
   feed.unshift(newPost);
+  saveFeed();
   closePost();
   renderList();
   window.scrollTo(0,0);
 }
-function demo(){alert('预览版～正式版接入后端后，这里能真的发帖/回复！');}
+function demo(){alert('预览版～正式版接入后端后，这里能真的回复！');}
 var pickerFor="",pickerMode="";
 function openPicker(name){
   pickerFor=name;pickerMode="avatar";
