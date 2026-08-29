@@ -7,10 +7,8 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;background:#f5f5f5}
-/* 顶部背景 */
 .hero{position:relative;height:200px;background:#1a1a2e;background-size:cover;background-position:center}
 .hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.3))}
-/* 标题：横穿整个上方的白条，字横放 */
 .hname{position:absolute;top:0;left:0;right:0;height:46px;line-height:46px;text-align:center;background:rgba(255,255,255,.82);color:#883a5e;font-size:20px;font-weight:800;letter-spacing:8px;z-index:2}
 #hleft{position:absolute;inset:0;z-index:2;pointer-events:none}
 .big-wrap{position:absolute;left:18px;bottom:-34px;width:92px;height:92px;pointer-events:auto}
@@ -18,13 +16,12 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .big-wrap .avbody::before{top:22%;width:32%;height:32%}
 .big-wrap .avbody::after{bottom:-26%;width:64%;height:56%}
 .big-wrap .avpet{font-size:20px}
-.idmsg{position:absolute;left:122px;bottom:38px;pointer-events:auto;color:#fff}
+.idmsg{position:absolute;left:116px;bottom:40px;pointer-events:auto;color:#fff}
 .hnm{font-size:22px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .hbio{font-size:13px;color:rgba(255,255,255,.9);margin-top:2px;text-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
-/* 内容区 */
 .feed{background:#f5f5f5;padding:2px 6px 30px}
 .topbar{display:flex;align-items:center;justify-content:center;padding:6px 0;font-weight:700;font-size:15px;color:#333}
-.back{display:inline-block;color:#883a5e;cursor:pointer;font-size:13px;margin:4px 8px 12px;font-weight:600}
+.back{display:inline-block;color:#883a5e;cursor:pointer;font-size:13px;margin:42px 8px 10px;font-weight:600}
 .avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;position:relative;overflow:hidden;object-fit:cover;cursor:pointer}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .avbody{width:100%;height:100%;position:relative;background:var(--bg)}
@@ -77,18 +74,23 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .upload{font-size:13px;color:#666;text-align:center;border-top:1px solid #f0f0f0;padding-top:14px;cursor:pointer}
 .upload input{display:none}
 .close{text-align:center;margin-top:14px;font-size:14px;color:#883a5e;cursor:pointer}
+/* 发帖面板 */
+.postbox label{display:block;font-size:12px;color:#999;margin:8px 0 4px}
+.postbox select,.postbox input,.postbox textarea{width:100%;border:1px solid #eee;border-radius:10px;padding:9px 12px;font-size:14px;margin-bottom:6px;font-family:inherit}
+.postbox textarea{min-height:60px;resize:vertical}
+.postbox .btn{width:100%;margin-top:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="hero" id="hero">
+  <div class="hero" id="hero" onclick="coverClick(event)">
     <div class="shade"></div>
     <div class="hname">小情侣竟如此！</div>
     <div id="hleft"></div>
   </div>
   <div class="feed" id="view"></div>
 </div>
-<div class="wx-btn" onclick="toHome()">+</div>
+<div class="wx-btn" onclick="showPost()">+</div>
 
 <div class="mask" id="mask" onclick="if(event.target===this)closePicker()">
   <div class="panel">
@@ -98,6 +100,20 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
     <div class="upload" onclick="document.getElementById('file').click()">📷 上传自己的图片</div>
     <input type="file" id="file" accept="image/*">
     <div class="close" onclick="closePicker()">关闭</div>
+  </div>
+</div>
+
+<div class="mask" id="pMask" onclick="if(event.target===this)closePost()">
+  <div class="panel postbox">
+    <h3>发个帖</h3>
+    <label>身份</label>
+    <select id="pAuthor"><option value="桐桐">桐桐 🌸</option><option value="林霁">林霁 🌙</option></select>
+    <label>标题</label>
+    <input id="pTitle" placeholder="比如「今天也想你」">
+    <label>内容</label>
+    <textarea id="pContent" placeholder="写点什么……"></textarea>
+    <button class="btn" onclick="doPost()">发布</button>
+    <div class="close" onclick="closePost()">取消</div>
   </div>
 </div>
 
@@ -120,6 +136,7 @@ var users={
   "路人乙":{bg:"#ececec",fg:"#333",pet:"🙂",dot:true,cover:"#d4c2ff",bio:"路过，别管我"}
 };
 var LIB=["🌸","🌙","🍩","💘","🍋","🍉","🍅","🔥","👍","📣","🍓","🐱","🐶","🍦","✨","🥰","😘","🦄","🐰","🐻","🌈","⭐"];
+var WREPLIES=["好甜好甜，磕到了！","前排卖瓜子","请你们原地结婚！","呜呜呜太幸福了","路过，顺便磕一口","好酸，但好爱看","这就是爱情啊","蹲一个后续"];
 var feed=[
   {id:1,u:"深夜emo选手",t:"加班到十点，路上只剩路灯了……没事，明天再战。",v:"8.7万",r:"3千",c:52,cs:[
     {u:"柠檬味汽水",at:"深夜emo选手",t:"抱抱，我也在加班。",l:"32 点",p:"1 转"},
@@ -143,8 +160,9 @@ var feed=[
     {u:"路人乙",at:"追更小分队队长",t:"细说，快。",l:"20 点",p:"0 转"},
     {u:"小草莓",at:"追更小分队队长",t:"呜呜呜我磕到了",l:"15 点",p:"0 转"}]}
 ];
-var view="list",curUser=null,curPost=null;
+var view="list",curUser=null,curPost=null,heroUser="桐桐";
 function num(n){return parseInt(String(n).replace(/[^0-9]/g,""))||0;}
+function pickUser(list){for(var k in users){if(k===list)return users[list];}return users["桐桐"];}
 function avatarData(u){
   var x=users[u]||{bg:"#eee",fg:"#333"};
   var pet=x.pet?'<span class="avpet">'+x.pet+'</span>':"";
@@ -174,14 +192,20 @@ function heroLeft(u,edit){
   return '<div class="big-wrap">'+av(u,92,true)+'</div>'
     +'<div class="idmsg"><div class="hnm">'+u+'</div><div class="hbio" onclick="editBio(\''+u+'\')">'+bio+(edit?' ✏️':"")+'</div></div>';
 }
-function setHero(bg,left){
+function setHero(bg,left,u){
+  heroUser=u||"桐桐";
   var h=document.getElementById('hero');
   h.style.background=bg;
   document.getElementById('hleft').innerHTML=left||"";
 }
+function coverClick(e){
+  if(e.target===document.getElementById('hero')||e.target.classList.contains('shade')){
+    openCover(heroUser);
+  }
+}
 function renderList(){
   view="list";curUser=null;curPost=null;
-  setHero(users["桐桐"].cover,heroLeft("桐桐"));
+  setHero(users["桐桐"].cover,heroLeft("桐桐"),"桐桐");
   var html='<div class="topbar">全部动态</div>';
   feed.forEach(function(p){
     var top=p.cs.slice().sort(function(a,b){return num(b.l)-num(a.l);}).slice(0,2);
@@ -198,7 +222,7 @@ function renderList(){
 function goPost(id){
   var p=feed.filter(function(x){return x.id===id;})[0];if(!p)return;
   view="post";curPost=id;
-  setHero(users[p.u].cover,heroLeft(p.u));
+  setHero(users[p.u].cover,heroLeft(p.u),p.u);
   var html='<span class="back" onclick="renderList()">‹ 返回</span>'
     +'<div class="post" style="cursor:default">'
     +'<div class="head">'+av(p.u,44,true)+'<div>'+head(p.u)+'</div></div>'
@@ -213,15 +237,32 @@ function goPost(id){
 function goProfile(u){
   if(!users[u])return;
   view="profile";curUser=u;var x=users[u];
-  setHero(x.cover,heroLeft(u,true));
+  setHero(x.cover,heroLeft(u,true),u);
   var posts="";var own=feed.filter(function(p){return p.u===u;});
   if(own.length){own.forEach(function(p){posts+='<div class="post" onclick="goPost('+p.id+')"><div class="body">'+p.t+'</div><div class="stats"><span>👁 '+p.v+' 次查看</span><span>🔁 '+p.r+' 转推</span><span>💬 '+p.c+' 引用</span></div></div>';});}
   else{posts='<div style="text-align:center;color:#aaa;padding:20px">TA 还没发过帖哦</div>';}
-  document.getElementById('view').innerHTML='<div class="topbar">'+u+' 的主页</div>'+posts
+  document.getElementById('view').innerHTML='<span class="back" onclick="renderList()">‹ 返回</span>'
+    +'<div class="topbar">'+u+' 的主页</div>'+posts
     +((u==="桐桐"||u==="林霁")?'<div class="tip">← 点头像/背景能换 · 点个签改成你的话</div>':"");
   window.scrollTo(0,0);
 }
 function toHome(){renderList();}
+function showPost(){document.getElementById('pMask').classList.add("show");}
+function closePost(){document.getElementById('pMask').classList.remove("show");}
+function doPost(){
+  var author=document.getElementById('pAuthor').value;
+  var title=document.getElementById('pTitle').value.trim();
+  var content=document.getElementById('pContent').value.trim();
+  var text=title?(title+"\n"+content):content;
+  if(!text){alert("写点什么再发～");return;}
+  var id=feed.length+1;
+  var newPost={id:id,u:author,t:text,v:Math.floor(Math.random()*50000+10000)+"万",r:Math.floor(Math.random()*9000+1000)+"千",c:Math.floor(Math.random()*60+10),cs:[]};
+  for(var i=0;i<3;i++){newPost.cs.push({u:Object.keys(users)[Math.floor(Math.random()*14)],at:author,t:WREPLIES[Math.floor(Math.random()*WREPLIES.length)],l:Math.floor(Math.random()*900+50)+" 点",p:Math.floor(Math.random()*99)+" 转"});}
+  feed.unshift(newPost);
+  closePost();
+  renderList();
+  window.scrollTo(0,0);
+}
 function demo(){alert('预览版～正式版接入后端后，这里能真的发帖/回复！');}
 var pickerFor="",pickerMode="";
 function openPicker(name){
