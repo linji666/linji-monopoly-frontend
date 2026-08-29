@@ -7,17 +7,14 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;background:#f5f5f5}
-/* 顶部固定背景：不随滑动划走 */
 .hero{position:fixed;top:0;left:0;right:0;height:210px;z-index:30;background:#1a1a2e;background-size:cover;background-position:center;overflow:hidden}
 .hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.5))}
 .hname{position:absolute;top:16px;left:0;right:0;text-align:center;color:#fff;font-size:22px;font-weight:800;letter-spacing:8px;text-shadow:0 2px 10px rgba(0,0,0,.6);z-index:2}
-.hleft{position:absolute;left:16px;bottom:16px;display:flex;align-items:flex-end;gap:12px;z-index:2;color:#fff}
+.hleft{position:absolute;left:18px;bottom:12px;display:flex;align-items:flex-end;gap:14px;z-index:2;color:#fff}
 .htag{position:absolute;right:16px;bottom:16px;z-index:2;color:rgba(255,255,255,.85);font-size:12px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-/* 内容区：顶部留出 hero 高度，滚动时 hero 固定 */
 .feed{background:#f5f5f5;padding:220px 6px 30px}
 .topbar{display:flex;align-items:center;justify-content:center;padding:8px 0;font-weight:700;font-size:15px;color:#333}
 .back{display:inline-block;color:#883a5e;cursor:pointer;font-size:13px;margin:4px 8px 12px;font-weight:600}
-/* 头像 */
 .avatar{width:44px;height:44px;border-radius:50%;flex-shrink:0;position:relative;overflow:hidden;object-fit:cover;cursor:pointer}
 .avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .avbody{width:100%;height:100%;position:relative;background:var(--bg)}
@@ -30,10 +27,9 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f5f5;m
 .avbig .avbody::before{top:22%;width:32%;height:32%}
 .avbig .avbody::after{bottom:-26%;width:64%;height:56%}
 .avbig .avpet{font-size:18px}
-.hbig{width:62px;height:62px;border:3px solid rgba(255,255,255,.9);box-shadow:0 2px 12px rgba(0,0,0,.4)}
-.hnm{font-size:19px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.hbig{width:76px;height:76px}
+.hnm{font-size:20px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .hid{font-size:12px;color:rgba(255,255,255,.8);text-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
-/* 帖子 */
 .post{background:#fff;border-radius:14px;padding:16px;margin:0 8px 12px;box-shadow:0 1px 6px rgba(0,0,0,.06);cursor:pointer}
 .head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .name{font-size:14px;font-weight:700;color:#222;cursor:pointer}
@@ -170,10 +166,9 @@ function cmt(c,hot){
     +'<div class="ct"><span class="at">回复 @'+c.at+'：</span>'+c.t+'</div>'
     +'<div class="cs"><span>'+c.l+'</span><span>'+c.p+'</span></div></div></div>';
 }
-/* 左上永远放：头像 + 后面跟ID */
 function hleftFor(u,editable){
-  var editableHtml=editable?' <span class="hid" onclick="editId(\''+u+'\')">✏️ 改ID</span>':"";
-  return '<div class="hbig">'+av(u,62,true)+'</div><div><div class="hnm">'+u+'</div><div class="hid">@'+u+editableHtml+'</div></div>';
+  var e=editable?' <span class="hid" onclick="editId(\''+u+'\')">✏️ 改ID</span>':"";
+  return '<div class="hbig">'+av(u,76,true)+'</div><div><div class="hnm">'+u+'</div><div class="hid">@'+u+e+'</div></div>';
 }
 function setHero(bg,left,tag){
   var h=document.getElementById('hero');
