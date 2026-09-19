@@ -81,33 +81,53 @@ var maskW=document.getElementById('maskW'),maskV=document.getElementById('maskV'
 var wishEl=document.getElementById('wish'),signEl=document.getElementById('sign');
 var viewEl=document.getElementById('view'),vsignEl=document.getElementById('vsign');
 
-var W=0,H=0,DPR=1,CELL=44;
+var W=0,H=0,DPR=1,CELL=36;
 var camX=0,camY=0,scale=1.05;
 var stars=[],flies=[],curW=null,focus=null;
 var tmap=new Map();
 
-/* 那一株四叶草：去白底，复制成一片 */
 var SPRITE_URL='https://i.postimg.cc/mBQxP3pW/1789800299981.png';
 var sprite=null,SPW=1,SPH=1,alphaOk=false,groundPat=null;
 (function(){
   var img=new Image();
   img.crossOrigin='anonymous';
   img.onload=function(){
-    var tw=280, th=Math.round(280*img.height/img.width);
+    var tw=300, th=Math.round(300*img.height/img.width);
     var c=document.createElement('canvas');c.width=tw;c.height=th;
     var g=c.getContext('2d');
     g.drawImage(img,0,0,tw,th);
+    var cropped=false;
     try{
       var d=g.getImageData(0,0,tw,th),p=d.data;
       for(var i=0;i<p.length;i+=4){
         var lum=p[i]*0.299+p[i+1]*0.587+p[i+2]*0.114;
-        var a=(218-lum)/78; if(a<0)a=0; if(a>1)a=1;
+        var a=(220-lum)/82; if(a<0)a=0; if(a>1)a=1;
         p[i+3]=Math.round(a*p[i+3]);
       }
       g.putImageData(d,0,0);
       alphaOk=true;
+      var minX=tw,minY=th,maxX=-1,maxY=-1;
+      for(var y=0;y<th;y++){
+        for(var x=0;x<tw;x++){
+          if(p[(y*tw+x)*4+3]>20){
+            if(x<minX)minX=x; if(x>maxX)maxX=x;
+            if(y<minY)minY=y; if(y>maxY)maxY=y;
+          }
+        }
+      }
+      if(maxX>minX&&maxY>minY){
+        var pad=4;
+        minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+        maxX=Math.min(tw-1,maxX+pad); maxY=Math.min(th-1,maxY+pad);
+        var cw=maxX-minX+1, ch=maxY-minY+1;
+        var k=260/Math.max(cw,ch);
+        var nw=Math.max(1,Math.round(cw*k)), nh=Math.max(1,Math.round(ch*k));
+        var c2=document.createElement('canvas');c2.width=nw;c2.height=nh;
+        c2.getContext('2d').drawImage(c,minX,minY,cw,ch,0,0,nw,nh);
+        sprite=c2;SPW=nw;SPH=nh;cropped=true;
+      }
     }catch(e){alphaOk=false;}
-    sprite=c;SPW=tw;SPH=th;
+    if(!cropped){sprite=c;SPW=tw;SPH=th;}
   };
   img.src=SPRITE_URL;
 })();
@@ -127,7 +147,7 @@ function resize(){
   var pg=pc.getContext('2d');
   var gr=pg.createRadialGradient(70,70,4,70,70,70);
   gr.addColorStop(0,'rgba(120,190,140,.5)');
-  gr.addColorStop(.55,'rgba(70,130,90,.28)');
+  gr.addColorStop(.55,'rgba(70,130,90,.26)');
   gr.addColorStop(1,'rgba(30,70,45,0)');
   pg.fillStyle=gr;pg.fillRect(0,0,140,140);
   groundPat=ctx.createPattern(pc,'repeat');
@@ -145,12 +165,12 @@ function tuftAt(ix,iy){
   if(t)return t;
   var r1=hash(ix,iy,1),r2=hash(ix,iy,2),r3=hash(ix,iy,3),r4=hash(ix,iy,4),r5=hash(ix,iy,5),r6=hash(ix,iy,6);
   t={k:key,
-    wx:ix*CELL+CELL*0.5+(r1-.5)*CELL*0.92,
-    wy:iy*CELL+CELL*0.5+(r2-.5)*CELL*0.92,
-    sz:CELL*(0.92+r5*0.5),
-    rot:(r3-.5)*0.86,
+    wx:ix*CELL+CELL*0.5+(r1-.5)*CELL*0.95,
+    wy:iy*CELL+CELL*0.5+(r2-.5)*CELL*0.95,
+    sz:CELL*(0.95+r5*0.55),
+    rot:(r3-.5)*0.9,
     flip:r6>0.5,
-    tilt:(r4-.5)*0.2,
+    tilt:(r4-.5)*0.22,
     ph:r3*6.283,
     fall:[0,0,0,0]};
   tmap.set(key,t);
@@ -159,16 +179,17 @@ function tuftAt(ix,iy){
 function drawSprite(tf,time){
   var p=proj(tf.wx,tf.wy);
   var w=tf.sz*scale, h=w*(SPH/SPW);
-  if(p.x<-w||p.x>W+w||p.y<-h||p.y>H+h)return;
+  if(p.x<-w||p.x>W+w||p.y<-h*1.2||p.y>H+h*0.4)return;
   if(!sprite)return;
   var deep=!!wishes[tf.k];
   var sway=Math.sin(time/2200+tf.ph)*(deep?0.006:0.014);
+  var cx=p.x, cy=p.y-h*0.5;
   if(w>5){
-    var gl=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,w*0.95);
-    if(deep){gl.addColorStop(0,'rgba(150,255,205,.42)');gl.addColorStop(1,'rgba(150,255,205,0)');}
-    else{gl.addColorStop(0,'rgba(180,255,215,.16)');gl.addColorStop(1,'rgba(180,255,215,0)');}
+    var gl=ctx.createRadialGradient(cx,cy,0,cx,cy,w*0.9);
+    if(deep){gl.addColorStop(0,'rgba(150,255,205,.40)');gl.addColorStop(1,'rgba(150,255,205,0)');}
+    else{gl.addColorStop(0,'rgba(185,255,220,.13)');gl.addColorStop(1,'rgba(185,255,220,0)');}
     ctx.fillStyle=gl;
-    ctx.beginPath();ctx.arc(p.x,p.y,w*0.95,0,6.2832);ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,w*0.9,0,6.2832);ctx.fill();
   }
   ctx.save();
   ctx.translate(p.x,p.y);
@@ -176,13 +197,12 @@ function drawSprite(tf,time){
   ctx.scale(tf.flip?-1:1,1);
   ctx.transform(1,0,tf.tilt,1,0,0);
   ctx.globalCompositeOperation=alphaOk?'source-over':'multiply';
-  ctx.globalAlpha=deep?0.62:0.94;
-  ctx.drawImage(sprite,-w/2,-h/2,w,h);
+  ctx.globalAlpha=deep?0.6:0.95;
+  ctx.drawImage(sprite,-w*0.5,-h,w,h);
   ctx.restore();
   ctx.globalCompositeOperation='source-over';
   ctx.globalAlpha=1;
 }
-/* 点开后放大的那朵：手画的，能一片片摘 */
 function leafShape(L){
   ctx.beginPath();
   ctx.moveTo(0,L*0.04);
@@ -251,7 +271,7 @@ function loop(time){
   if(groundPat){
     ctx.save();
     ctx.translate(-(camX*scale)%140,-(camY*scale)%140);
-    ctx.globalAlpha=.5;
+    ctx.globalAlpha=.45;
     ctx.fillStyle=groundPat;
     ctx.fillRect(0,0,W+140,H+140);
     ctx.restore();
@@ -262,15 +282,15 @@ function loop(time){
   var ix0=Math.floor((camX-halfW)/CELL)-1, ix1=Math.ceil((camX+halfW)/CELL)+1;
   var iy0=Math.floor((camY-halfH)/CELL)-1, iy1=Math.ceil((camY+halfH)/CELL)+1;
   for(iy=iy0;iy<=iy1;iy++)for(ix=ix0;ix<=ix1;ix++)drawSprite(tuftAt(ix,iy),time);
-  var sky=ctx.createLinearGradient(0,0,0,H*0.46);
+  var sky=ctx.createLinearGradient(0,0,0,H*0.44);
   sky.addColorStop(0,'rgba(3,6,13,0.97)');
   sky.addColorStop(0.5,'rgba(4,10,16,0.7)');
   sky.addColorStop(1,'rgba(4,10,16,0)');
-  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*0.46);
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*0.44);
   for(i=0;i<stars.length;i++){
     var s=stars[i];s.a+=s.s;
     if(s.a>1){s.a=1;s.s*=-1}if(s.a<0){s.a=0;s.s*=-1}
-    var fade=1-(s.y/(H*0.42));
+    var fade=1-(s.y/(H*0.4));
     if(fade<=0)continue;
     ctx.globalAlpha=(0.2+s.a*0.8)*fade*0.9;
     ctx.fillStyle='#eaf4ff';
@@ -305,7 +325,7 @@ function loop(time){
     ctx.globalAlpha=1;
     closeBtn.classList.toggle('on',focus.t>=1);
   } else closeBtn.classList.remove('on');
-  if(Math.random()<.008&&tmap.size>3000){
+  if(Math.random()<.008&&tmap.size>4000){
     var kill=[];
     tmap.forEach(function(tf,kk){
       var p=proj(tf.wx,tf.wy);
@@ -390,17 +410,18 @@ function tap(px,py){
   var wx=(px-W/2)/scale+camX, wy=(py-H/2)/scale+camY;
   var ix0=Math.floor(wx/CELL), iy0=Math.floor(wy/CELL);
   var best=null,bd=1e9,bp=null;
-  for(var i=-1;i<=1;i++)for(var j=-1;j<=1;j++){
+  for(var i=-2;i<=2;i++)for(var j=-2;j<=2;j++){
     var t=tuftAt(ix0+i,iy0+j);
     var p=proj(t.wx,t.wy);
-    var d=Math.sqrt((p.x-px)*(p.x-px)+(p.y-py)*(p.y-py));
+    var hh=t.sz*scale*(SPH/SPW)*0.5;
+    var d=Math.sqrt((p.x-px)*(p.x-px)+(p.y-hh-py)*(p.y-hh-py));
     if(d<bd){bd=d;best=t;bp=p;}
   }
   if(!best)return;
-  var R=best.sz*scale*0.5;
-  if(bd>Math.max(14,R*1.5))return;
+  var R=best.sz*scale*0.55;
+  if(bd>Math.max(16,R*1.4))return;
   hint.style.opacity=0;
-  focus={tf:best,t:0,x0:bp.x,y0:bp.y,R0:Math.max(6,R)};
+  focus={tf:best,t:0,x0:bp.x,y0:bp.y- best.sz*scale*(SPH/SPW)*0.5, R0:Math.max(6,R)};
   if(wishes[best.k])setTimeout(function(){if(focus&&focus.tf===best)openView(best);},900);
 }
 var bgm=document.getElementById('bgm'),mbtn=document.getElementById('music');
