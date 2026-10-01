@@ -102,17 +102,17 @@ var C = {
   sky2 : '#3d2069',
   sky3 : '#5c2f70',
   sky4 : '#7a4a7d',
-
   grassFar : '#47b493',
   grassMid : '#6ed7ab',
   grassNear: '#9df0c4',
-  grassLip : 'rgba(230,255,245,.75)'
+  grassLip : 'rgba(230,255,245,.75)',
+  leafFill : '#5fc07f',
+  leafLine : '#37975f'
 };
 
 function rnd(a,b){ return a + Math.random()*(b-a); }
 
 /* ============ 🍀 emoji 精灵 ============ */
-/* kind: 0 正常 / 1 远景(亮淡) / 2 已许愿(压暗) */
 function makeEmoji(px, kind){
   var pad = Math.round(px*0.30);
   var cv = document.createElement('canvas');
@@ -123,9 +123,7 @@ function makeEmoji(px, kind){
   g.textBaseline = 'middle';
   g.font = Math.round(px*0.92) + 'px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji","EmojiOne Color",sans-serif';
 
-  if(kind === 1){
-    g.filter = 'brightness(1.24) saturate(0.78)';
-  }else if(kind === 2){
+  if(kind === 2){
     g.filter = 'brightness(0.60) saturate(0.62)';
   }
 
@@ -152,19 +150,75 @@ var SPR = [];
 function buildSprites(){
   SPR = [];
   var base = 96;
-  for(var k=0;k<3;k++){
-    var row = [];
-    for(var a=0;a<4;a++){
-      var cv = makeEmoji(base, k);
-      var rot = document.createElement('canvas');
-      rot.width = rot.height = cv.width;
-      var rg = rot.getContext('2d');
-      rg.translate(cv.width/2, cv.height/2);
-      rg.rotate(a*0.13 - 0.20);
-      rg.drawImage(cv, -cv.width/2, -cv.height/2);
-      row.push(rot);
-    }
-    SPR.push(row);
+  for(var a=0;a<4;a++){
+    var cv = makeEmoji(base, 0);
+    var rot = document.createElement('canvas');
+    rot.width = rot.height = cv.width;
+    var rg = rot.getContext('2d');
+    rg.translate(cv.width/2, cv.height/2);
+    rg.rotate(a*0.13 - 0.20);
+    rg.drawImage(cv, -cv.width/2, -cv.height/2);
+    SPR.push(rot);
+  }
+}
+
+/* 心形叶片路径 */
+function heartLeafPath(g, r){
+  g.beginPath();
+  g.moveTo(0,0);
+  g.bezierCurveTo(-r*1.18,-r*0.42, -r*1.02,-r*1.42, 0,-r*1.52);
+  g.bezierCurveTo( r*1.02,-r*1.42,  r*1.18,-r*0.42, 0,0);
+  g.closePath();
+}
+
+/* ============ 掉落的叶子 ============ */
+var leaves = [];
+function spawnLeaves(cx, cy, size, n){
+  for(var i=0;i<n;i++){
+    var ang = rnd(0, Math.PI*2);
+    leaves.push({
+      x: cx + Math.cos(ang)*size*0.16,
+      y: cy + Math.sin(ang)*size*0.16,
+      vx: Math.cos(ang)*rnd(0.8,2.6),
+      vy: rnd(-3.4,-1.0),
+      rot: rnd(0, Math.PI*2),
+      vr: rnd(-0.10,0.10),
+      life: 0,
+      max: rnd(70, 105),
+      size: size*rnd(0.20,0.30)
+    });
+  }
+}
+
+function updateLeaves(){
+  for(var i=leaves.length-1;i>=0;i--){
+    var L = leaves[i];
+    L.vy += 0.115;
+    L.vx *= 0.992;
+    L.x += L.vx;
+    L.y += L.vy;
+    L.rot += L.vr;
+    L.life++;
+    if(L.life > L.max || L.y > H + 80) leaves.splice(i,1);
+  }
+}
+
+function drawLeaves(){
+  for(var i=0;i<leaves.length;i++){
+    var L = leaves[i];
+    var k = 1 - L.life/L.max;
+    if(k < 0) k = 0;
+    fg.save();
+    fg.globalAlpha = k * 0.95;
+    fg.translate(L.x, L.y);
+    fg.rotate(L.rot);
+    heartLeafPath(fg, L.size);
+    fg.fillStyle = C.leafFill;
+    fg.fill();
+    fg.strokeStyle = C.leafLine;
+    fg.lineWidth = Math.max(1, L.size*0.16);
+    fg.stroke();
+    fg.restore();
   }
 }
 
@@ -177,8 +231,7 @@ function buildStars(){
   var n = Math.round(W*H/6000);
   for(var i=0;i<n;i++){
     stars.push({
-      x: Math.random()*W,
-      y: Math.random()*H*0.70,
+      x: Math.random()*W, y: Math.random()*H*0.70,
       r: rnd(0.55,1.8), a: rnd(0.30,0.98),
       tw: rnd(0.5,2.6), ph: Math.random()*Math.PI*2,
       col: PAL[Math.floor(Math.random()*PAL.length)]
@@ -187,8 +240,7 @@ function buildStars(){
   fireflies = [];
   for(var j=0;j<28;j++){
     fireflies.push({
-      x: Math.random()*W,
-      y: H*0.24 + Math.random()*H*0.68,
+      x: Math.random()*W, y: H*0.24 + Math.random()*H*0.68,
       r: rnd(1.4,3.0), sp: rnd(0.10,0.36),
       ph: Math.random()*Math.PI*2,
       amp: rnd(10,36), a: rnd(0.35,0.95)
@@ -198,7 +250,7 @@ function buildStars(){
 
 function drawSky(t){
   skg.clearRect(0,0,W,H);
-  var horizon = H*0.90;
+  var horizon = H*0.92;
 
   var grad = skg.createLinearGradient(0,0,0,horizon);
   grad.addColorStop(0,    C.sky0);
@@ -209,7 +261,7 @@ function drawSky(t){
   skg.fillStyle = grad;
   skg.fillRect(0,0,W,horizon);
 
-  var hz = skg.createRadialGradient(W*0.42, H*0.88, 10, W*0.42, H*0.88, Math.max(W,H)*0.66);
+  var hz = skg.createRadialGradient(W*0.42, H*0.90, 10, W*0.42, H*0.90, Math.max(W,H)*0.66);
   hz.addColorStop(0,   'rgba(205,165,255,.36)');
   hz.addColorStop(0.45,'rgba(165,125,225,.16)');
   hz.addColorStop(1,   'rgba(120,90,190,0)');
@@ -227,8 +279,8 @@ function drawSky(t){
     skg.fillStyle = g2; skg.fill();
     skg.restore();
   };
-  cloud(W*0.18, H*0.68, W*0.48, H*0.12, '0.17');
-  cloud(W*0.86, H*0.58, W*0.42, H*0.10, '0.14');
+  cloud(W*0.18, H*0.70, W*0.48, H*0.12, '0.17');
+  cloud(W*0.86, H*0.60, W*0.42, H*0.10, '0.14');
 
   for(var i=0;i<stars.length;i++){
     var s = stars[i];
@@ -261,24 +313,19 @@ function drawSky(t){
   }
 }
 
-/* ============ 草坡（更低） ============ */
+/* ============ 草坡 ============ */
 function ridgeY(x){
   var u = x / W;
-  var base = H*0.885 - u*H*0.135;
-  if(u > 0.60) base -= (u-0.60)*H*0.065;
-  base += Math.sin(u*Math.PI*2.1)*H*0.014;
-  base += Math.sin(u*Math.PI*5.3+1.3)*H*0.0065;
+  var base = H*0.905 - u*H*0.125;
+  if(u > 0.60) base -= (u-0.60)*H*0.055;
+  base += Math.sin(u*Math.PI*2.1)*H*0.013;
+  base += Math.sin(u*Math.PI*5.3+1.3)*H*0.006;
   return base;
 }
 
 var clovers = [];
-
-/* 统一大小 */
 var BASE_PX = 42;
-
-function emojiSize(c){
-  return BASE_PX * (Math.min(W,H)/380) * 1.0;
-}
+function emojiSize(){ return BASE_PX * (Math.min(W,H)/380); }
 
 function buildField(){
   clovers = [];
@@ -291,13 +338,9 @@ function buildField(){
     var v = Math.pow(Math.random(), 0.72);
     var y = top + v*(H - top)*0.94;
 
-    var depth = v;
-    /* 只有明暗和位置变，大小不变 */
-    var alpha = 0.62 + (1-depth)*0.38;
-
     clovers.push({
-      x:x, y:y, depth:depth,
-      alpha: alpha,
+      x:x, y:y, depth:v,
+      alpha: 0.62 + (1-v)*0.38,
       used:false, wt:'', sg:'',
       angle: Math.floor(Math.random()*4),
       sway: rnd(0.4,1.5),
@@ -337,7 +380,7 @@ function drawField(t, skip){
   fg.beginPath();
   fg.moveTo(0, ridgeY(0));
   for(var x2=0;x2<=W;x2+=4){ fg.lineTo(x2, ridgeY(x2)); }
-  fg.lineWidth = 2.6;
+  fg.lineWidth = 2.4;
   fg.strokeStyle = C.grassLip;
   fg.shadowColor = 'rgba(200,255,235,.9)';
   fg.shadowBlur = 12;
@@ -365,9 +408,9 @@ function drawField(t, skip){
 }
 
 function drawOne(c, t){
-  var px = emojiSize(c);
+  var px = emojiSize();
   var sway = Math.sin(t*0.0009*c.sway + c.ph) * (px*0.05);
-  var img = SPR[ c.used ? 2 : 0 ][ c.angle ];
+  var img = SPR[ c.used ? 1 : 0 ];
   if(!img) return;
 
   fg.save();
@@ -382,10 +425,10 @@ var picked = null, picking = false, anim = null, petals = 4;
 
 function hitTest(mx,my){
   var best = null, bestD = 1e9;
+  var px = emojiSize();
   for(var i=clovers.length-1;i>=0;i--){
     var c = clovers[i];
     if(c.used) continue;
-    var px = emojiSize(c);
     var rx = Math.max(18, px*0.55), ry = Math.max(18, px*0.55);
     var dx = (mx-c.x)/rx, dy = (my-c.y)/ry;
     var d = dx*dx + dy*dy;
@@ -394,31 +437,40 @@ function hitTest(mx,my){
   return best;
 }
 
-fldC.addEventListener('pointerdown', function(e){
-  if(picking){
-    petals--;
-    if(petals > 0){
-      if(petals === 1) showHint('最后一片了');
-      return;
-    }
-    picking = false;
-    var target = picked;
-    picked = null; anim = null;
-    showHint('');
-    openModal(target);
+function pickLeaf(){
+  if(!anim) return;
+  var bigPx = emojiSize() * anim.s;
+  /* 每次从一片叶子的方向飞出去 */
+  var dirs = [ 0.75, 2.25, 3.75, 5.25 ];  /* 左上 左下 右下 右上 */
+  var a = dirs[4 - petals] || 0;
+  var cx = anim.x + Math.cos(a)*bigPx*0.22;
+  var cy = anim.y + Math.sin(a)*bigPx*0.22;
+  spawnLeaves(cx, cy, bigPx, 5);
+
+  petals--;
+  if(petals > 0){
+    if(petals === 1) showHint('最后一片了');
     return;
   }
+  var target = picked;
+  picking = false;
+  picked = null; anim = null;
+  showHint('');
+  setTimeout(function(){ openModal(target); }, 420);
+}
+
+fldC.addEventListener('pointerdown', function(e){
+  if(picking){ pickLeaf(); return; }
   if(picked) return;
 
   var r = fldC.getBoundingClientRect();
   var mx = (e.clientX - r.left) * W / r.width;
   var my = (e.clientY - r.top)  * H / r.height;
 
-  /* 先看是不是点已许愿的 */
   for(var i=clovers.length-1;i>=0;i--){
     var c0 = clovers[i];
     if(!c0.used) continue;
-    var p0 = emojiSize(c0);
+    var p0 = emojiSize();
     var rx0 = Math.max(18, p0*0.55), ry0 = Math.max(18, p0*0.55);
     var dx0 = (mx-c0.x)/rx0, dy0 = (my-c0.y)/ry0;
     if(dx0*dx0 + dy0*dy0 < 1){ showWish(c0); return; }
@@ -434,9 +486,9 @@ fldC.addEventListener('pointerdown', function(e){
 
 function flyIn(c){
   picking = true;
-  var px0 = emojiSize(c);
+  var px0 = emojiSize();
   var targetPx = Math.min(W,H) * 0.34;
-  anim = { t0: performance.now(), dur: 640,
+  anim = { t0: performance.now(), dur: 560,
            x0:c.x, y0:c.y, x1:W*0.5, y1:H*0.40,
            s0:1, s1: targetPx / px0 };
   (function tick(now){
@@ -455,18 +507,24 @@ function loop(){
   drawSky(t);
   drawField(t, picked);
 
+  updateLeaves();
+
   if(picking && anim && anim.x !== undefined){
-    var basePx = BASE_PX * (Math.min(W,H)/380);
-    var px = basePx * anim.s;
-    var img = SPR[0][0];
+    var basePx = emojiSize();
+    /* 摘掉一片，本体缩一点、淡一点 */
+    var shrink = 0.72 + 0.28*(petals/4);
+    var fade   = 0.75 + 0.25*(petals/4);
+    var px = basePx * anim.s * shrink;
+    var img = SPR[0];
     fg.save();
+    fg.globalAlpha = fade;
     fg.translate(anim.x, anim.y);
     fg.drawImage(img, -px/2, -px/2, px, px);
     fg.restore();
 
     if(petals > 0){
       fg.save();
-      fg.globalAlpha = 0.5 + 0.5*Math.sin(t*0.006);
+      fg.globalAlpha = 0.45 + 0.45*Math.sin(t*0.006);
       fg.beginPath();
       fg.arc(anim.x, anim.y, px*0.62, 0, Math.PI*2);
       fg.strokeStyle = 'rgba(255,250,200,.6)';
@@ -477,6 +535,8 @@ function loop(){
       fg.restore();
     }
   }
+
+  drawLeaves();
   requestAnimationFrame(loop);
 }
 
@@ -524,7 +584,7 @@ function showWish(c){
 }
 
 /* ============ 本地存 ============ */
-var KEY = 'clover_wishes_v5';
+var KEY = 'clover_wishes_v6';
 function save(){
   try{
     var list = [];
