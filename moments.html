@@ -9,18 +9,25 @@
 <title>我们 · 朋友圈</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* ── 全站统一色卡：粉紫一家 ──
+   粉 #ff9ecd  紫 #a98cff
+   朋友圈＝白底（白天）  心事/银河＝紫黑底（夜里）
+   同一个色，只换明度 */
 :root{
+  --pink:#ff9ecd;
+  --pink-d:#f77bb8;
+  --violet:#a98cff;
+  --violet-d:#8f6ff0;
+
   --bg:#ffffff;
-  --line:rgba(160,130,175,.13);
-  --line2:rgba(160,130,175,.09);
-  --txt:#3f3850;
-  --txt2:#8a7f9e;
-  --txt3:#b6adc4;
-  --pink:#ff8ecb;
+  --line:rgba(178,138,190,.13);
+  --line2:rgba(178,138,190,.09);
+  --txt:#40365a;
+  --txt2:#8a7fa4;
+  --txt3:#b8abca;
   --pink-soft:#ffd9ec;
-  --violet:#b79aff;
-  --nick:#7b86c4;
-  --inter:#f7f4fb;
+  --nick:#8b76e8;               /* 原先偏蓝，现在收进紫里 */
+  --inter:#f8f4fd;
   --shadow-sm:0 3px 10px rgba(180,150,200,.10);
 }
 html,body{height:100%}
@@ -32,16 +39,15 @@ body{
 }
 #app{position:relative;min-height:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
-/* ═══ 封面：直接顶到屏幕最上 ═══ */
 .cover{
   position:relative;overflow:hidden;
   height:calc(248px + env(safe-area-inset-top));
   padding-top:env(safe-area-inset-top);
   background:
-    radial-gradient(110% 85% at 16% 6%,rgba(255,182,222,.85),transparent 62%),
-    radial-gradient(115% 80% at 88% 18%,rgba(197,175,255,.78),transparent 64%),
-    radial-gradient(150% 120% at 50% 122%,rgba(190,240,225,.55),transparent 68%),
-    linear-gradient(168deg,#ffe6f4 0%,#f3e6ff 46%,#eaf6ff 78%,#ffffff 100%);
+    radial-gradient(110% 85% at 16% 6%,rgba(255,158,205,.62),transparent 62%),
+    radial-gradient(115% 80% at 88% 18%,rgba(169,140,255,.58),transparent 64%),
+    radial-gradient(150% 120% at 50% 122%,rgba(200,170,255,.42),transparent 68%),
+    linear-gradient(168deg,#ffe4f5 0%,#f2e4ff 48%,#ece4ff 80%,#ffffff 100%);
   background-size:cover;background-position:center;
   -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
   cursor:pointer;transition:transform .12s ease;
@@ -64,7 +70,6 @@ body{
   z-index:2;
 }
 
-/* 右下角：昵称 + 方形头像 */
 .corner{
   position:relative;z-index:6;
   display:flex;justify-content:flex-end;align-items:flex-end;
@@ -79,7 +84,7 @@ body{
 }
 .corner .av{
   width:86px;height:86px;border-radius:16px;flex-shrink:0;
-  background:linear-gradient(150deg,#ffe7f6,#f0e6ff);
+  background:linear-gradient(150deg,#ffe4f5,#f0e6ff);
   border:4px solid #fff;
   box-shadow:0 10px 26px rgba(190,150,205,.26);
   overflow:hidden;display:flex;align-items:center;justify-content:center;
@@ -88,17 +93,13 @@ body{
 .corner .av img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
 .spacer{height:8px}
 
-/* ═══ 动态流：白底，不用卡片 ═══ */
 .feed{padding:4px 0 18px}
-.post{
-  padding:18px 18px 15px;
-  border-bottom:1px solid var(--line2);
-}
+.post{padding:18px 18px 15px;border-bottom:1px solid var(--line2)}
 .post:last-child{border-bottom:none}
 .p-head{display:flex;gap:12px;align-items:flex-start}
 .p-av{
   width:42px;height:42px;border-radius:10px;flex-shrink:0;overflow:hidden;
-  background:linear-gradient(150deg,#ffe7f6,#f0e6ff);
+  background:linear-gradient(150deg,#ffe4f5,#f0e6ff);
   display:flex;align-items:center;justify-content:center;font-size:19px;
   border:1.5px solid #fff;box-shadow:var(--shadow-sm);
 }
@@ -114,7 +115,7 @@ body{
 .p-imgs.g4{grid-template-columns:repeat(2,minmax(0,1fr));max-width:66%}
 .p-imgs .ph{
   position:relative;padding-top:100%;border-radius:10px;overflow:hidden;
-  background:linear-gradient(140deg,#ffe9f6,#eee4ff);
+  background:linear-gradient(140deg,#ffe6f5,#efe2ff);
 }
 .p-imgs .ph span{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -124,19 +125,19 @@ body{
 .p-foot .tm{flex:1;font-size:12px;color:var(--txt3)}
 .p-foot .dots{
   padding:3px 10px;border-radius:8px;cursor:pointer;
-  background:#f6f2fa;color:#a892c0;
+  background:#f8f3fc;color:#ab97c8;
   font-size:13px;letter-spacing:1.5px;line-height:1.2;transition:background .16s;
 }
-.p-foot .dots:active{background:#efe8f7}
-.p-foot .dots.on{background:linear-gradient(135deg,#ffd7ec,#e6dbff);color:#fff}
+.p-foot .dots:active{background:#f1e9f9}
+.p-foot .dots.on{background:linear-gradient(135deg,var(--pink-soft),#eadfff);color:#a07ac4}
 .p-inter{
   margin-left:54px;margin-top:10px;border-radius:12px;
   background:var(--inter);overflow:hidden;
 }
 .p-inter:empty{display:none}
 .p-likes{
-  padding:10px 13px;font-size:13px;line-height:1.72;color:#9b7cc9;
-  border-bottom:1px solid rgba(160,130,175,.09);
+  padding:10px 13px;font-size:13px;line-height:1.72;color:#9d84d4;
+  border-bottom:1px solid rgba(178,138,190,.09);
 }
 .p-likes b{color:var(--nick);font-weight:600}
 .p-likes .ht{color:var(--pink)}
@@ -150,16 +151,16 @@ body{
 @keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .menu span{
   padding:8px 16px;border-radius:11px;font-size:13px;cursor:pointer;
-  background:#f7f4fb;color:#8f7ab0;letter-spacing:.3px;
+  background:#f9f4fd;color:#9578c4;letter-spacing:.3px;
 }
-.menu span.on{background:linear-gradient(135deg,#ffd7ec,#e6dbff);color:#fff;font-weight:600}
+.menu span.on{background:linear-gradient(135deg,var(--pink-soft),#eadfff);color:#a07ac4;font-weight:600}
 
 .fab{
   position:fixed;right:20px;z-index:45;
   bottom:calc(94px + env(safe-area-inset-bottom));
   width:52px;height:52px;border-radius:50%;border:none;
-  background:linear-gradient(140deg,#ffb3dd,#c9a9ff);
-  box-shadow:0 14px 32px rgba(201,169,255,.48);
+  background:linear-gradient(140deg,var(--pink),var(--violet));
+  box-shadow:0 14px 32px rgba(169,140,255,.5);
   color:#fff;font-size:26px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;transition:transform .14s;
 }
@@ -176,10 +177,10 @@ body{
 .tabbar button{
   flex:1;border:none;background:transparent;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:#c1b3d0;font-size:10.5px;letter-spacing:1.2px;font-family:inherit;
+  color:#c8bcd8;font-size:10.5px;letter-spacing:1.2px;font-family:inherit;
   transition:color .18s;
 }
-.tabbar button.on{color:#a07ac4}
+.tabbar button.on{color:#a98cff}
 .tabbar svg{width:22px;height:22px}
 
 .scrim{
@@ -196,9 +197,9 @@ body{
   max-height:88vh;overflow-y:auto;
 }
 .sheet.on{transform:translateY(0)}
-.sheet h3{font-size:15.5px;font-weight:600;margin-bottom:18px;letter-spacing:1.2px;color:#5a4a70}
+.sheet h3{font-size:15.5px;font-weight:600;margin-bottom:18px;letter-spacing:1.2px;color:#5f5180}
 .sheet textarea{
-  width:100%;min-height:112px;background:#faf7fd;
+  width:100%;min-height:112px;background:#fbf7fe;
   border:1px solid var(--line);border-radius:18px;padding:15px;
   color:var(--txt);font-size:15px;line-height:1.78;font-family:inherit;resize:none;outline:none;
 }
@@ -206,24 +207,24 @@ body{
 .pickimgs{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
 .pickimgs .sq{
   position:relative;padding-top:100%;border-radius:14px;cursor:pointer;
-  border:1.5px dashed var(--pink-soft);background:#faf7fd;
+  border:1.5px dashed var(--pink-soft);background:#fbf7fe;
 }
 .pickimgs .sq span{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:23px;color:#d7bfe0;
+  font-size:23px;color:#d9c3e6;
 }
 .rowbtns{display:flex;gap:11px;margin-top:20px}
 .rowbtns button{
   flex:1;padding:14px 0;border-radius:18px;border:none;
   font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;
 }
-.rowbtns .no{background:#f4f0f8;color:var(--txt2)}
-.rowbtns .ok{background:linear-gradient(135deg,#ffb3dd,#c9a9ff);color:#fff;
-  box-shadow:0 10px 24px rgba(201,169,255,.4)}
+.rowbtns .no{background:#f6f1fa;color:var(--txt2)}
+.rowbtns .ok{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff;
+  box-shadow:0 10px 24px rgba(169,140,255,.42)}
 .fld{margin-bottom:16px}
 .fld label{display:block;font-size:12.5px;color:var(--txt2);margin-bottom:8px;letter-spacing:.4px}
 .fld input{
-  width:100%;background:#faf7fd;border:1px solid var(--line);
+  width:100%;background:#fbf7fe;border:1px solid var(--line);
   border-radius:15px;padding:12px 14px;color:var(--txt);font-size:15px;
   font-family:inherit;outline:none;
 }
@@ -233,33 +234,33 @@ body{
 .who{display:flex;gap:10px;margin-bottom:20px}
 .who button{
   flex:1;padding:11px 0;border-radius:15px;border:1.5px solid var(--line);
-  background:#faf7fd;color:var(--txt2);font-size:13.5px;font-family:inherit;
+  background:#fbf7fe;color:var(--txt2);font-size:13.5px;font-family:inherit;
   font-weight:600;cursor:pointer;letter-spacing:.4px;transition:all .18s;
   display:flex;align-items:center;justify-content:center;gap:7px;
   overflow:hidden;white-space:nowrap;
 }
 .who button.on{
   border-color:var(--pink-soft);
-  background:linear-gradient(135deg,#fff0f9,#f4ecff);
+  background:linear-gradient(135deg,#fff2fa,#f5eeff);
   color:#a07ac4;box-shadow:var(--shadow-sm);
 }
 .who .dot{
   width:22px;height:22px;border-radius:6px;overflow:hidden;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:12px;
-  background:linear-gradient(150deg,#ffe7f6,#f0e6ff);
+  background:linear-gradient(150deg,#ffe4f5,#f0e6ff);
 }
 .who .dot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
 .who .lb{overflow:hidden;text-overflow:ellipsis}
 
 .cmtbox{
-  width:100%;background:#faf7fd;border:1px solid var(--line);
+  width:100%;background:#fbf7fe;border:1px solid var(--line);
   border-radius:18px;padding:15px;color:var(--txt);font-size:15px;
   line-height:1.78;font-family:inherit;resize:none;outline:none;min-height:92px;
 }
 .cmtbox::placeholder{color:var(--txt3)}
 .replyto{
   display:inline-block;font-size:12.5px;color:#a07ac4;
-  background:#f7f1ff;border-radius:99px;padding:5px 13px;margin-bottom:11px;
+  background:#f8f2ff;border-radius:99px;padding:5px 13px;margin-bottom:11px;
 }
 .replyto b{font-weight:600}
 
@@ -268,7 +269,7 @@ body{
 .toast{
   position:fixed;left:50%;bottom:calc(148px + env(safe-area-inset-bottom));
   transform:translateX(-50%) translateY(8px);
-  background:rgba(90,74,112,.92);color:#fff;
+  background:rgba(90,70,120,.92);color:#fff;
   font-size:12.5px;letter-spacing:.5px;
   padding:9px 18px;border-radius:99px;
   opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;
@@ -351,7 +352,7 @@ body{
 <div class="sheet" id="shCover">
   <h3>换封面</h3>
   <div class="fld"><label>图片网址</label><input id="cvUrl" placeholder="贴一个图片网址"></div>
-  <div class="note">留空就用现在这个梦幻粉的渐变。</div>
+  <div class="note">留空就用现在这个粉紫渐变。</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">算了</button>
     <button class="ok" onclick="saveCover()">用这张</button>
@@ -361,7 +362,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v15';
+var LS = 'moments_v16';
 var db = null;
 
 function nowStr(){
