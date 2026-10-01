@@ -166,8 +166,9 @@ window.__API__ = {
 /* ═══════════════════════════════════════════════════════
    时间解析（全站统一）
    ───────────────────────────────────────────────────────
-   服务器存的是 UTC。后端老数据长这样： "2026-10-01 17:20"
-   后端新数据长这样：                    "2026-10-01T09:20:00Z"
+   服务器存的是 UTC。
+   老数据： "2026-10-01 17:20"           （没带时区）
+   新数据： "2026-10-01T09:20:00Z"       （带了 Z）
    两种都当 UTC 读，再换算成本机时间。
    ═══════════════════════════════════════════════════════ */
 window.parseTime = function (t) {
@@ -176,13 +177,12 @@ window.parseTime = function (t) {
 
   var iso;
   if (/Z$|[+-]\d{2}:?\d{2}$/.test(raw)) {
-    iso = raw;                                  /* 已经带时区标记 */
+    iso = raw;                                  /* 已带时区标记 */
   } else {
-    iso = raw.replace(' ', 'T') + 'Z';          /* 没带，按 UTC 补上 */
+    iso = raw.replace(' ', 'T') + 'Z';          /* 没带，按 UTC 补 */
   }
   var d = new Date(iso);
   if (isNaN(d.getTime())) {
-    /* 实在不认，退回按本地时间读，至少不会崩 */
     d = new Date(raw.replace(/-/g, '/'));
     if (isNaN(d.getTime())) return null;
   }
@@ -195,7 +195,7 @@ window.sinceText = function (t) {
   if (!d) return '';
 
   var s = (Date.now() - d.getTime()) / 1000;
-  if (s < 0) s = 0;                             /* 时间比现在还晚就当作刚刚 */
+  if (s < 0) s = 0;
   if (s < 60) return '刚刚';
   if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
   if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
@@ -203,8 +203,23 @@ window.sinceText = function (t) {
 
   function p(n) { return n < 10 ? '0' + n : '' + n; }
   var now = new Date();
-  var same = (d.getFullYear() === now.getFullYear());
-  return (same ? '' : d.getFullYear() + '-') +
+  return (d.getFullYear() === now.getFullYear() ? '' : d.getFullYear() + '-') +
          p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
          p(d.getHours()) + ':' + p(d.getMinutes());
 };
+
+/* ── 兜底：把页面里那个老的 since 也接到新的上面 ──
+   页面里写的是 function since(){}（在顶层就等于 window.since），
+   这里等它执行完再盖掉，之后所有 since(...) 都会走正确的那套。 */
+(function () {
+  function apply() {
+    try { window.since = window.sinceText; } catch (e) {}
+  }
+  apply();
+  setTimeout(apply, 0);
+  setTimeout(apply, 60);
+  setTimeout(apply, 400);
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', apply);
+  }
+})();
