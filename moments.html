@@ -58,12 +58,11 @@ body{
     linear-gradient(165deg,#ffe6f4,#f3e6ff 55%,#eaf4ff);
   background-size:cover;background-position:center;
   -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
-  cursor:pointer;
-  transition:transform .12s ease;
+  cursor:pointer;transition:transform .12s ease;
 }
 .cover.holding{transform:scale(.986)}
 .cover::after{
-  content:"";position:absolute;inset:0;
+  content:"";position:absolute;inset:0;pointer-events:none;
   background-image:
     radial-gradient(1.8px 1.8px at 11% 24%,rgba(255,255,255,.95),transparent),
     radial-gradient(1.2px 1.2px at 31% 60%,rgba(255,255,255,.85),transparent),
@@ -72,10 +71,7 @@ body{
     radial-gradient(1.6px 1.6px at 87% 72%,rgba(255,255,255,.9),transparent),
     radial-gradient(1.2px 1.2px at 45% 86%,rgba(255,255,255,.75),transparent);
   opacity:.85;
-  pointer-events:none;
 }
-
-/* 资料行：整块贴右，往上提到封面里 */
 .ident{
   display:flex;align-items:flex-end;justify-content:flex-end;gap:16px;
   padding:0 24px;margin-top:-96px;position:relative;z-index:3;
@@ -101,11 +97,8 @@ body{
 /* ═══ 动态流 ═══ */
 .feed{padding:38px 20px 18px}
 .post{
-  background:var(--card);
-  border-radius:26px;
-  padding:24px 22px 20px;
-  box-shadow:var(--shadow);
-  margin-bottom:18px;
+  background:var(--card);border-radius:26px;
+  padding:24px 22px 20px;box-shadow:var(--shadow);margin-bottom:18px;
 }
 .post:last-child{margin-bottom:0}
 .p-head{display:flex;gap:14px;align-items:flex-start}
@@ -139,8 +132,7 @@ body{
 .p-time{margin-left:auto;font-size:12px}
 .p-inter{
   margin-left:60px;margin-top:14px;border-radius:18px;
-  background:linear-gradient(140deg,#fff4fa,#f7f1ff);
-  overflow:hidden;
+  background:linear-gradient(140deg,#fff4fa,#f7f1ff);overflow:hidden;
 }
 .p-inter:empty{display:none}
 .p-likes{
@@ -155,7 +147,7 @@ body{
 .cmt .to{color:var(--txt3)}
 .cmt .rp{font-size:11.5px;color:var(--txt3);margin-left:8px;cursor:pointer}
 
-/* ═══ 发动态按钮 ═══ */
+/* ═══ 浮动按钮 ═══ */
 .fab{
   position:fixed;right:22px;z-index:45;
   bottom:calc(96px + env(safe-area-inset-bottom));
@@ -163,8 +155,7 @@ body{
   background:linear-gradient(140deg,#ffb3dd,#c9a9ff);
   box-shadow:0 14px 34px rgba(201,169,255,.5);
   color:#fff;font-size:26px;line-height:1;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .14s;
+  display:flex;align-items:center;justify-content:center;transition:transform .14s;
 }
 .fab:active{transform:scale(.92)}
 
@@ -194,27 +185,24 @@ body{
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{
   position:fixed;left:0;right:0;bottom:0;z-index:61;
-  background:#fff;
-  border-radius:28px 28px 0 0;
+  background:#fff;border-radius:28px 28px 0 0;
   box-shadow:0 -10px 44px rgba(190,150,205,.22);
   padding:26px 24px calc(32px + env(safe-area-inset-bottom));
   transform:translateY(102%);transition:transform .34s cubic-bezier(.22,1,.36,1);
-  max-height:86vh;overflow-y:auto;
+  max-height:88vh;overflow-y:auto;
 }
 .sheet.on{transform:translateY(0)}
 .sheet h3{font-size:16px;font-weight:600;margin-bottom:20px;letter-spacing:1.5px;color:#5a4a70}
 .sheet textarea{
   width:100%;min-height:118px;background:#fdf6fb;
   border:1px solid var(--line);border-radius:20px;padding:16px;
-  color:var(--txt);font-size:15px;line-height:1.8;font-family:inherit;
-  resize:none;outline:none;
+  color:var(--txt);font-size:15px;line-height:1.8;font-family:inherit;resize:none;outline:none;
 }
 .sheet textarea::placeholder{color:var(--txt3)}
 .pickimgs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
 .pickimgs .sq{
   position:relative;padding-top:100%;border-radius:16px;cursor:pointer;
-  border:1.5px dashed var(--pink-soft);
-  background:#fdf6fb;
+  border:1.5px dashed var(--pink-soft);background:#fdf6fb;
 }
 .pickimgs .sq span{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -238,12 +226,47 @@ body{
 .fld input::placeholder{color:var(--txt3)}
 .note{font-size:11.5px;color:var(--txt3);line-height:1.75;margin-top:6px}
 
+/* 资料弹层里的双人切换 */
+.who{
+  display:flex;gap:10px;margin-bottom:22px;
+}
+.who button{
+  flex:1;padding:12px 0;border-radius:16px;border:1.5px solid var(--line);
+  background:#fdf6fb;color:var(--txt2);font-size:13.5px;font-family:inherit;
+  font-weight:600;cursor:pointer;letter-spacing:.5px;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.who button.on{
+  border-color:var(--pink-soft);
+  background:linear-gradient(135deg,#fff0f9,#f4ecff);
+  color:#a07ac4;box-shadow:var(--shadow-sm);
+}
+.who .dot{
+  width:22px;height:22px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  background:linear-gradient(150deg,#ffe7f6,#f0e6ff);
+}
+.who .dot img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+
+/* 评论弹层 */
+.cmtbox{
+  width:100%;background:#fdf6fb;border:1px solid var(--line);
+  border-radius:20px;padding:16px;color:var(--txt);font-size:15px;
+  line-height:1.8;font-family:inherit;resize:none;outline:none;min-height:96px;
+}
+.cmtbox::placeholder{color:var(--txt3)}
+.replyto{
+  display:inline-block;font-size:12.5px;color:#a07ac4;
+  background:#f7f1ff;border-radius:99px;padding:5px 13px;margin-bottom:12px;
+}
+.replyto b{font-weight:600}
+
 .empty{
   text-align:center;color:var(--txt3);font-size:13.5px;
   padding:90px 30px;line-height:2.1;
 }
 
-/* 长按提示小气泡 */
+/* 小气泡 */
 .toast{
   position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));
   transform:translateX(-50%) translateY(8px);
@@ -297,6 +320,7 @@ body{
 <div class="scrim" id="scrim" onclick="closeAll()"></div>
 <div class="toast" id="toast"></div>
 
+<!-- 发动态 -->
 <div class="sheet" id="shCompose">
   <h3>说点什么</h3>
   <textarea id="cpText" placeholder="此刻的想法…"></textarea>
@@ -310,17 +334,34 @@ body{
   </div>
 </div>
 
+<!-- 评论 -->
+<div class="sheet" id="shComment">
+  <h3 id="cmTitle">评论</h3>
+  <div id="cmToWrap"></div>
+  <textarea class="cmtbox" id="cmText" placeholder="说点什么…"></textarea>
+  <div class="rowbtns">
+    <button class="no" onclick="closeAll()">算了</button>
+    <button class="ok" onclick="sendComment()">发出去</button>
+  </div>
+</div>
+
+<!-- 资料：两个人 -->
 <div class="sheet" id="shProfile">
-  <h3>我的资料</h3>
-  <div class="fld"><label>昵称</label><input id="pfName" placeholder="给自己起个名字"></div>
+  <h3>资料</h3>
+  <div class="who">
+    <button id="whoMe" class="on" onclick="switchWho('me')"><span class="dot" id="dotMe">🐱</span><span id="lblMe">我</span></button>
+    <button id="whoHim" onclick="switchWho('him')"><span class="dot" id="dotHim">🍀</span><span id="lblHim">林霁</span></button>
+  </div>
+  <div class="fld"><label>昵称</label><input id="pfName" placeholder="起个名字"></div>
   <div class="fld"><label>头像</label><input id="pfAvatar" placeholder="贴一个图片网址，或一个 emoji"></div>
-  <div class="note">改完存后端，刷新、换手机都不丢。（这一版先存本机，接了后端就同步）</div>
+  <div class="note">改完存在后端，刷新、换手机都不丢。（这一版先存本机，接上后端就同步）</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">算了</button>
     <button class="ok" onclick="saveProfile()">保存</button>
   </div>
 </div>
 
+<!-- 封面 -->
 <div class="sheet" id="shCover">
   <h3>换封面</h3>
   <div class="fld"><label>图片网址</label><input id="cvUrl" placeholder="贴一个图片网址"></div>
@@ -334,7 +375,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v8';
+var LS = 'moments_v9';
 var db = null;
 
 function nowStr(){
@@ -360,6 +401,8 @@ function esc(t){
 function blank(){
   return {
     me:{ name:'桐桐', avatar:'🐱', cover:'' },
+    him:{ name:'桐桐大人饶命呀', avatar:'🍀',
+          img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png' },
     posts:[
       {
         id:uid(), who:HIM, time:nowStr(),
@@ -379,6 +422,8 @@ function load(){
     db = raw ? JSON.parse(raw) : blank();
   }catch(e){ db = blank(); }
   if(!db.me) db.me = {name:'桐桐',avatar:'🐱',cover:''};
+  if(!db.him) db.him = {name:'桐桐大人饶命呀',avatar:'🍀',
+    img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png'};
   if(!db.posts) db.posts = [];
   if(!db.posts.length) db.posts = blank().posts;
 }
@@ -389,9 +434,9 @@ function person(who){
     return { name: db.me.name||'桐桐', avatar: db.me.avatar||'🐱' };
   }
   return {
-    name:'桐桐大人饶命呀',
-    avatar:'🍀',
-    img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png'
+    name: db.him.name||'桐桐大人饶命呀',
+    avatar: db.him.avatar||'🍀',
+    img: db.him.img
   };
 }
 function avatarInner(p){
@@ -407,11 +452,8 @@ function render(){
   document.getElementById('topRight').textContent = db.posts.length + ' 条';
 
   var cv = document.getElementById('cover');
-  if(db.me.cover){
-    cv.style.backgroundImage = 'url('+db.me.cover+')';
-  }else{
-    cv.style.backgroundImage = '';
-  }
+  if(db.me.cover){ cv.style.backgroundImage = 'url('+db.me.cover+')'; }
+  else{ cv.style.backgroundImage = ''; }
 
   var feed = document.getElementById('feed');
   if(!db.posts.length){
@@ -475,17 +517,31 @@ function like(id){
   save(); render();
 }
 
+/* ══ 评论：用应用里的输入框 ══ */
+var cmTarget = null, cmTo = null;
 function openComment(id, to){
   var p = db.posts.filter(function(x){return x.id===id})[0];
   if(!p) return;
-  var who = to ? person(to).name : '';
-  var txt = prompt(who ? ('回复 '+who+'：') : '评论：');
-  if(txt===null) return;
-  txt = String(txt).trim();
-  if(!txt) return;
+  cmTarget = id; cmTo = to||null;
+  var wrap = document.getElementById('cmToWrap');
+  if(to){
+    document.getElementById('cmTitle').textContent = '回复';
+    wrap.innerHTML = '<div class="replyto">回复 <b>'+ esc(person(to).name) +'</b></div>';
+  }else{
+    document.getElementById('cmTitle').textContent = '评论';
+    wrap.innerHTML = '';
+  }
+  document.getElementById('cmText').value = '';
+  openSheet('shComment');
+  setTimeout(function(){ document.getElementById('cmText').focus(); }, 320);
+}
+function sendComment(){
+  var p = db.posts.filter(function(x){return x.id===cmTarget})[0];
+  var txt = document.getElementById('cmText').value.trim();
+  if(!p || !txt) return;
   p.comments = p.comments || [];
-  p.comments.push({who:ME, to:to||null, text:txt, time:nowStr()});
-  save(); render();
+  p.comments.push({who:ME, to:cmTo||null, text:txt, time:nowStr()});
+  save(); render(); closeAll();
 }
 
 function openSheet(id){
@@ -494,7 +550,7 @@ function openSheet(id){
 }
 function closeAll(){
   document.getElementById('scrim').classList.remove('on');
-  ['shCompose','shProfile','shCover'].forEach(function(k){
+  ['shCompose','shProfile','shCover','shComment'].forEach(function(k){
     document.getElementById(k).classList.remove('on');
   });
 }
@@ -519,7 +575,7 @@ function addPhoto(){
   if(e===null) return;
   e = String(e).trim();
   if(!e) return;
-  if(cpImgs.length>=9){ alert('最多九张'); return; }
+  if(cpImgs.length>=9){ toast('最多九张'); return; }
   cpImgs.push(e); drawPick();
 }
 function delPhoto(i){ cpImgs.splice(i,1); drawPick(); }
@@ -535,14 +591,45 @@ function publish(){
   save(); render(); closeAll();
 }
 
+/* ══ 资料：我 / 林霁 ══ */
+var whoNow = 'me';
 function openProfile(){
-  document.getElementById('pfName').value = db.me.name||'';
-  document.getElementById('pfAvatar').value = db.me.avatar||'';
+  whoNow = 'me';
+  fillWho();
   openSheet('shProfile');
 }
+function switchWho(w){
+  whoNow = w;
+  fillWho();
+}
+function fillWho(){
+  var meOn = whoNow==='me';
+  document.getElementById('whoMe').classList.toggle('on', meOn);
+  document.getElementById('whoHim').classList.toggle('on', !meOn);
+
+  var meP = person(ME), himP = person(HIM);
+  document.getElementById('dotMe').innerHTML = avatarInner({avatar:meP.avatar});
+  document.getElementById('dotHim').innerHTML = avatarInner({avatar:himP.avatar, img:db.him.img});
+  document.getElementById('lblMe').textContent = meP.name;
+  document.getElementById('lblHim').textContent = himP.name;
+
+  var cur = meOn ? db.me : db.him;
+  document.getElementById('pfName').value = cur.name||'';
+  document.getElementById('pfAvatar').value = cur.avatar||'';
+  document.getElementById('pfAvatar').placeholder = meOn ? '贴图片网址，或一个 emoji' : '贴图片网址，或一个 emoji';
+}
 function saveProfile(){
-  db.me.name = document.getElementById('pfName').value.trim() || '桐桐';
-  db.me.avatar = document.getElementById('pfAvatar').value.trim() || '🐱';
+  var n = document.getElementById('pfName').value.trim();
+  var a = document.getElementById('pfAvatar').value.trim();
+  if(whoNow==='me'){
+    db.me.name = n || '桐桐';
+    db.me.avatar = a || '🐱';
+  }else{
+    db.him.name = n || '桐桐大人饶命呀';
+    db.him.avatar = a || '🍀';
+    /* 头像换了，就把原来的图片地址清掉 */
+    if(a) db.him.img = '';
+  }
   save(); render(); closeAll();
 }
 
@@ -560,7 +647,6 @@ function saveCover(){
   var el = document.getElementById('cover');
   var t = null, sx=0, sy=0, fired=false;
   var HOLD = 520;
-
   function start(x,y){
     sx=x; sy=y; fired=false;
     el.classList.add('holding');
@@ -571,22 +657,13 @@ function saveCover(){
       openCover();
     }, HOLD);
   }
-  function move(x,y){
-    if(t && (Math.abs(x-sx)>10 || Math.abs(y-sy)>10)) cancel();
-  }
-  function cancel(){
-    if(t){ clearTimeout(t); t=null; }
-    el.classList.remove('holding');
-  }
+  function move(x,y){ if(t && (Math.abs(x-sx)>10 || Math.abs(y-sy)>10)) cancel(); }
+  function cancel(){ if(t){ clearTimeout(t); t=null; } el.classList.remove('holding'); }
   function end(){
     if(t){ clearTimeout(t); t=null; }
     el.classList.remove('holding');
-    if(!fired){
-      /* 短按：给个提示，告诉用户这里能长按 */
-      toast('长按封面可以换背景');
-    }
+    if(!fired) toast('长按封面可以换背景');
   }
-
   el.addEventListener('touchstart', function(e){
     if(e.touches.length!==1) return;
     start(e.touches[0].clientX, e.touches[0].clientY);
@@ -595,10 +672,8 @@ function saveCover(){
     if(e.touches.length!==1) return;
     move(e.touches[0].clientX, e.touches[0].clientY);
   }, {passive:true});
-  el.addEventListener('touchend', function(e){ end(); }, {passive:true});
+  el.addEventListener('touchend', function(){ end(); }, {passive:true});
   el.addEventListener('touchcancel', function(){ cancel(); }, {passive:true});
-
-  /* 桌面端也能按 */
   el.addEventListener('mousedown', function(e){ start(e.clientX,e.clientY); });
   el.addEventListener('mousemove', function(e){ move(e.clientX,e.clientY); });
   el.addEventListener('mouseup', function(){ end(); });
@@ -606,7 +681,6 @@ function saveCover(){
   el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 })();
 
-/* 小气泡 */
 var toastT = null;
 function toast(msg){
   var el = document.getElementById('toast');
