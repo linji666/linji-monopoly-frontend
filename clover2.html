@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1d18">
+<title>四叶草许愿海</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b1d18;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif}
+  #sky,#field{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #field{touch-action:none}
+
+  #hint{position:fixed;left:0;right:0;bottom:22px;text-align:center;
+    color:#9fe0b8;font-size:13px;letter-spacing:1px;opacity:.9;
+    pointer-events:none;transition:opacity .5s}
+  #hint.gone{opacity:0}
+
+  #modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(4,14,11,.75);z-index:20}
+  #modal.on{display:flex}
+  .card{width:min(88vw,380px);background:#12281f;border:1.5px solid #5fbf85;
+    border-radius:18px;padding:22px 18px 16px;box-shadow:0 16px 50px rgba(0,0,0,.65)}
+  .card h2{margin:0 0 4px;font-size:17px;color:#c9f5d6;font-weight:600;
+    letter-spacing:6px;text-align:center}
+  .card p{margin:0 0 14px;font-size:12px;color:#7fb795;text-align:center;letter-spacing:1px}
+  #wish{width:100%;height:92px;background:#0b1d18;border:1px solid #356050;
+    border-radius:12px;color:#eafff2;font-size:15px;line-height:1.65;
+    padding:11px 12px;resize:none;outline:none;font-family:inherit}
+  #wish::placeholder{color:#4d7563}
+  #sign{width:100%;margin-top:9px;background:#0b1d18;border:1px solid #356050;
+    border-radius:12px;color:#eafff2;font-size:14px;padding:10px 12px;
+    outline:none;font-family:inherit}
+  #sign::placeholder{color:#4d7563}
+  .row{display:flex;gap:10px;margin-top:14px}
+  .btn{flex:1;padding:12px 0;border-radius:12px;font-size:15px;font-family:inherit;
+    font-weight:600;cursor:pointer;transition:transform .12s}
+  .btn:active{transform:scale(.97)}
+  .ok{background:#6fd190;color:#06251a;border:none}
+  .no{background:transparent;color:#8fb9a2;border:1px solid #356050}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<canvas id="field"></canvas>
+<div id="hint">点一朵四叶草，摘掉四片叶子许个愿</div>
+
+<div id="modal"><div class="card">
+  <h2>许 愿</h2>
+  <p>一行不超过十个字，写完挂上去</p>
+  <textarea id="wish" maxlength="40" placeholder="写下你的愿望…"></textarea>
+  <input id="sign" maxlength="8" placeholder="署名">
+  <div class="row">
+    <button class="btn no" id="cancel">再想想</button>
+    <button class="btn ok" id="submit">挂上去</button>
+  </div>
+</div></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============ 基础 ============ */
+var DPR = Math.min(window.devicePixelRatio||1, 2);
+var W = 0, H = 0;
+var skyC = document.getElementById('sky');
+var fldC = document.getElementById('field');
+var skg = skyC.getContext('2d');
+var fg  = fldC.getContext('2d');
+var hint = document.getElementById('hint');
+
+var C = {
+  night : '#0b1d18',
+  nightHi: '#14342a',
+  grassFar : '#6fc47a',
+  grassMid : '#8ada86',
+  grassNear: '#a9e896',
+  leafEdge : '#2f7a4e',
+  leafFill : '#83b07e',
+  leafVein : '#3d8a5c',
+  bloom    : '#f3e36e',
+  bloomHi  : '#fff4a8',
+  stem     : '#2f7a4e',
+  petal    : '#f7f0c0'
+};
+
+function rnd(a,b){ return a + Math.random()*(b-a); }
+
+/* ============ 画一朵四叶草（离屏精灵） ============ */
+/* kind: 0=正常  1=淡（远景）  2=已许愿（深） */
+function makeClover(px, kind, seed){
+  var cv = document.createElement('canvas');
+  cv.width = px; cv.height = px;
+  var g = cv.getContext('2d');
+  g.translate(px*0.5, px*0.60);
+
+  var s = px / 100;
+  var edge = kind===2 ? '#1f5c39' : C.leafEdge;
+  var fill = kind===2 ? '#3f6b53' : C.leafFill;
+  if(kind===1){ fill = '#9cc796'; }
+
+  /* 茎：往左下弯 */
+  g.save();
+  g.strokeStyle = kind===2 ? '#1f5c39' : C.stem;
+  g.lineWidth = 4.4*s;
+  g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(0, -2*s);
+  g.quadraticCurveTo(-7*s, 20*s, -15*s, 39*s);
+  g.stroke();
+  g.restore();
+
+  /* 四片心形叶 */
+  var R = 25*s;
+  for(var i=0;i<4;i++){
+    g.save();
+    g.rotate(i*Math.PI/2);
+
+    g.beginPath();
+    g.moveTo(0,0);
+    g.bezierCurveTo(-R*1.18,-R*0.42, -R*1.02,-R*1.42, 0,-R*1.52);
+    g.bezierCurveTo( R*1.02,-R*1.42,  R*1.18,-R*0.42, 0,0);
+    g.closePath();
+
+    g.fillStyle = fill;
+    g.fill();
+    g.lineWidth = 6.5*s;
+    g.strokeStyle = edge;
+    g.stroke();
+
+    /* 叶脉 */
+    g.beginPath();
+    g.moveTo(0,-5*s);
+    g.lineTo(0,-30*s);
+    g.lineWidth = 2*s;
+    g.strokeStyle = kind===2 ? '#2a5644' : C.leafVein;
+    g.stroke();
+
+    g.restore();
+  }
+
+  /* 中间小黄花 */
+  g.save();
+  var pr = 7.2*s;
+  for(var p=0;p<5;p++){
+    g.save();
+    g.rotate(p*Math.PI*2/5);
+    g.beginPath();
+    g.ellipse(0,-pr*0.85, pr*0.62, pr*0.95, 0, 0, Math.PI*2);
+    g.fillStyle = C.petal;
+    g.fill();
+    g.restore();
+  }
+  g.beginPath();
+  g.arc(0,0, pr*0.72, 0, Math.PI*2);
+  g.fillStyle = kind===2 ? '#c9b955' : C.bloom;
+  g.fill();
+  g.beginPath();
+  g.arc(-pr*0.18,-pr*0.18, pr*0.3, 0, Math.PI*2);
+  g.fillStyle = kind===2 ? '#ddd07a' : C.bloomHi;
+  g.fill();
+  g.restore();
+
+  return cv;
+}
+
+/* 预渲染：4 个朝角 × 3 种质感 */
+var SPR = [];
+function buildSprites(){
+  SPR = [];
+  var base = 96;
+  for(var k=0;k<3;k++){
+    var row = [];
+    for(var a=0;a<4;a++){
+      var cv = makeClover(base, k, a);
+      /* 旋转一点，制造差异 */
+      var rot = document.createElement('canvas');
+      rot.width = rot.height = base;
+      var rg = rot.getContext('2d');
+      rg.translate(base/2, base/2);
+      rg.rotate(a*0.09 - 0.13);
+      rg.drawImage(cv, -base/2, -base/2);
+      row.push(rot);
+    }
+    SPR.push(row);
+  }
+}
+
+/* ============ 星空 ============ */
+var stars = [];
+function buildStars(){
+  stars = [];
+  var n = Math.round(W*H/9000);
+  for(var i=0;i<n;i++){
+    stars.push({
+      x: Math.random()*W,
+      y: Math.random()*H*0.62,
+      r: rnd(0.6, 1.7),
+      a: rnd(0.25, 0.95),
+      tw: rnd(0.6, 2.4),
+      ph: Math.random()*Math.PI*2
+    });
+  }
+}
+
+function drawSky(t){
+  skg.clearRect(0,0,W,H);
+
+  /* 深绿夜空，上深下略亮 */
+  var grad = skg.createLinearGradient(0,0,0,H*0.8);
+  grad.addColorStop(0, '#081713');
+  grad.addColorStop(0.55, C.night);
+  grad.addColorStop(1, C.nightHi);
+  skg.fillStyle = grad;
+  skg.fillRect(0,0,W,H);
+
+  /* 星星 */
+  for(var i=0;i<stars.length;i++){
+    var s = stars[i];
+    var a = s.a * (0.62 + 0.38*Math.sin(t*0.0011*s.tw + s.ph));
+    skg.beginPath();
+    skg.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    skg.fillStyle = 'rgba(224,255,238,'+a.toFixed(3)+')';
+    skg.fill();
+    if(s.r > 1.35){
+      skg.beginPath();
+      skg.arc(s.x, s.y, s.r*3.4, 0, Math.PI*2);
+      skg.fillStyle = 'rgba(190,255,220,'+(a*0.10).toFixed(3)+')';
+      skg.fill();
+    }
+  }
+}
+
+/* ============ 草坡曲线 ============ */
+/* 返回给定 x 处坡顶的 y（左边低、右边高，带起伏） */
+function ridgeY(x){
+  var u = x / W;
+  /* 主趋势：从 0.72H 升到 0.42H，右边再抬起一点 */
+  var base = H*0.74 - u*H*0.30;
+  if(u > 0.58) base -= (u-0.58)*H*0.16;
+  /* 起伏 */
+  base += Math.sin(u*Math.PI*2.1)*H*0.028;
+  base += Math.sin(u*Math.PI*5.3+1.3)*H*0.013;
+  return base;
+}
+
+/* ============ 草坡上的四叶草 ============ */
+var clovers = [];
+
+function buildField(){
+  clovers = [];
+  /* 数量按面积走 */
+  var target = Math.round(W*H/6200);
+  target = Math.max(90, Math.min(target, 460));
+
+  for(var i=0;i<target;i++){
+    var x = Math.random()*W;
+    var top = ridgeY(x);
+    /* 坡面纵深：0 最近，1 贴坡顶 */
+    var v = Math.pow(Math.random(), 0.72);
+    var y = top + v*(H - top)*0.92;
+
+    /* 越远越小越淡 */
+    var depth = v;                       /* 0 近 1 远 */
+    var scale = 0.34 + (1-depth)*0.72;    /* 远 0.34 → 近 1.06 */
+    var alpha = 0.48 + (1-depth)*0.52;
+    var kind  = depth > 0.62 ? 1 : 0;
+
+    clovers.push({
+      x: x, y: y, depth: depth,
+      sc: scale * rnd(0.86,1.14),
+      al: alpha,
+      kind: kind,
+      angle: Math.floor(Math.random()*4),
+      sway: rnd(0.4,1.5),
+      ph: Math.random()*Math.PI*2,
+      used: false,
+      wish: ''
+    });
+  }
+
+  /* 按 y 从小到大排，近的盖远的 */
+  clovers.sort(function(a,b){ return a.y - b.y; });
+}
+
+function drawField(t, skip){
+  fg.clearRect(0,0,W,H);
+
+  /* 坡面底色：从坡顶向下由亮绿到深绿 */
+  fg.save();
+  fg.beginPath();
+  fg.moveTo(0, H);
+  fg.lineTo(0, ridgeY(0));
+  for(var x=0;x<=W;x+=6){ fg.lineTo(x, ridgeY(x)); }
+  fg.lineTo(W, H);
+  fg.closePath();
+
+  var gg = fg.createLinearGradient(0, ridgeY(W*0.5), 0, H);
+  gg.addColorStop(0, C.grassFar);
+  gg.addColorStop(0.42, C.grassMid);
+  gg.addColorStop(1, C.grassNear);
+  fg.fillStyle = gg;
+  fg.fill();
+  fg.restore();
+
+  /* 坡顶边缘：一层浅色绒毛 */
+  fg.save();
+  fg.beginPath();
+  fg.moveTo(0, ridgeY(0));
+  for(var x2=0;x2<=W;x2+=4){ fg.lineTo(x2, ridgeY(x2)); }
+  fg.lineWidth = 2.4;
+  fg.strokeStyle = 'rgba(215,255,205,.60)';
+  fg.stroke();
+  fg.restore();
+
+  /* 草上的白点（像光落在叶尖） */
+  fg.save();
+  for(var d=0; d<Math.round(W*H/16000); d++){
+    var dx = Math.random()*W;
+    var dtop = ridgeY(dx);
+    var dy = dtop + Math.random()*(H-dtop)*0.9;
+    var dv = (dy-dtop)/Math.max(1,(H-dtop));
+    fg.beginPath();
+    fg.arc(dx, dy, rnd(0.7,1.5), 0, Math.PI*2);
+    fg.fillStyle = 'rgba(240,255,235,'+(0.30-dv*0.22).toFixed(3)+')';
+    fg.fill();
+  }
+  fg.restore();
+
+  /* 四叶草 */
+  for(var i=0;i<clovers.length;i++){
+    var c = clovers[i];
+    if(skip && skip === c) continue;
+    drawOne(c, t);
+  }
+}
+
+function drawOne(c, t){
+  var px = 96 * c.sc * (Math.min(W,H)/420);
+  if(px < 6) px = 6;
+  if(px > 200) px = 200;
+
+  var sway = Math.sin(t*0.0009*c.sway + c.ph) * (px*0.035);
+  var img = SPR[ c.used ? 2 : c.kind ][ c.angle ];
+  if(!img) return;
+
+  var alpha = c.al;
+  if(c.depth < 0.2) alpha = Math.min(1, alpha + 0.06);
+
+  fg.save();
+  fg.globalAlpha = alpha;
+  fg.translate(c.x + sway, c.y);
+  fg.drawImage(img, -px/2, -px*0.62, px, px);
+
+  /* 许过愿的，加一圈微光 */
+  if(c.used){
+    fg.beginPath();
+    fg.arc(0, -px*0.12, px*0.36, 0, Math.PI*2);
+    fg.fillStyle = 'rgba(255,244,168,.10)';
+    fg.fill();
+  }
+  fg.restore();
+}
+
+/* ============ 交互 ============ */
+var picked = null;
+var picking = false;
+
+function hitTest(mx,my){
+  var best = null, bestD = 1e9;
+  for(var i=clovers.length-1;i>=0;i--){
+    var c = clovers[i];
+    if(c.used) continue;
+    if(c.depth > 0.72) continue;
+    var px = 96 * c.sc * (Math.min(W,H)/420);
+    var rx = Math.max(22, px*0.5), ry = Math.max(22, px*0.55);
+    var dx = (mx-c.x)/rx, dy = (my-(c.y-px*0.12))/ry;
+    var d = dx*dx + dy*dy;
+    if(d < 1 && d < bestD){ bestD = d; best = c; }
+  }
+  return best;
+}
+
+/* 点开 → 摘叶 */
+var shMsg = '';
+var petals = 4;
+
+fldC.addEventListener('pointerdown', function(e){
+  if(picked || picking) return;
+  var r = fldC.getBoundingClientRect();
+  var mx = (e.clientX - r.left) * W / r.width;
+  var my = (e.clientY - r.top)  * H / r.height;
+  var c = hitTest(mx,my);
+  if(!c) return;
+
+  picked = c;
+  petals = 4;
+  showHint('点一下叶子，把它摘掉');
+  flyIn(c);
+});
+
+/* 飘到中间放大 */
+var anim = null;
+function flyIn(c){
+  picking = true;
+  anim = { c: c, t0: performance.now(), dur: 620,
+           x0: c.x, y0: c.y, x1: W*0.5, y1: H*0.44, s0: c.sc, s1: 2.35 };
+  var tick = function(now){
+    var k = Math.min(1,(now-anim.t0)/anim.dur);
+    var e = 1-Math.pow(1-k,3);
+    anim.x = anim.x0 + (anim.x1-anim.x0)*e;
+    anim.y = anim.y0 + (anim.y1-anim.y0)*e;
+    anim.s = anim.s0 + (anim.s1-anim.s0)*e;
+    if(k<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ============ 主循环 ============ */
+var t0 = performance.now();
+function loop(){
+  var t = performance.now() - t0;
+  drawSky(t);
+  drawField(t, picked);
+
+  if(picking && anim && anim.x !== undefined){
+    var px = 96 * anim.s * (Math.min(W,H)/420);
+    var img = SPR[0][ Math.floor(t/300)%4 ];
+    fg.save();
+    fg.translate(anim.x, anim.y);
+    fg.drawImage(img, -px/2, -px*0.62, px, px);
+    fg.restore();
+
+    /* 剩余叶子高亮提示 */
+    if(petals > 0){
+      fg.save();
+      fg.globalAlpha = 0.55 + 0.45*Math.sin(t*0.006);
+      fg.beginPath();
+      fg.arc(anim.x, anim.y - px*0.12, px*0.62, 0, Math.PI*2);
+      fg.strokeStyle = 'rgba(255,250,190,.55)';
+      fg.lineWidth = 1.6;
+      fg.stroke();
+      fg.restore();
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+/* 摘叶：整个屏幕都算点击区，摘完弹窗 */
+fldC.addEventListener('pointerdown', function(e){
+  if(!picking || !picked) return;
+
+  petals--;
+  if(petals > 0){
+    if(petals === 1) showHint('最后一片了');
+    return;
+  }
+  /* 摘完 */
+  picking = false;
+  var target = picked;
+  picked = null;
+  anim = null;
+  showHint('');
+  openModal(target);
+}, true);
+
+/* ============ 许愿窗 ============ */
+var modal = document.getElementById('modal');
+var wishEl = document.getElementById('wish');
+var signEl = document.getElementById('sign');
+var curC = null;
+
+function openModal(c){
+  curC = c;
+  wishEl.value = '';
+  signEl.value = '';
+  modal.classList.add('on');
+  setTimeout(function(){ wishEl.focus(); }, 260);
+}
+
+document.getElementById('cancel').addEventListener('click', function(){
+  /* 取消：叶子长回来 */
+  petals = 4;
+  if(curC){ curC.used = false; curC.wish=''; }
+  curC = null;
+  modal.classList.remove('on');
+  showHint('想好了再来点它一次');
+});
+
+document.getElementById('submit').addEventListener('click', function(){
+  var w = wishEl.value.trim();
+  var s = signEl.value.trim();
+  if(!w){ wishEl.focus(); return; }
+  if(curC){
+    curC.used = true;
+    curC.wish = w + (s ? ' —— ' + s : '');
+  }
+  save();
+  curC = null;
+  modal.classList.remove('on');
+  showHint('愿望挂上去了，它会一直留在这儿');
+});
+
+/* ============ 存本地 ============ */
+var KEY = 'clover_wishes_v2';
+function save(){
+  try{
+    var list = [];
+    for(var i=0;i<clovers.length;i++){
+      if(clovers[i].used) list.push({
+        x: clovers[i].x, y: clovers[i].y, w: clovers[i].wish
+      });
+    }
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }catch(e){}
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    var list = JSON.parse(raw);
+    /* 简单按坐标就近匹配 */
+    for(var i=0;i<list.length;i++){
+      var p = list[i], best=null, bd=1e9;
+      for(var j=0;j<clovers.length;j++){
+        var c = clovers[j];
+        var d = (c.x-p.x)*(c.x-p.x) + (c.y-p.y)*(c.y-p.y);
+        if(d<bd){ bd=d; best=c; }
+      }
+      if(best && bd < 40000){ best.used = true; best.wish = p.w; }
+    }
+  }catch(e){}
+}
+
+/* ============ hint ============ */
+var hintTimer = null;
+function showHint(msg){
+  if(!msg){
+    hint.classList.add('gone');
+    return;
+  }
+  hint.textContent = msg;
+  hint.classList.remove('gone');
+  if(hintTimer) clearTimeout(hintTimer);
+  hintTimer = setTimeout(function(){ hint.classList.add('gone'); }, 3200);
+}
+
+/* ============ 尺寸 ============ */
+function resize(){
+  W = window.innerWidth;
+  H = window.innerHeight;
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+
+  [skyC, fldC].forEach(function(cv){
+    cv.width = Math.round(W*DPR);
+    cv.height = Math.round(H*DPR);
+    cv.style.width = W+'px';
+    cv.style.height = H+'px';
+  });
+  skg.setTransform(DPR,0,0,DPR,0,0);
+  fg.setTransform(DPR,0,0,DPR,0,0);
+
+  buildStars();
+  buildField();
+  load();
+}
+
+var rzTimer = null;
+window.addEventListener('resize', function(){
+  if(rzTimer) clearTimeout(rzTimer);
+  rzTimer = setTimeout(resize, 220);
+});
+window.addEventListener('orientationchange', function(){ setTimeout(resize, 320); });
+
+/* ============ 启动 ============ */
+buildSprites();
+resize();
+setTimeout(function(){ showHint('点一朵四叶草，摘掉四片叶子许个愿'); }, 900);
+loop();
+
+})();
+</script>
+</body>
+</html>
