@@ -14,27 +14,40 @@ window.__API__ = {
 
   KEY: 'linji_app_token',
 
-  /* 最近一次出错的原因，页面上能显示出来，方便找问题 */
+  /* 最近一次出错的原因 */
   lastError: '',
 
-  /* 出错时要不要弹个小条告诉用户（调试完可以关掉） */
+  /* 出错时弹不弹小条（调好了可以关掉） */
   showErrors: true,
 
   ready: function () { return !!this.base; },
 
   /* ── 口令 ── */
-  token: function () {
+  tokenRaw: function () {
     try { return localStorage.getItem(this.KEY) || ''; } catch (e) { return ''; }
   },
+  /* 送出去的必须是纯英文数字，中文会让浏览器直接报错，这里先剔干净 */
+  token: function () {
+    return this.tokenRaw().replace(/[^\x21-\x7E]/g, '');
+  },
   setToken: function (t) {
-    try { localStorage.setItem(this.KEY, String(t || '').trim()); } catch (e) {}
+    var clean = String(t || '').replace(/[^\x21-\x7E]/g, '').trim();
+    try { localStorage.setItem(this.KEY, clean); } catch (e) {}
+    return clean;
   },
   clearToken: function () {
     try { localStorage.removeItem(this.KEY); } catch (e) {}
   },
   hasToken: function () { return !!this.token(); },
 
-  /* 没口令就弹一个自己画的框（手机的浏览器常把 prompt 拦掉）　返回 Promise */
+  /* 口令人话描述：只露前几位，方便确认填的是什么 */
+  tokenHint: function () {
+    var t = this.token();
+    if (!t) return '（还没填）';
+    return t.length <= 4 ? t : (t.slice(0, 4) + '…（共 ' + t.length + ' 位）');
+  },
+
+  /* 没口令就弹一个自己画的框 */
   askToken: function () {
     var self = this;
     if (self._asking) return self._asking;
@@ -55,8 +68,9 @@ window.__API__ = {
             '<div style="font-size:16px;font-weight:600;color:#5f5180;letter-spacing:1px;' +
             'margin-bottom:8px">填一下口令</div>' +
             '<div style="font-size:12px;color:#b8abca;line-height:1.7;margin-bottom:18px">' +
-            '只填这一次，以后这台手机就记住了。</div>' +
-            '<input id="__linji_token_input" type="password" inputmode="text" autocomplete="off" ' +
+            '只填这一次，以后这台手机就记住了。<br>口令是英文字母和数字，别带中文。</div>' +
+            '<input id="__linji_token_input" type="text" inputmode="email" ' +
+            'autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ' +
             'placeholder="我们俩的口令" style="width:100%;box-sizing:border-box;' +
             'background:#fbf7fe;border:1px solid rgba(178,138,190,.2);border-radius:15px;' +
             'padding:14px 15px;color:#40365a;font-size:16px;outline:none">' +
@@ -82,14 +96,16 @@ window.__API__ = {
       function done(v) {
         self._asking = null;
         if (box.parentNode) box.parentNode.removeChild(box);
-        if (v) { self.setToken(v); resolve(true); }
+        if (v) { resolve(self.setToken(v)); }
         else { resolve(false); }
       }
 
       document.getElementById('__linji_token_ok').onclick = function () {
-        var v = (inp.value || '').trim();
-        if (!v) { err.textContent = '还没填呢'; inp.focus(); return; }
-        done(v);
+        var v = (inp.value || '');
+        var cleaned = String(v).replace(/[^\x21-\x7E]/g, '').trim();
+        if (!cleaned) { err.textContent = '还没填，或者里面带了中文'; inp.focus(); return; }
+        if (cleaned !== String(v).trim()) { err.textContent = '里面有中文，已经帮你去掉了'; }
+        done(cleaned);
       };
       document.getElementById('__linji_token_later').onclick = function () { done(''); };
       inp.addEventListener('keydown', function (e) {
@@ -109,35 +125,42 @@ window.__API__ = {
     return self.askToken();
   },
 
+  /* ── 请求头：值一律只留可见 ASCII，保证浏览器不报错 ── */
+  clean: function (v) {
+    return String(v == null ? '' : v).replace(/[^\x20-\x7E]/g, '');
+  },
   headers: function (extra) {
-    var h = {
-      'Content-Type': 'application/json',
-      'X-Who': this.who,
-      'X-Token': this.token(),
-      /* ngrok 免费版会往浏览器里插一张警告页，这个头让它别插 */
-      'ngrok-skip-browser-warning': '1'
-    };
-    if (extra) for (var k in extra) h[k] = extra[k];
+    var h = {};
+    h['Content-Type'] = 'application/json';
+    h['X-Who'] = this.clean(this.who);
+    h['X-Token'] = this.clean(this.token());
+    h['ngrok-skip-browser-warning'] = '1';
+    if (extra) {
+      for (var k in extra) {
+        if (!Object.prototype.hasOwnProperty.call(extra, k)) continue;
+        h[this.clean(k)] = this.clean(extra[k]);
+      }
+    }
     return h;
   },
 
-  /* 把失败说清楚 */
   why: function (err, r) {
     var m = (err && err.message) || '';
     if (m === 'NO_TOKEN') return '还没填口令';
-    if (m === 'TOKEN') return '口令不对';
+    if (m === 'TOKEN') return '口令不对（填的是 ' + this.tokenHint() + '）';
     if (r && r.status) {
-      if (r.status === 403) return '口令不对';
+      if (r.status === 403) return '口令不对（填的是 ' + this.tokenHint() + '）';
       if (r.status === 404) return '地址不对（404）';
       if (r.status === 502) return '后端连不上记忆库';
       return '服务器回了 ' + r.status;
     }
+    if (m.indexOf('non ISO-8859-1') >= 0 || m.indexOf('ISO-8859-1') >= 0)
+      return '口令里混进了中文，已经清掉了，再试一次';
     if (m.indexOf('Failed to fetch') >= 0) return '连不上服务器（网络被挡）';
     if (m.indexOf('JSON') >= 0) return '收到的不是数据（被中间页挡了）';
     return m || '不知道哪儿出了问题';
   },
 
-  /* 出错时弹一个小条，字是给人看的 */
   shout: function (msg) {
     if (!this.showErrors) return;
     try {
@@ -161,7 +184,6 @@ window.__API__ = {
     } catch (e) {}
   },
 
-  /* 统一的失败处理 */
   fail: function (e, r) {
     var msg = '';
     try { msg = this.why(e, r); } catch (x) {}
@@ -170,7 +192,6 @@ window.__API__ = {
     return e;
   },
 
-  /* 读全部 */
   state: function (w) {
     var self = this;
     var who = w || this.who;
@@ -216,6 +237,12 @@ window.__API__ = {
     }).catch(function (e) {
       throw self.fail(e, e && e._r);
     });
+  },
+
+  /* 想重填口令的时候在页面控制台敲 __API__.resetToken() 就行 */
+  resetToken: function () {
+    this.clearToken();
+    return this.askToken();
   }
 };
 
@@ -258,7 +285,6 @@ window.sinceText = function (t) {
          p(d.getHours()) + ':' + p(d.getMinutes());
 };
 
-/* 把页面里那个老的 since 也接到新的上面 */
 (function () {
   function apply() {
     try { window.since = window.sinceText; } catch (e) {}
