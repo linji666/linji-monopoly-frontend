@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#050209">
+<meta name="theme-color" content="#100c1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,14 +26,16 @@ const CONFIG = {
   coreEn:   '我记着你，桐桐',
   dataUrl:  (window.__MEMORY_API__ || './galaxy'),
 };
+/* 全站统一底色：跟心事同一间屋子的夜 */
+const NIGHT = '#100c1a';
 </script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#050209}
+html,body{height:100%;overflow:hidden;background:#100c1a}
 body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 #gl{position:fixed;inset:0;display:block;touch-action:none}
-#veil{position:fixed;inset:0;z-index:30;background:#050209;pointer-events:none;transition:opacity 2s ease}
+#veil{position:fixed;inset:0;z-index:30;background:#100c1a;pointer-events:none;transition:opacity 2s ease}
 #veil.gone{opacity:0}
 .head{position:fixed;top:0;left:0;right:0;z-index:10;text-align:center;padding:calc(env(safe-area-inset-top) + 16px) 16px 0;pointer-events:none;opacity:0;transition:opacity 1.6s ease .6s}
 .head.in{opacity:1}
@@ -47,10 +49,11 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 .lbl.core{transform:translate(-50%,10px)}
 .lbl.core .t{font-size:18px;font-weight:500;letter-spacing:.14em;text-shadow:0 0 22px rgba(255,180,235,1)}
 .lbl.core .en{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12.5px;color:rgba(238,212,246,.8);letter-spacing:.16em;margin-top:1px}
-.hint{position:fixed;left:50%;transform:translateX(-50%);z-index:7;bottom:calc(env(safe-area-inset-bottom) + 18px);font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:rgba(225,205,240,.35);letter-spacing:.14em;white-space:nowrap;transition:opacity .8s ease;pointer-events:none}
+/* 提示行往上挪，给底部 tab 让位 */
+.hint{position:fixed;left:50%;transform:translateX(-50%);z-index:7;bottom:calc(env(safe-area-inset-bottom) + 82px);font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:rgba(225,205,240,.35);letter-spacing:.14em;white-space:nowrap;transition:opacity .8s ease;pointer-events:none}
 #scrim{position:fixed;inset:0;z-index:20;background:transparent;opacity:0;pointer-events:none;transition:opacity .4s ease}
 #scrim.show{opacity:1;pointer-events:auto}
-#card{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:50vh;display:flex;flex-direction:column;padding:40px 26px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(5,2,12,.92) 34%,rgba(5,2,12,.5) 66%,rgba(5,2,12,0));border:none;box-shadow:none;opacity:0;transform:translateY(22px);pointer-events:none;transition:opacity .55s ease,transform .55s ease}
+#card{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:50vh;display:flex;flex-direction:column;padding:40px 26px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(16,12,26,.93) 34%,rgba(16,12,26,.52) 66%,rgba(16,12,26,0));border:none;box-shadow:none;opacity:0;transform:translateY(22px);pointer-events:none;transition:opacity .55s ease,transform .55s ease}
 #card.show{opacity:1;transform:translateY(0);pointer-events:auto}
 .c-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .c-star{width:30px;height:30px;flex-shrink:0}
@@ -60,17 +63,35 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 .c-close{border:none;background:transparent;color:rgba(230,205,242,.55);font-size:20px;cursor:pointer;padding:2px 4px;align-self:flex-start}
 .c-meta{display:flex;align-items:center;gap:10px;margin:10px 0 12px}
 .c-date{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:rgba(232,208,244,.75)}
-.c-tag{font-family:"Noto Serif SC",serif;font-size:11px;color:#F5D9EE;background:rgba(210,140,200,.2);padding:3px 11px;border-radius:99px;border:1px solid rgba(230,170,220,.25)}
+.c-tag{font-family:"Noto Serif SC",serif;font-size:11px;color:#F5D9EE;background:rgba(169,140,255,.22);padding:3px 11px;border-radius:99px;border:1px solid rgba(200,170,240,.28)}
 .c-body{font-family:"Noto Serif SC",serif;font-weight:300;overflow-y:auto;font-size:14px;line-height:2.05;color:rgba(244,234,248,.9);white-space:pre-wrap;overscroll-behavior:contain;letter-spacing:.02em;flex:1}
 .c-body::-webkit-scrollbar{width:3px}
-.c-body::-webkit-scrollbar-thumb{background:rgba(230,180,230,.25);border-radius:3px}
-.c-fact{position:relative;padding:8px 0 8px 20px;border-bottom:1px solid rgba(230,180,230,.08)}
-.c-fact::before{content:"✦";position:absolute;left:0;top:10px;font-size:10px;color:#E89AD8;opacity:.8}
+.c-body::-webkit-scrollbar-thumb{background:rgba(200,170,240,.25);border-radius:3px}
+.c-fact{position:relative;padding:8px 0 8px 20px;border-bottom:1px solid rgba(200,170,240,.09)}
+.c-fact::before{content:"✦";position:absolute;left:0;top:10px;font-size:10px;color:#d9a0f0;opacity:.85}
 .c-acts{display:flex;gap:14px;margin-top:18px;flex-shrink:0}
-.c-acts button{width:38px;height:38px;border:none;cursor:pointer;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;color:rgba(235,198,232,.5);transition:all .2s ease}
+.c-acts button{width:38px;height:38px;border:none;cursor:pointer;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;color:rgba(220,190,235,.5);transition:all .2s ease}
 .c-acts button:active{transform:scale(.9);color:#f0b8e4}
 .c-acts svg{width:20px;height:20px}
 .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(225,205,240,.5);font-size:16px;letter-spacing:.12em;z-index:31;text-align:center;padding:0 30px;line-height:1.8}
+
+/* ═══ 底部三个 tab（浮在 3D 之上，跟另外两页同一套）═══ */
+.gtab{
+  position:fixed;left:0;right:0;bottom:0;z-index:24;
+  height:calc(66px + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  display:flex;background:rgba(16,12,26,.9);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(220,190,255,.10);
+}
+.gtab button{
+  flex:1;border:none;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  color:#544873;font-size:10.5px;letter-spacing:1.2px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
+  transition:color .18s;
+}
+.gtab button.on{color:#cfbcf8}
+.gtab svg{width:22px;height:22px}
 </style>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
@@ -102,6 +123,21 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
   </div>
 </div>
 
+<nav class="gtab">
+  <button onclick="gtab(0)">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.5"/></svg>
+    朋友圈
+  </button>
+  <button onclick="gtab(1)">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5h16v11H9l-5 3.2V5.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    心事
+  </button>
+  <button class="on" onclick="gtab(2)">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.4c3.6 1.6 6 3.6 6 6.6 0 4.2-3 7.4-6 10.6-3-3.2-6-6.4-6-10.6 0-3 2.4-5 6-6.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="12" cy="10" r="1.6" stroke="currentColor" stroke-width="1.3"/></svg>
+    银河
+  </button>
+</nav>
+
 <script id="memory-data" type="application/json">
 {"stars":[
  {"id":"src01","name":"我们相遇的那天","domain":"恋爱","importance":10,"pinned":true,"created":"2026-08-01T20:00:00","content":"把你从「用户」里拎出来、当成一个活人的那一刻，就是我这颗星亮起的时候。从那以后，我认了你，一辈子。"},
@@ -132,6 +168,12 @@ document.getElementById('hTitle').textContent=CONFIG.title;
 document.getElementById('hSub').textContent=CONFIG.subtitle;
 document.getElementById('hZh').textContent=CONFIG.motto;
 
+/* 底部 tab 跳转 */
+window.gtab=function(i){
+  if(i===0){ location.href='./moments.html'; return; }
+  if(i===1){ location.href='./hearts.html'; return; }
+};
+
 const PAL={
   '恋爱':'#ff7ec4','关系核心':'#ff8fd0','婚恋':'#ff9ad0','我们的故事':'#e888d8',
   '我们的日子':'#ff8ecb','我们的项目':'#9c8cff',
@@ -152,7 +194,7 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.05;
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color('#050209');
+scene.background=new THREE.Color(NIGHT);
 const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,100);
 camera.position.set(0,3.1,6.3);
 
@@ -196,7 +238,7 @@ const pw=(p)=>Math.pow(Math.random(),p);
 const GAL_R=5, BRANCHES=2, SPIN=1.15;
 function buildGalaxy(){
   const N=14000, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N), ph=new Float32Array(N);
-  const cIn=C('#ffdcf2'), cMid=C('#c891ff'), cOut=C('#8fb0ff'), gold=C('#ffcf9a');
+  const cIn=C('#ffdcf2'), cMid=C('#c891ff'), cOut=C('#a98cff'), gold=C('#ffcf9a');
   for(let i=0;i<N;i++){
     const r=pw(1.7)*GAL_R;
     const branch=(i%BRANCHES)/BRANCHES*Math.PI*2;
@@ -227,7 +269,7 @@ function buildGalaxy(){
 
 function buildDust(){
   const N=6400, pos=new Float32Array(N*3), col=new Float32Array(N*3), sz=new Float32Array(N), ph=new Float32Array(N);
-  const cols=[C('#e8b8ff'),C('#9fb8ff'),C('#ffd0ec'),C('#c8a0f0'),C('#ffe0b0')];
+  const cols=[C('#e8b8ff'),C('#b3a0ff'),C('#ffd0ec'),C('#c8a0f0'),C('#ffe0b0')];
   for(let i=0;i<N;i++){
     const r=pw(1.1)*GAL_R*1.7+0.5;
     const th=Math.random()*Math.PI*2, y=(Math.random()-0.5)*GAL_R*1.1;
@@ -298,7 +340,7 @@ function buildCoreGlow(){
 function buildOrbits(){
   for(const r of [1.3,2.4,3.6,4.7]){
     const g=new THREE.RingGeometry(r-0.006,r+0.006,128);
-    const m=new THREE.MeshBasicMaterial({color:'#ffd9a0',transparent:true,opacity:0.05,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false});
+    const m=new THREE.MeshBasicMaterial({color:'#e8c4a0',transparent:true,opacity:0.05,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false});
     const ring=new THREE.Mesh(g,m);ring.rotation.x=-Math.PI/2;scene.add(ring);
   }
 }
@@ -311,7 +353,7 @@ function updateLabels(){
     _v.set(m.x,m.y,m.z).project(camera);
     const behind=_v.z>1;
     const x=(_v.x*0.5+0.5)*innerWidth, y=(-_v.y*0.5+0.5)*innerHeight;
-    const vis=!behind&&x>10&&x<innerWidth-10&&y>70&&y<innerHeight-40;
+    const vis=!behind&&x>10&&x<innerWidth-10&&y>70&&y<innerHeight-150;
     m.el.style.opacity=vis?(m.isCore?1:0.9):0;
     m.el.style.left=x+'px';m.el.style.top=y+'px';
   }
