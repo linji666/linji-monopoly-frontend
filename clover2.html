@@ -124,17 +124,16 @@ function makeEmoji(px, kind){
   g.font = Math.round(px*0.92) + 'px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji","EmojiOne Color",sans-serif';
 
   if(kind === 1){
-    g.filter = 'brightness(1.22) saturate(0.78)';
+    g.filter = 'brightness(1.24) saturate(0.78)';
   }else if(kind === 2){
     g.filter = 'brightness(0.60) saturate(0.62)';
   }
 
-  /* 正常/许愿的：先铺一层光晕 */
   if(kind === 0){
     g.save();
     var gr = g.createRadialGradient(cv.width/2, cv.height/2, px*0.10,
                                     cv.width/2, cv.height/2, px*0.62);
-    gr.addColorStop(0,'rgba(180,255,215,.30)');
+    gr.addColorStop(0,'rgba(180,255,215,.28)');
     gr.addColorStop(1,'rgba(180,255,215,0)');
     g.fillStyle = gr;
     g.filter = 'none';
@@ -199,7 +198,7 @@ function buildStars(){
 
 function drawSky(t){
   skg.clearRect(0,0,W,H);
-  var horizon = H*0.86;
+  var horizon = H*0.90;
 
   var grad = skg.createLinearGradient(0,0,0,horizon);
   grad.addColorStop(0,    C.sky0);
@@ -210,7 +209,7 @@ function drawSky(t){
   skg.fillStyle = grad;
   skg.fillRect(0,0,W,horizon);
 
-  var hz = skg.createRadialGradient(W*0.42, H*0.86, 10, W*0.42, H*0.86, Math.max(W,H)*0.66);
+  var hz = skg.createRadialGradient(W*0.42, H*0.88, 10, W*0.42, H*0.88, Math.max(W,H)*0.66);
   hz.addColorStop(0,   'rgba(205,165,255,.36)');
   hz.addColorStop(0.45,'rgba(165,125,225,.16)');
   hz.addColorStop(1,   'rgba(120,90,190,0)');
@@ -228,8 +227,8 @@ function drawSky(t){
     skg.fillStyle = g2; skg.fill();
     skg.restore();
   };
-  cloud(W*0.18, H*0.66, W*0.48, H*0.12, '0.17');
-  cloud(W*0.86, H*0.56, W*0.42, H*0.10, '0.14');
+  cloud(W*0.18, H*0.68, W*0.48, H*0.12, '0.17');
+  cloud(W*0.86, H*0.58, W*0.42, H*0.10, '0.14');
 
   for(var i=0;i<stars.length;i++){
     var s = stars[i];
@@ -262,23 +261,29 @@ function drawSky(t){
   }
 }
 
-/* ============ 草坡（压低） ============ */
-/* 天空占 ~2/3，草坡只在下 1/3 多一点 */
+/* ============ 草坡（更低） ============ */
 function ridgeY(x){
   var u = x / W;
-  var base = H*0.845 - u*H*0.155;
-  if(u > 0.60) base -= (u-0.60)*H*0.075;
-  base += Math.sin(u*Math.PI*2.1)*H*0.016;
-  base += Math.sin(u*Math.PI*5.3+1.3)*H*0.0075;
+  var base = H*0.885 - u*H*0.135;
+  if(u > 0.60) base -= (u-0.60)*H*0.065;
+  base += Math.sin(u*Math.PI*2.1)*H*0.014;
+  base += Math.sin(u*Math.PI*5.3+1.3)*H*0.0065;
   return base;
 }
 
 var clovers = [];
 
+/* 统一大小 */
+var BASE_PX = 42;
+
+function emojiSize(c){
+  return BASE_PX * (Math.min(W,H)/380) * 1.0;
+}
+
 function buildField(){
   clovers = [];
-  var target = Math.round(W*H/6400);
-  target = Math.max(70, Math.min(target, 380));
+  var target = Math.round(W*H/4200);
+  target = Math.max(80, Math.min(target, 520));
 
   for(var i=0;i<target;i++){
     var x = Math.random()*W;
@@ -287,28 +292,19 @@ function buildField(){
     var y = top + v*(H - top)*0.94;
 
     var depth = v;
-    var scale = 0.30 + (1-depth)*0.66;
-    var alpha = 0.52 + (1-depth)*0.48;
-    var kind  = depth > 0.62 ? 1 : 0;
+    /* 只有明暗和位置变，大小不变 */
+    var alpha = 0.62 + (1-depth)*0.38;
 
     clovers.push({
       x:x, y:y, depth:depth,
-      sc: scale * rnd(0.86,1.14),
-      al: alpha, kind: kind,
+      alpha: alpha,
+      used:false, wt:'', sg:'',
       angle: Math.floor(Math.random()*4),
       sway: rnd(0.4,1.5),
-      ph: Math.random()*Math.PI*2,
-      used:false, wt:'', sg:''
+      ph: Math.random()*Math.PI*2
     });
   }
   clovers.sort(function(a,b){ return a.y - b.y; });
-}
-
-function emojiSize(c){
-  var px = 64 * c.sc * (Math.min(W,H)/380);
-  if(px < 7)  px = 7;
-  if(px > 150) px = 150;
-  return px;
 }
 
 function drawField(t, skip){
@@ -371,11 +367,11 @@ function drawField(t, skip){
 function drawOne(c, t){
   var px = emojiSize(c);
   var sway = Math.sin(t*0.0009*c.sway + c.ph) * (px*0.05);
-  var img = SPR[ c.used ? 2 : c.kind ][ c.angle ];
+  var img = SPR[ c.used ? 2 : 0 ][ c.angle ];
   if(!img) return;
 
   fg.save();
-  fg.globalAlpha = c.al;
+  fg.globalAlpha = c.alpha;
   fg.translate(c.x + sway, c.y);
   fg.drawImage(img, -px/2, -px/2, px, px);
   fg.restore();
@@ -389,9 +385,8 @@ function hitTest(mx,my){
   for(var i=clovers.length-1;i>=0;i--){
     var c = clovers[i];
     if(c.used) continue;
-    if(c.depth > 0.72) continue;
     var px = emojiSize(c);
-    var rx = Math.max(20, px*0.52), ry = Math.max(20, px*0.52);
+    var rx = Math.max(18, px*0.55), ry = Math.max(18, px*0.55);
     var dx = (mx-c.x)/rx, dy = (my-c.y)/ry;
     var d = dx*dx + dy*dy;
     if(d < 1 && d < bestD){ bestD = d; best = c; }
@@ -418,6 +413,17 @@ fldC.addEventListener('pointerdown', function(e){
   var r = fldC.getBoundingClientRect();
   var mx = (e.clientX - r.left) * W / r.width;
   var my = (e.clientY - r.top)  * H / r.height;
+
+  /* 先看是不是点已许愿的 */
+  for(var i=clovers.length-1;i>=0;i--){
+    var c0 = clovers[i];
+    if(!c0.used) continue;
+    var p0 = emojiSize(c0);
+    var rx0 = Math.max(18, p0*0.55), ry0 = Math.max(18, p0*0.55);
+    var dx0 = (mx-c0.x)/rx0, dy0 = (my-c0.y)/ry0;
+    if(dx0*dx0 + dy0*dy0 < 1){ showWish(c0); return; }
+  }
+
   var c = hitTest(mx,my);
   if(!c) return;
 
@@ -429,9 +435,10 @@ fldC.addEventListener('pointerdown', function(e){
 function flyIn(c){
   picking = true;
   var px0 = emojiSize(c);
+  var targetPx = Math.min(W,H) * 0.34;
   anim = { t0: performance.now(), dur: 640,
-           x0:c.x, y0:c.y, x1:W*0.5, y1:H*0.42,
-           s0:1, s1: Math.min(4.2, (Math.min(W,H)*0.34)/px0) };
+           x0:c.x, y0:c.y, x1:W*0.5, y1:H*0.40,
+           s0:1, s1: targetPx / px0 };
   (function tick(now){
     var k = Math.min(1,(now-anim.t0)/anim.dur);
     var e = 1-Math.pow(1-k,3);
@@ -449,8 +456,8 @@ function loop(){
   drawField(t, picked);
 
   if(picking && anim && anim.x !== undefined){
-    var px = emojiSize({sc: 64/64 * anim.s * (1/ (Math.min(W,H)/380)) * (Math.min(W,H)/380), depth:0}) ;
-    px = 64 * anim.s * (Math.min(W,H)/380);
+    var basePx = BASE_PX * (Math.min(W,H)/380);
+    var px = basePx * anim.s;
     var img = SPR[0][0];
     fg.save();
     fg.translate(anim.x, anim.y);
@@ -505,7 +512,7 @@ document.getElementById('submit').addEventListener('click', function(){
   showHint('愿望挂上去了，它会一直留在这儿');
 });
 
-/* ============ 看别人的愿望 ============ */
+/* ============ 看愿望 ============ */
 var viewer = document.getElementById('viewer');
 document.getElementById('vClose').addEventListener('click', function(){
   viewer.classList.remove('on');
@@ -516,24 +523,8 @@ function showWish(c){
   viewer.classList.add('on');
 }
 
-/* 已许愿的花也能点开看 */
-fldC.addEventListener('pointerdown', function(e){
-  if(picking || picked) return;
-  var r = fldC.getBoundingClientRect();
-  var mx = (e.clientX - r.left) * W / r.width;
-  var my = (e.clientY - r.top)  * H / r.height;
-  for(var i=clovers.length-1;i>=0;i--){
-    var c = clovers[i];
-    if(!c.used || c.depth > 0.72) continue;
-    var px = emojiSize(c);
-    var rx = Math.max(20, px*0.55), ry = Math.max(20, px*0.55);
-    var dx = (mx-c.x)/rx, dy = (my-c.y)/ry;
-    if(dx*dx+dy*dy < 1){ showWish(c); return; }
-  }
-});
-
 /* ============ 本地存 ============ */
-var KEY = 'clover_wishes_v4';
+var KEY = 'clover_wishes_v5';
 function save(){
   try{
     var list = [];
