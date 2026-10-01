@@ -331,6 +331,11 @@ body{
 .mini .row .no{background:#f6f1fa;color:var(--txt2)}
 .mini .row .ok{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff}
 </style>
+
+<!-- api.js 每次都拿最新的，改完不用再管缓存 -->
+<script>
+document.write('<script src="api.js?t=' + Date.now() + '"><\/script>');
+</script>
 </head>
 <body>
 <div id="app">
@@ -438,7 +443,6 @@ body{
   </div>
 </div>
 
-<script src="api.js"></script>
 <script>
 var ME  = 'me';
 var HIM = 'linji';
@@ -510,9 +514,12 @@ function syncFromServer(showBar){
     online = true;
     cache(); render();
     if(showBar) setBar('已经在服务器上了');
-  }).catch(function(){
+  }).catch(function(err){
     online = false;
-    if(showBar || !db.posts.length) setBar('服务器没连上，先看的是本机缓存', true);
+    var m = (err && err.message) || '';
+    if(m === 'NO_TOKEN') setBar('还没填口令', true);
+    else if(m === 'TOKEN') setBar('口令不对，重开一次再填', true);
+    else if(showBar || !db.posts.length) setBar('服务器没连上，先看的是本机缓存', true);
   });
 }
 
