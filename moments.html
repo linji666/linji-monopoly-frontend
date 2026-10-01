@@ -9,10 +9,7 @@
 <title>我们 · 朋友圈</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-/* ── 全站统一色卡：粉紫一家 ──
-   粉 #ff9ecd  紫 #a98cff
-   朋友圈＝白底（白天）  心事/银河＝紫黑底（夜里）
-   同一个色，只换明度 */
+/* ── 全站统一色卡：粉紫一家 ── */
 :root{
   --pink:#ff9ecd;
   --pink-d:#f77bb8;
@@ -121,6 +118,7 @@ body{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:26px;opacity:.7;
 }
+.p-imgs .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .p-foot{display:flex;align-items:center;margin-top:12px;margin-left:54px}
 .p-foot .tm{flex:1;font-size:12px;color:var(--txt3)}
 .p-foot .dots{
@@ -207,12 +205,13 @@ body{
 .pickimgs{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
 .pickimgs .sq{
   position:relative;padding-top:100%;border-radius:14px;cursor:pointer;
-  border:1.5px dashed var(--pink-soft);background:#fbf7fe;
+  border:1.5px dashed var(--pink-soft);background:#fbf7fe;overflow:hidden;
 }
 .pickimgs .sq span{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:23px;color:#d9c3e6;
 }
+.pickimgs .sq img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .rowbtns{display:flex;gap:11px;margin-top:20px}
 .rowbtns button{
   flex:1;padding:14px 0;border-radius:18px;border:none;
@@ -230,6 +229,30 @@ body{
 }
 .fld input::placeholder{color:var(--txt3)}
 .note{font-size:11.5px;color:var(--txt3);line-height:1.72;margin-top:5px}
+
+/* ══ 头像那一块：预览 + 两个按钮 ══ */
+.avrow{
+  display:flex;align-items:center;gap:16px;margin-bottom:18px;
+}
+.avprev{
+  width:76px;height:76px;border-radius:20px;flex-shrink:0;
+  background:linear-gradient(150deg,#ffe4f5,#f0e6ff);
+  border:2px solid #fff;box-shadow:var(--shadow-sm);
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  font-size:32px;
+}
+.avprev img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.avbtns{flex:1;display:flex;flex-direction:column;gap:8px}
+.avbtns button{
+  padding:11px 0;border-radius:14px;border:none;cursor:pointer;
+  font-size:13.5px;font-family:inherit;font-weight:600;
+  background:#f7f2fb;color:#8f7ab0;transition:background .16s;
+}
+.avbtns button:active{background:#f0e8f8}
+.avbtns .main{
+  background:linear-gradient(135deg,var(--pink-soft),#e8dcff);color:#9a6ac4;
+}
+.avbtns .tip{font-size:11px;color:var(--txt3);text-align:center;line-height:1.5}
 
 .who{display:flex;gap:10px;margin-bottom:20px}
 .who button{
@@ -277,7 +300,6 @@ body{
 }
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* 连接状态的小横条 */
 .sbar{
   position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%) translateY(-40px);
   z-index:80;padding:6px 15px;border-radius:99px;
@@ -286,6 +308,28 @@ body{
 }
 .sbar.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .sbar.bad{background:rgba(180,80,110,.9)}
+
+/* 贴网址的小弹窗 */
+.mini{
+  position:fixed;left:22px;right:22px;top:50%;transform:translateY(-50%) scale(.96);
+  z-index:75;background:#fff;border-radius:22px;padding:22px;
+  box-shadow:0 20px 60px rgba(120,80,150,.28);
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;
+}
+.mini.on{opacity:1;pointer-events:auto;transform:translateY(-50%) scale(1)}
+.mini h4{font-size:15px;color:#5f5180;margin-bottom:14px;letter-spacing:.8px}
+.mini input{
+  width:100%;background:#fbf7fe;border:1px solid var(--line);
+  border-radius:14px;padding:12px 14px;color:var(--txt);font-size:14.5px;
+  font-family:inherit;outline:none;
+}
+.mini .row{display:flex;gap:10px;margin-top:16px}
+.mini .row button{
+  flex:1;padding:12px 0;border-radius:14px;border:none;cursor:pointer;
+  font-size:14.5px;font-family:inherit;font-weight:600;
+}
+.mini .row .no{background:#f6f1fa;color:var(--txt2)}
+.mini .row .ok{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff}
 </style>
 </head>
 <body>
@@ -322,13 +366,23 @@ body{
 <div class="toast" id="toast"></div>
 <div class="sbar" id="sbar"></div>
 
+<!-- 贴网址 -->
+<div class="mini" id="miUrl">
+  <h4>贴一个图片网址</h4>
+  <input id="miUrlInput" placeholder="https://…">
+  <div class="row">
+    <button class="no" onclick="closeMini()">算了</button>
+    <button class="ok" onclick="useUrl()">用这个</button>
+  </div>
+</div>
+
 <div class="sheet" id="shCompose">
   <h3>说点什么</h3>
   <textarea id="cpText" placeholder="此刻的想法…"></textarea>
   <div class="pickimgs" id="cpImgs">
     <div class="sq" onclick="addPhoto()"><span>＋</span></div>
   </div>
-  <div class="note">图片先做成占位 —— 真图上传还没做</div>
+  <div class="note">图片可以先从相册选（会自动缩小），不用图床</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">先不写</button>
     <button class="ok" onclick="publish()">发出去</button>
@@ -352,7 +406,14 @@ body{
     <button id="whoHim" onclick="switchWho('him')"><span class="dot" id="dotHim">🍀</span><span class="lb" id="lblHim">林霁</span></button>
   </div>
   <div class="fld"><label>昵称</label><input id="pfName" placeholder="起个名字"></div>
-  <div class="fld"><label>头像</label><input id="pfAvatar" placeholder="贴一个图片网址，或一个 emoji"></div>
+  <div class="avrow">
+    <div class="avprev" id="avPrev">🐱</div>
+    <div class="avbtns">
+      <button class="main" onclick="pickImage()">从相册选一张</button>
+      <button onclick="askUrl()">或者贴个网址</button>
+      <div class="tip">选完会自动缩小，省流量</div>
+    </div>
+  </div>
   <div class="note">改完存在服务器上，刷新、换手机都不丢。</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">算了</button>
@@ -362,10 +423,17 @@ body{
 
 <div class="sheet" id="shCover">
   <h3>换封面</h3>
-  <div class="fld"><label>图片网址</label><input id="cvUrl" placeholder="贴一个图片网址"></div>
-  <div class="note">留空就用现在这个粉紫渐变。</div>
+  <div class="avrow">
+    <div class="avprev" id="cvPrev" style="width:112px;border-radius:16px">🌸</div>
+    <div class="avbtns">
+      <button class="main" onclick="pickCover()">从相册选一张</button>
+      <button onclick="askCoverUrl()">或者贴个网址</button>
+      <div class="tip">封面会宽一点</div>
+    </div>
+  </div>
+  <div class="note">不选就用现在这个粉紫渐变。</div>
   <div class="rowbtns">
-    <button class="no" onclick="closeAll()">算了</button>
+    <button class="no" onclick="clearCover()">清掉</button>
     <button class="ok" onclick="saveCover()">用这张</button>
   </div>
 </div>
@@ -377,11 +445,15 @@ var HIM = 'linji';
 
 var API = window.__API__ || null;
 
-/* 服务器上的数据 + 本机缓存（连不上时还能看） */
 var db = null;
 var CACHE = 'moments_cache_v1';
 var online = false;
 var openMenu = null;
+
+/* 待保存的头像/封面（data URL 或网址）。null 表示没动过 */
+var pendingAvatar = null;
+var pendingCover  = null;
+var urlTarget     = null;
 
 function nowStr(){
   var d=new Date();
@@ -402,6 +474,9 @@ function esc(t){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];
   });
 }
+function isImg(v){
+  return /^(https?:\/\/|data:image\/)/.test(v||'');
+}
 
 function blank(){
   return {
@@ -412,30 +487,22 @@ function blank(){
     posts:[]
   };
 }
-
-/* 把后端返回的转成页面要的形状 */
-function fromServer(d){
-  return { profiles: d.profiles || {}, posts: d.posts || [] };
-}
+function fromServer(d){ return { profiles: d.profiles || {}, posts: d.posts || [] }; }
 
 function load(){
-  /* 先读本机缓存，秒开 */
   try{
     var raw = localStorage.getItem(CACHE);
     db = raw ? JSON.parse(raw) : blank();
   }catch(e){ db = blank(); }
   if(!db.profiles) db.profiles = blank().profiles;
   if(!db.posts) db.posts = [];
-
   render();
   syncFromServer();
 }
-
 function cache(){
   try{ localStorage.setItem(CACHE, JSON.stringify(db)); }catch(e){}
 }
 
-/* ══ 从服务器拉 ══ */
 function syncFromServer(showBar){
   if(!API || !API.ready()) return;
   API.state().then(function(d){
@@ -443,7 +510,7 @@ function syncFromServer(showBar){
     online = true;
     cache(); render();
     if(showBar) setBar('已经在服务器上了');
-  }).catch(function(err){
+  }).catch(function(){
     online = false;
     if(showBar || !db.posts.length) setBar('服务器没连上，先看的是本机缓存', true);
   });
@@ -457,7 +524,6 @@ function setBar(msg, bad){
   clearTimeout(el._t);
   el._t = setTimeout(function(){ el.classList.remove('on'); }, 2600);
 }
-
 function toast(msg){
   var el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('on');
@@ -465,23 +531,18 @@ function toast(msg){
   el._t = setTimeout(function(){ el.classList.remove('on'); }, 2000);
 }
 
-/* ══ 人物 ══ */
 function person(who){
   var p = (db.profiles && db.profiles[who]) || {};
-  var fallback = (who===ME) ? {name:'桐桐',avatar:'🐱'} : {name:'桐桐大人饶命呀',avatar:'🍀'};
-  return {
-    name: p.name || fallback.name,
-    avatar: p.avatar || fallback.avatar,
-    img: p.img || ''
-  };
+  var fb = (who===ME) ? {name:'桐桐',avatar:'🐱'} : {name:'桐桐大人饶命呀',avatar:'🍀'};
+  return { name: p.name || fb.name, avatar: p.avatar || fb.avatar, img: p.img || '' };
 }
 function avatarInner(p){
-  if(p.img) return '<img src="'+p.img+'" alt="" onerror="this.parentNode.innerHTML=\''+esc(p.avatar)+'\'">';
-  if(/^https?:/.test(p.avatar||'')) return '<img src="'+esc(p.avatar)+'" alt="">';
-  return esc(p.avatar||'🙂');
+  var a = p.avatar || '';
+  if(isImg(a)) return '<img src="'+esc(a)+'" alt="">';
+  return esc(a || '🙂');
 }
 
-/* ══ 渲染 ══ */
+/* ═══ 渲染 ═══ */
 function render(){
   var mp = person(ME);
   document.getElementById('myName').textContent = mp.name;
@@ -489,7 +550,7 @@ function render(){
 
   var cv = document.getElementById('cover');
   var cov = (db.profiles && db.profiles[ME] && db.profiles[ME].cover) || '';
-  if(cov){ cv.style.backgroundImage = 'url('+cov+')'; }
+  if(cov){ cv.style.backgroundImage = 'url("'+cov+'")'; }
   else{ cv.style.backgroundImage = ''; }
 
   var feed = document.getElementById('feed');
@@ -514,7 +575,12 @@ function render(){
       var g = Math.min(p.imgs.length, 9);
       var cls = g===1?'g1':(g===2?'g2':(g===4?'g4':'g3'));
       h += '<div class="p-imgs '+cls+'">';
-      for(var i=0;i<g;i++) h += '<div class="ph"><span>'+ esc(p.imgs[i]||'🖼') +'</span></div>';
+      for(var i=0;i<g;i++){
+        var src = p.imgs[i]||'';
+        h += '<div class="ph">'+
+             (isImg(src) ? '<img src="'+esc(src)+'" alt="">' : '<span>'+esc(src||'🖼')+'</span>')+
+             '</div>';
+      }
       h += '</div>';
     }
     h +=   '</div>';
@@ -551,15 +617,11 @@ function render(){
   feed.innerHTML = h;
 }
 
-function toggleMenu(id){
-  openMenu = (openMenu===id) ? null : id;
-  render();
-}
+function toggleMenu(id){ openMenu = (openMenu===id) ? null : id; render(); }
 
-/* ══ 写操作：先动本地（立刻有反馈），再发服务器，失败就回滚 ══ */
 function needOnline(){
   if(online) return true;
-  toast('服务器没连上，这条先发不出去');
+  toast('服务器没连上，先发不出去');
   return false;
 }
 
@@ -574,7 +636,6 @@ function like(id){
 
   if(!API || !API.ready()) return;
   API.post('/api/post/'+id+'/like', {}).catch(function(){
-    /* 回滚 */
     p.likes = p.likes || [];
     if(wasLiked){ if(p.likes.indexOf(ME)<0) p.likes.push(ME); }
     else { var j = p.likes.indexOf(ME); if(j>=0) p.likes.splice(j,1); }
@@ -626,6 +687,7 @@ function closeAll(){
   });
 }
 
+/* ═══ 发动态 ═══ */
 var cpImgs = [];
 function openCompose(){
   cpImgs = [];
@@ -636,18 +698,18 @@ function openCompose(){
 function drawPick(){
   var box = document.getElementById('cpImgs'), h = '';
   cpImgs.forEach(function(e,i){
-    h += '<div class="sq" onclick="delPhoto('+i+')"><span>'+ esc(e) +'</span></div>';
+    h += '<div class="sq" onclick="delPhoto('+i+')">'+
+         (isImg(e) ? '<img src="'+esc(e)+'" alt="">' : '<span>'+esc(e)+'</span>')+
+         '</div>';
   });
   if(cpImgs.length < 9) h += '<div class="sq" onclick="addPhoto()"><span>＋</span></div>';
   box.innerHTML = h;
 }
 function addPhoto(){
-  var e = prompt('先贴一个 emoji 当图片（真图上传还没做）','🌸');
-  if(e===null) return;
-  e = String(e).trim();
-  if(!e) return;
-  if(cpImgs.length>=9){ toast('最多九张'); return; }
-  cpImgs.push(e); drawPick();
+  if(cpImgs.length >= 9){ toast('最多九张'); return; }
+  pickImageFile(900, 0.82, function(dataUrl){
+    cpImgs.push(dataUrl); drawPick();
+  });
 }
 function delPhoto(i){ cpImgs.splice(i,1); drawPick(); }
 
@@ -672,10 +734,59 @@ function publish(){
     });
 }
 
-/* ══ 资料 ══ */
+/* ═══ 选图 → 缩小 → dataURL ═══ */
+function pickImageFile(maxSide, quality, cb){
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.style.display = 'none';
+  document.body.appendChild(inp);
+
+  inp.addEventListener('change', function(){
+    var f = inp.files && inp.files[0];
+    document.body.removeChild(inp);
+    if(!f) return;
+    if(f.size > 12*1024*1024){ toast('这张太大了，换一张'); return; }
+
+    var fr = new FileReader();
+    fr.onload = function(){
+      var im = new Image();
+      im.onload = function(){
+        var r = Math.min(maxSide/im.width, maxSide/im.height, 1);
+        var w = Math.max(1, Math.round(im.width * r));
+        var h = Math.max(1, Math.round(im.height * r));
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        var g = c.getContext('2d');
+        g.drawImage(im, 0, 0, w, h);
+        var out;
+        try{ out = c.toDataURL('image/jpeg', quality); }
+        catch(e){ out = fr.result; }
+        cb(out);
+      };
+      im.onerror = function(){ toast('这张读不出来'); };
+      im.src = fr.result;
+    };
+    fr.onerror = function(){ toast('这张读不出来'); };
+    fr.readAsDataURL(f);
+  }, { once:true });
+
+  inp.click();
+}
+
+/* ═══ 资料 ═══ */
 var whoNow = 'me';
-function openProfile(){ whoNow='me'; fillWho(); openSheet('shProfile'); }
-function switchWho(w){ whoNow = w; fillWho(); }
+function openProfile(){
+  whoNow = 'me';
+  pendingAvatar = null;
+  fillWho();
+  openSheet('shProfile');
+}
+function switchWho(w){
+  whoNow = w;
+  pendingAvatar = null;
+  fillWho();
+}
 function fillWho(){
   var meOn = whoNow==='me';
   document.getElementById('whoMe').classList.toggle('on', meOn);
@@ -683,47 +794,97 @@ function fillWho(){
 
   var meP = person(ME), himP = person(HIM);
   document.getElementById('dotMe').innerHTML = avatarInner({avatar:meP.avatar});
-  document.getElementById('dotHim').innerHTML = avatarInner({avatar:himP.avatar, img:himP.img});
+  document.getElementById('dotHim').innerHTML = avatarInner({avatar:himP.avatar});
   document.getElementById('lblMe').textContent = meP.name;
   document.getElementById('lblHim').textContent = himP.name;
 
-  var cur = person(meOn ? ME : HIM);
-  document.getElementById('pfName').value = cur.name||'';
-  document.getElementById('pfAvatar').value = cur.avatar||'';
+  var cur = meOn ? meP : himP;
+  document.getElementById('pfName').value = cur.name || '';
+  document.getElementById('avPrev').innerHTML = avatarInner({avatar:cur.avatar});
 }
+function pickImage(){
+  pickImageFile(240, 0.86, function(dataUrl){
+    pendingAvatar = dataUrl;
+    document.getElementById('avPrev').innerHTML = '<img src="'+dataUrl+'" alt="">';
+  });
+}
+function askUrl(){
+  urlTarget = 'avatar';
+  document.getElementById('miUrlInput').value = '';
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('miUrl').classList.add('on');
+}
+function askCoverUrl(){
+  urlTarget = 'cover';
+  document.getElementById('miUrlInput').value = '';
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('miUrl').classList.add('on');
+}
+function closeMini(){
+  document.getElementById('miUrl').classList.remove('on');
+  document.getElementById('scrim').classList.remove('on');
+}
+function useUrl(){
+  var u = document.getElementById('miUrlInput').value.trim();
+  if(!isImg(u)){ toast('要 http(s) 或图片地址'); return; }
+  if(urlTarget === 'avatar'){
+    pendingAvatar = u;
+    document.getElementById('avPrev').innerHTML = '<img src="'+esc(u)+'" alt="">';
+  }else{
+    pendingCover = u;
+    document.getElementById('cvPrev').innerHTML = '<img src="'+esc(u)+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+  }
+  closeMini();
+}
+
 function saveProfile(){
   if(!needOnline()) return;
   var n = document.getElementById('pfName').value.trim();
-  var a = document.getElementById('pfAvatar').value.trim();
   var target = (whoNow==='me') ? ME : HIM;
 
   db.profiles[target] = db.profiles[target] || {};
-  db.profiles[target].name = n || db.profiles[target].name;
-  db.profiles[target].avatar = a || db.profiles[target].avatar;
-  cache(); render(); closeAll();
+  var payload = { target: target, name: n };
+  if(pendingAvatar){ db.profiles[target].avatar = pendingAvatar; payload.avatar = pendingAvatar; }
+  if(n) db.profiles[target].name = n;
 
-  API.post('/api/profile', {target:target, name:n, avatar:a})
-    .then(function(){ syncFromServer(); })
+  cache(); render(); closeAll();
+  API.post('/api/profile', payload)
+    .then(function(){ pendingAvatar = null; syncFromServer(); })
     .catch(function(){ setBar('资料没存上', true); });
 }
 
-function openCover(){
-  document.getElementById('cvUrl').value =
-    (db.profiles && db.profiles[ME] && db.profiles[ME].cover) || '';
+/* ═══ 封面 ═══ */
+function openCoverHold(){
+  pendingCover = null;
+  var cov = (db.profiles[ME] && db.profiles[ME].cover) || '';
+  document.getElementById('cvPrev').innerHTML =
+    cov ? '<img src="'+esc(cov)+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '🌸';
   openSheet('shCover');
+}
+function pickCover(){
+  pickImageFile(1100, 0.82, function(dataUrl){
+    pendingCover = dataUrl;
+    document.getElementById('cvPrev').innerHTML = '<img src="'+dataUrl+'" alt="" style="width:100%;height:100%;object-fit:cover">';
+  });
+}
+function clearCover(){
+  pendingCover = '';
+  document.getElementById('cvPrev').innerHTML = '🌸';
 }
 function saveCover(){
   if(!needOnline()) return;
-  var u = document.getElementById('cvUrl').value.trim();
-  db.profiles[ME] = db.profiles[ME] || {};
+  var u = (pendingCover === null) ? ((db.profiles[ME] && db.profiles[ME].cover) || '') : pendingCover;
+
+  db.profiles[ME] = db.profiles[ME] || {name:'桐桐',avatar:'🐱'};
   db.profiles[ME].cover = u;
   cache(); render(); closeAll();
+
   API.post('/api/profile', {target:ME, name:db.profiles[ME].name, cover:u})
-    .then(function(){ syncFromServer(); })
+    .then(function(){ pendingCover = null; syncFromServer(); })
     .catch(function(){ setBar('封面没存上', true); });
 }
 
-/* ══ 长按封面 ══ */
+/* ═══ 长按封面 ═══ */
 (function(){
   var el = document.getElementById('cover');
   var t=null, sx=0, sy=0, fired=false, HOLD=520;
@@ -732,7 +893,7 @@ function saveCover(){
     t = setTimeout(function(){
       fired = true; el.classList.remove('holding');
       if(navigator.vibrate) navigator.vibrate(12);
-      openCover();
+      openCoverHold();
     }, HOLD);
   }
   function move(x,y){ if(t && (Math.abs(x-sx)>10 || Math.abs(y-sy)>10)) cancel(); }
@@ -768,7 +929,6 @@ function tab(i){
   if(i===2){ location.href = './galaxy.html'; return; }
 }
 
-/* 回到前台时悄悄对齐一次 */
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden) syncFromServer();
 });
