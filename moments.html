@@ -33,7 +33,6 @@ body{
 }
 #app{position:relative;min-height:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
-/* ═══ 顶栏：两个浮在封面上的图标 ═══ */
 .topbar{
   position:fixed;top:0;left:0;right:0;z-index:40;
   height:calc(50px + env(safe-area-inset-top));
@@ -50,7 +49,6 @@ body{
 }
 .topbar .ico:active{background:rgba(255,255,255,.5)}
 
-/* ═══ 封面：直接顶到头 ═══ */
 .cover{
   position:relative;overflow:hidden;
   height:calc(240px + env(safe-area-inset-top));
@@ -76,24 +74,23 @@ body{
     radial-gradient(1.2px 1.2px at 45% 86%,rgba(255,255,255,.75),transparent);
   opacity:.85;
 }
-/* 封面 → 页面的柔和过渡，消掉硬边 */
 .cover::before{
   content:"";position:absolute;left:0;right:0;bottom:0;height:56px;pointer-events:none;
   background:linear-gradient(to bottom,rgba(253,243,252,0),rgba(253,243,252,.85));
   z-index:2;
 }
 
-/* 右下角：昵称 + 方形头像 —— 在封面外面，浮着 */
+/* 右下角：昵称 + 方形头像 —— 往上提了 */
 .corner{
   position:relative;z-index:6;
   display:flex;justify-content:flex-end;align-items:flex-end;
-  gap:14px;padding:0 20px;margin-top:-44px;
+  gap:14px;padding:0 20px;margin-top:-72px;
   pointer-events:none;
 }
 .corner .nm{
   color:#fff;font-size:19px;font-weight:600;letter-spacing:.4px;
   text-shadow:0 2px 14px rgba(120,70,145,.55);
-  padding-bottom:16px;max-width:56vw;
+  padding-bottom:20px;max-width:56vw;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .corner .av{
@@ -105,10 +102,9 @@ body{
   font-size:36px;cursor:pointer;pointer-events:auto;
 }
 .corner .av img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-.spacer{height:44px}
+.spacer{height:22px}
 
-/* ═══ 动态流 ═══ */
-.feed{padding:14px 18px 18px}
+.feed{padding:8px 18px 18px}
 .post{
   background:var(--card);border-radius:24px;
   padding:20px 18px 16px;box-shadow:var(--shadow);margin-bottom:16px;
@@ -385,7 +381,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v12';
+var LS = 'moments_v13';
 var db = null;
 
 function nowStr(){
