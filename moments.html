@@ -102,19 +102,11 @@ body{
 .post:first-child{border-top:none}
 .p-head{display:flex;gap:11px;align-items:flex-start}
 .p-av{
-  width:42px;height:42px;border-radius:12px;flex-shrink:0;overflow:hidden;position:relative;
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;overflow:hidden;
   background:linear-gradient(150deg,#2a2440,#1b1730);
   display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;
 }
 .p-av img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-/* 我的记号：头像角上一朵四叶草 */
-.p-av .clover{
-  position:absolute;left:-3px;top:-3px;z-index:2;
-  width:17px;height:17px;border-radius:50%;
-  background:var(--bg);border:1.5px solid var(--line);
-  display:flex;align-items:center;justify-content:center;font-size:9px;
-  box-shadow:0 0 8px rgba(127,227,192,.35);
-}
 .p-nm{flex:1;min-width:0}
 .p-nm .n{font-size:14.5px;color:#c9b8f0;font-weight:500}
 .p-body{margin-left:53px;margin-top:-2px}
@@ -329,7 +321,7 @@ body{
 var ME  = 'me';       /* 我 = 桐桐 */
 var HIM = 'linji';    /* 他 = 林霁 */
 
-var LS = 'moments_v3';
+var LS = 'moments_v4';
 var db = null;
 
 function nowStr(){
@@ -382,14 +374,12 @@ function save(){ try{ localStorage.setItem(LS, JSON.stringify(db)); }catch(e){} 
 /* ══════════════ 人物 ══════════════ */
 function person(who){
   if(who===ME){
-    return { name: db.me.name||'桐桐', avatar: db.me.avatar||'🐱', isMe:true, mark:false };
+    return { name: db.me.name||'桐桐', avatar: db.me.avatar||'🐱' };
   }
   return {
     name:'桐桐大人饶命呀',
     avatar:'🍀',
-    img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png',
-    isMe:false,
-    mark:true              /* 我的记号：角上一朵四叶草 */
+    img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png'
   };
 }
 function avatarInner(p){
@@ -425,7 +415,7 @@ function render(){
     var liked = p.likes && p.likes.indexOf(ME)>=0;
     h += '<div class="post" data-id="'+p.id+'">';
     h +=   '<div class="p-head">';
-    h +=     '<div class="p-av">'+ avatarInner(who) + (who.mark?'<div class="clover">🍀</div>':'') +'</div>';
+    h +=     '<div class="p-av">'+ avatarInner(who) +'</div>';
     h +=     '<div class="p-nm"><div class="n">'+ esc(who.name) +'</div></div>';
     h +=   '</div>';
     h +=   '<div class="p-body">';
