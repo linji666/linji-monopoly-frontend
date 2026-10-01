@@ -56,7 +56,12 @@ body{
     radial-gradient(115% 80% at 88% 18%,rgba(197,175,255,.78),transparent 64%),
     radial-gradient(150% 120% at 50% 122%,rgba(190,240,225,.55),transparent 68%),
     linear-gradient(165deg,#ffe6f4,#f3e6ff 55%,#eaf4ff);
+  background-size:cover;background-position:center;
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+  cursor:pointer;
+  transition:transform .12s ease;
 }
+.cover.holding{transform:scale(.986)}
 .cover::after{
   content:"";position:absolute;inset:0;
   background-image:
@@ -67,24 +72,16 @@ body{
     radial-gradient(1.6px 1.6px at 87% 72%,rgba(255,255,255,.9),transparent),
     radial-gradient(1.2px 1.2px at 45% 86%,rgba(255,255,255,.75),transparent);
   opacity:.85;
-}
-/* 换封面：挪到封面右上角，跟顶栏右侧同一列 */
-.cover .edit{
-  position:absolute;right:20px;top:16px;z-index:2;
-  width:34px;height:34px;border-radius:50%;
-  background:rgba(255,255,255,.78);
-  border:1px solid rgba(255,255,255,.92);
-  box-shadow:var(--shadow-sm);
-  display:flex;align-items:center;justify-content:center;
-  color:#a06ec0;font-size:14px;cursor:pointer;
-  backdrop-filter:blur(6px);
+  pointer-events:none;
 }
 
 /* 资料行：整块贴右，往上提到封面里 */
 .ident{
   display:flex;align-items:flex-end;justify-content:flex-end;gap:16px;
   padding:0 24px;margin-top:-96px;position:relative;z-index:3;
+  pointer-events:none;
 }
+.ident .avatar{pointer-events:auto}
 .ident .nm{padding-bottom:16px;min-width:0;text-align:right;max-width:60%}
 .ident .nm .n{font-size:19px;font-weight:600;letter-spacing:.5px;color:#fff;
   text-shadow:0 2px 12px rgba(140,90,160,.45);
@@ -245,6 +242,18 @@ body{
   text-align:center;color:var(--txt3);font-size:13.5px;
   padding:90px 30px;line-height:2.1;
 }
+
+/* 长按提示小气泡 */
+.toast{
+  position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(8px);
+  background:rgba(90,74,112,.92);color:#fff;
+  font-size:12.5px;letter-spacing:.5px;
+  padding:9px 18px;border-radius:99px;
+  opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;
+  z-index:70;white-space:nowrap;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -255,13 +264,11 @@ body{
   </div>
 
   <div class="hero">
-    <div class="cover" id="cover">
-      <div class="edit" onclick="openCover()">✎</div>
-    </div>
+    <div class="cover" id="cover"></div>
     <div class="ident">
       <div class="nm">
         <div class="n" id="myName">桐桐</div>
-        <div class="s" id="mySub">点右边头像改资料</div>
+        <div class="s" id="mySub">点头像改资料</div>
       </div>
       <div class="avatar" id="myAvatar" onclick="openProfile()"></div>
     </div>
@@ -288,6 +295,7 @@ body{
 </nav>
 
 <div class="scrim" id="scrim" onclick="closeAll()"></div>
+<div class="toast" id="toast"></div>
 
 <div class="sheet" id="shCompose">
   <h3>说点什么</h3>
@@ -326,7 +334,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v7';
+var LS = 'moments_v8';
 var db = null;
 
 function nowStr(){
@@ -401,8 +409,6 @@ function render(){
   var cv = document.getElementById('cover');
   if(db.me.cover){
     cv.style.backgroundImage = 'url('+db.me.cover+')';
-    cv.style.backgroundSize = 'cover';
-    cv.style.backgroundPosition = 'center';
   }else{
     cv.style.backgroundImage = '';
   }
@@ -547,6 +553,67 @@ function openCover(){
 function saveCover(){
   db.me.cover = document.getElementById('cvUrl').value.trim();
   save(); render(); closeAll();
+}
+
+/* ══ 长按封面 = 换封面 ══ */
+(function(){
+  var el = document.getElementById('cover');
+  var t = null, sx=0, sy=0, fired=false;
+  var HOLD = 520;
+
+  function start(x,y){
+    sx=x; sy=y; fired=false;
+    el.classList.add('holding');
+    t = setTimeout(function(){
+      fired = true;
+      el.classList.remove('holding');
+      if(navigator.vibrate) navigator.vibrate(12);
+      openCover();
+    }, HOLD);
+  }
+  function move(x,y){
+    if(t && (Math.abs(x-sx)>10 || Math.abs(y-sy)>10)) cancel();
+  }
+  function cancel(){
+    if(t){ clearTimeout(t); t=null; }
+    el.classList.remove('holding');
+  }
+  function end(){
+    if(t){ clearTimeout(t); t=null; }
+    el.classList.remove('holding');
+    if(!fired){
+      /* 短按：给个提示，告诉用户这里能长按 */
+      toast('长按封面可以换背景');
+    }
+  }
+
+  el.addEventListener('touchstart', function(e){
+    if(e.touches.length!==1) return;
+    start(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  el.addEventListener('touchmove', function(e){
+    if(e.touches.length!==1) return;
+    move(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  el.addEventListener('touchend', function(e){ end(); }, {passive:true});
+  el.addEventListener('touchcancel', function(){ cancel(); }, {passive:true});
+
+  /* 桌面端也能按 */
+  el.addEventListener('mousedown', function(e){ start(e.clientX,e.clientY); });
+  el.addEventListener('mousemove', function(e){ move(e.clientX,e.clientY); });
+  el.addEventListener('mouseup', function(){ end(); });
+  el.addEventListener('mouseleave', function(){ cancel(); });
+  el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+})();
+
+/* 小气泡 */
+var toastT = null;
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  if(toastT) clearTimeout(toastT);
+  toastT = setTimeout(function(){ el.classList.remove('on'); }, 1800);
 }
 
 function tab(i){
