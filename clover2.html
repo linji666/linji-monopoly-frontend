@@ -102,15 +102,16 @@ var C = {
   sky2 : '#3d2069',
   sky3 : '#5c2f70',
   sky4 : '#7a4a7d',
-  grassFar : '#47b493',
-  grassMid : '#6ed7ab',
-  grassNear: '#9df0c4',
-  grassLip : 'rgba(230,255,245,.75)',
+  grassFar : '#4cb99a',
+  grassMid : '#74dbb0',
+  grassNear: '#a3f2c8',
+  grassLip : 'rgba(230,255,245,.78)',
   leafFill : '#5fc07f',
   leafLine : '#37975f'
 };
 
 function rnd(a,b){ return a + Math.random()*(b-a); }
+function gauss(){ return (Math.random()+Math.random()+Math.random()-1.5)/1.5; }
 
 /* ============ 🍀 emoji 精灵 ============ */
 function makeEmoji(px, kind){
@@ -183,8 +184,7 @@ function spawnLeaves(cx, cy, size, n){
       vy: rnd(-3.6,-1.0),
       rot: rnd(0, Math.PI*2),
       vr: rnd(-0.11,0.11),
-      life: 0,
-      max: rnd(70, 108),
+      life: 0, max: rnd(70, 108),
       size: size*rnd(0.19,0.29)
     });
   }
@@ -192,27 +192,21 @@ function spawnLeaves(cx, cy, size, n){
 function updateLeaves(){
   for(var i=leaves.length-1;i>=0;i--){
     var L = leaves[i];
-    L.vy += 0.118;
-    L.vx *= 0.992;
-    L.x += L.vx;
-    L.y += L.vy;
-    L.rot += L.vr;
-    L.life++;
+    L.vy += 0.118; L.vx *= 0.992;
+    L.x += L.vx; L.y += L.vy; L.rot += L.vr; L.life++;
     if(L.life > L.max || L.y > H + 80) leaves.splice(i,1);
   }
 }
 function drawLeaves(){
   for(var i=0;i<leaves.length;i++){
     var L = leaves[i];
-    var k = 1 - L.life/L.max;
-    if(k < 0) k = 0;
+    var k = 1 - L.life/L.max; if(k < 0) k = 0;
     fg.save();
     fg.globalAlpha = k * 0.95;
     fg.translate(L.x, L.y);
     fg.rotate(L.rot);
     heartLeafPath(fg, L.size);
-    fg.fillStyle = C.leafFill;
-    fg.fill();
+    fg.fillStyle = C.leafFill; fg.fill();
     fg.strokeStyle = C.leafLine;
     fg.lineWidth = Math.max(1, L.size*0.16);
     fg.stroke();
@@ -229,7 +223,7 @@ function buildStars(){
   var n = Math.round(W*H/5200);
   for(var i=0;i<n;i++){
     stars.push({
-      x: Math.random()*W, y: Math.random()*H*0.72,
+      x: Math.random()*W, y: Math.random()*H*0.74,
       r: rnd(0.55,1.8), a: rnd(0.30,0.98),
       tw: rnd(0.5,2.6), ph: Math.random()*Math.PI*2,
       col: PAL[Math.floor(Math.random()*PAL.length)]
@@ -238,7 +232,7 @@ function buildStars(){
   fireflies = [];
   for(var j=0;j<34;j++){
     fireflies.push({
-      x: Math.random()*W, y: H*0.20 + Math.random()*H*0.72,
+      x: Math.random()*W, y: H*0.20 + Math.random()*H*0.74,
       r: rnd(1.4,3.0), sp: rnd(0.10,0.36),
       ph: Math.random()*Math.PI*2,
       amp: rnd(10,36), a: rnd(0.35,0.95)
@@ -311,7 +305,7 @@ function drawSky(t){
   }
 }
 
-/* ============ 草坡（抬回来，占屏约四分之一） ============ */
+/* ============ 草坡 ============ */
 function ridgeY(x){
   var u = x / W;
   var base = H*0.775 - u*H*0.140;
@@ -321,36 +315,87 @@ function ridgeY(x){
   return base;
 }
 
-var clovers = [];
+var clovers = [];      /* 四叶草 */
+var blades = [];       /* 细草叶 */
 var BASE_PX = 34;
 function emojiSize(){ return BASE_PX * (Math.min(W,H)/380); }
 
+/* 成簇生长：先撒簇心，再围着簇心长 */
 function buildField(){
-  clovers = [];
-  var target = Math.round(W*H/2600);
-  target = Math.max(140, Math.min(target, 900));
+  clovers = []; blades = [];
 
-  for(var i=0;i<target;i++){
-    var x = Math.random()*W;
-    var top = ridgeY(x);
-    var v = Math.pow(Math.random(), 0.66);
-    var y = top + v*(H - top)*0.96;
+  var targetClover = Math.round(W*H/3400);
+  targetClover = Math.max(160, Math.min(targetClover, 780));
 
-    clovers.push({
-      x:x, y:y, depth:v,
-      alpha: 0.66 + (1-v)*0.34,
-      used:false, wt:'', sg:'',
-      angle: Math.floor(Math.random()*4),
-      sway: rnd(0.4,1.5),
-      ph: Math.random()*Math.PI*2
+  var clusterCount = Math.max(16, Math.round(targetClover/6.5));
+  var clusters = [];
+  for(var i=0;i<clusterCount;i++){
+    var cx = Math.random()*W;
+    var ctop = ridgeY(cx);
+    var cv2 = Math.pow(Math.random(), 0.70);
+    var cy = ctop + cv2*(H - ctop)*0.96;
+    var near = 1 - cv2;               /* 越靠下越"近" */
+    clusters.push({
+      x: cx, y: cy,
+      spread: rnd(0.5, 1.5) * (near*26 + 12) * (Math.min(W,H)/380),
+      bias: rnd(-1, 1),                /* 簇的横向拉伸感 */
+      n: Math.round(rnd(3, 11))
     });
   }
+
+  /* 每簇里撒四叶草 */
+  var made = 0;
+  for(var k=0;k<clusters.length && made<targetClover;k++){
+    var cl = clusters[k];
+    for(var m=0;m<cl.n && made<targetClover;m++){
+      var gx = cl.x + gauss()*cl.spread;
+      var gy = cl.y + gauss()*cl.spread*0.62;
+      if(gx < -20 || gx > W+20) continue;
+      var top2 = ridgeY(gx);
+      if(gy < top2 - 4) gy = top2 + rnd(0, 8);
+      if(gy > H + 20) continue;
+
+      var depth = Math.max(0, Math.min(1, (gy - top2)/Math.max(1,(H-top2))));
+      clovers.push({
+        x:gx, y:gy, depth:depth,
+        alpha: 0.68 + (1-depth)*0.32,
+        used:false, wt:'', sg:'',
+        angle: Math.floor(Math.random()*4),
+        sway: rnd(0.4,1.5),
+        ph: Math.random()*Math.PI*2
+      });
+      made++;
+    }
+  }
+
+  /* 细草叶：垫在下面，也是成簇的 */
+  var bladeCount = Math.round(W*H/900);
+  bladeCount = Math.max(260, Math.min(bladeCount, 2200));
+  for(var b=0;b<bladeCount;b++){
+    var bx = Math.random()*W;
+    var btop = ridgeY(bx);
+    var bv = Math.pow(Math.random(), 0.62);
+    var by = btop + bv*(H - btop)*0.98;
+    var bd = Math.max(0, Math.min(1, (by-btop)/Math.max(1,(H-btop))));
+    var mod = Math.min(W,H)/380;
+    blades.push({
+      x:bx, y:by, depth:bd,
+      h: (7 + Math.random()*16) * mod * (0.55 + bd*-0.15 + 0.6*0),
+      bend: rnd(-0.55, 0.55),
+      w: Math.max(1, 1.5*mod*rnd(0.7,1.5)),
+      alpha: 0.30 + (1-bd)*0.42,
+      col: Math.random() < 0.5 ? 'rgba(58,150,110,' : 'rgba(96,205,150,'
+    });
+  }
+
   clovers.sort(function(a,b){ return a.y - b.y; });
+  blades.sort(function(a,b){ return a.y - b.y; });
 }
 
 function drawField(t, skip){
   fg.clearRect(0,0,W,H);
 
+  /* 坡面 */
   fg.save();
   fg.beginPath();
   fg.moveTo(0, H);
@@ -366,6 +411,25 @@ function drawField(t, skip){
   fg.fillStyle = gg;
   fg.fill();
 
+  /* 坡面横向纹理（淡淡的，打破平涂） */
+  fg.save();
+  fg.clip();
+  for(var r=0;r<26;r++){
+    var ry = ridgeY(W*0.5) + r*(H-ridgeY(W*0.5))/26;
+    fg.beginPath();
+    fg.moveTo(-10, ry + Math.sin(r*1.7)*6);
+    for(var rx2=0; rx2<=W+10; rx2+=40){
+      fg.lineTo(rx2, ry + Math.sin(r*1.7 + rx2*0.006)*6);
+    }
+    fg.lineWidth = rnd(0.7, 2.2);
+    fg.strokeStyle = (r%2===0)
+      ? 'rgba(255,255,255,.035)'
+      : 'rgba(20,90,70,.045)';
+    fg.stroke();
+  }
+  fg.restore();
+
+  /* 柔光 */
   var sg = fg.createLinearGradient(0, ridgeY(W*0.5), 0, H);
   sg.addColorStop(0,'rgba(210,255,240,.30)');
   sg.addColorStop(0.6,'rgba(190,255,225,.06)');
@@ -374,6 +438,7 @@ function drawField(t, skip){
   fg.fill();
   fg.restore();
 
+  /* 坡顶亮边 */
   fg.save();
   fg.beginPath();
   fg.moveTo(0, ridgeY(0));
@@ -385,6 +450,7 @@ function drawField(t, skip){
   fg.stroke();
   fg.restore();
 
+  /* 叶尖白点 */
   fg.save();
   for(var d=0; d<Math.round(W*H/12000); d++){
     var dx = Math.random()*W;
@@ -398,11 +464,31 @@ function drawField(t, skip){
   }
   fg.restore();
 
+  /* 先画草叶（垫底），再画四叶草 */
+  drawBlades();
   for(var i=0;i<clovers.length;i++){
     var c = clovers[i];
     if(skip && skip === c) continue;
     drawOne(c, t);
   }
+}
+
+function drawBlades(){
+  fg.save();
+  fg.lineCap = 'round';
+  for(var i=0;i<blades.length;i++){
+    var b = blades[i];
+    fg.beginPath();
+    fg.moveTo(b.x, b.y);
+    fg.quadraticCurveTo(
+      b.x + b.bend*b.h*0.45, b.y - b.h*0.62,
+      b.x + b.bend*b.h*0.95, b.y - b.h
+    );
+    fg.lineWidth = b.w;
+    fg.strokeStyle = b.col + b.alpha.toFixed(3) + ')';
+    fg.stroke();
+  }
+  fg.restore();
 }
 
 function drawOne(c, t){
@@ -440,9 +526,8 @@ function pickLeaf(){
   var bigPx = emojiSize() * anim.s;
   var dirs = [ 0.75, 2.25, 3.75, 5.25 ];
   var a = dirs[4 - petals] || 0;
-  var cx = anim.x + Math.cos(a)*bigPx*0.22;
-  var cy = anim.y + Math.sin(a)*bigPx*0.22;
-  spawnLeaves(cx, cy, bigPx, 5);
+  spawnLeaves(anim.x + Math.cos(a)*bigPx*0.22,
+              anim.y + Math.sin(a)*bigPx*0.22, bigPx, 5);
 
   petals--;
   if(petals > 0){
@@ -450,8 +535,7 @@ function pickLeaf(){
     return;
   }
   var target = picked;
-  picking = false;
-  picked = null; anim = null;
+  picking = false; picked = null; anim = null;
   showHint('');
   setTimeout(function(){ openModal(target); }, 420);
 }
@@ -503,7 +587,6 @@ function loop(){
   var t = performance.now() - t0;
   drawSky(t);
   drawField(t, picked);
-
   updateLeaves();
 
   if(picking && anim && anim.x !== undefined){
@@ -511,11 +594,10 @@ function loop(){
     var shrink = 0.72 + 0.28*(petals/4);
     var fade   = 0.78 + 0.22*(petals/4);
     var px = basePx * anim.s * shrink;
-    var img = SPR[0];
     fg.save();
     fg.globalAlpha = fade;
     fg.translate(anim.x, anim.y);
-    fg.drawImage(img, -px/2, -px/2, px, px);
+    fg.drawImage(SPR[0], -px/2, -px/2, px, px);
     fg.restore();
 
     if(petals > 0){
@@ -580,7 +662,7 @@ function showWish(c){
 }
 
 /* ============ 本地存 ============ */
-var KEY = 'clover_wishes_v7';
+var KEY = 'clover_wishes_v8';
 function save(){
   try{
     var list = [];
