@@ -20,7 +20,7 @@
   --pink:#ff8ecb;
   --pink-soft:#ffd9ec;
   --violet:#b79aff;
-  --nick:#7b86c4;         /* 微信那种偏冷的蓝紫 */
+  --nick:#7b86c4;
   --shadow:0 10px 30px rgba(190,150,205,.11);
   --shadow-sm:0 4px 13px rgba(190,150,205,.10);
 }
@@ -33,26 +33,30 @@ body{
 }
 #app{min-height:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
-/* ═══ 顶栏：‹  朋友圈  📷 ═══ */
+/* ═══ 顶栏：只剩两个浮在封面上的图标 ═══ */
 .topbar{
   position:fixed;top:0;left:0;right:0;z-index:40;
   height:calc(50px + env(safe-area-inset-top));
-  padding:env(safe-area-inset-top) 16px 0;
+  padding:env(safe-area-inset-top) 14px 0;
   display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(to bottom,rgba(255,248,252,.96),rgba(255,248,252,.66) 74%,rgba(255,248,252,0));
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:linear-gradient(to bottom,rgba(255,250,253,.62),rgba(255,250,253,.18) 58%,rgba(255,250,253,0));
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  pointer-events:none;
 }
 .topbar .ico{
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  color:#6b5a80;font-size:19px;cursor:pointer;border-radius:50%;
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#6b5a80;font-size:20px;cursor:pointer;
+  pointer-events:auto;
+  transition:background .16s;
 }
-.topbar .ico:active{background:rgba(180,140,200,.1)}
-.topbar .t{font-size:15.5px;font-weight:600;letter-spacing:1px;color:#6b5a80}
+.topbar .ico:active{background:rgba(255,255,255,.5)}
 
-/* ═══ 封面 ═══ */
-.hero{position:relative;padding-top:calc(50px + env(safe-area-inset-top))}
+/* ═══ 封面：直接顶到头 ═══ */
 .cover{
-  height:238px;position:relative;overflow:hidden;
+  position:relative;overflow:hidden;
+  height:calc(238px + env(safe-area-inset-top));
+  padding-top:env(safe-area-inset-top);
   background:
     radial-gradient(110% 85% at 16% 6%,rgba(255,182,222,.85),transparent 62%),
     radial-gradient(115% 80% at 88% 18%,rgba(197,175,255,.78),transparent 64%),
@@ -75,7 +79,7 @@ body{
   opacity:.85;
 }
 
-/* 右下角：昵称 + 方形头像，半探出封面 */
+/* 右下角：昵称 + 方形头像 */
 .corner{
   position:absolute;right:20px;bottom:-34px;z-index:6;
   display:flex;align-items:flex-end;gap:14px;
@@ -130,23 +134,15 @@ body{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:26px;opacity:.7;
 }
-
-/* 底部：时间在左，··· 在右（微信那样） */
-.p-foot{
-  display:flex;align-items:center;margin-top:12px;
-  margin-left:54px;
-}
+.p-foot{display:flex;align-items:center;margin-top:12px;margin-left:54px}
 .p-foot .tm{flex:1;font-size:12px;color:var(--txt3)}
 .p-foot .dots{
   padding:3px 10px;border-radius:8px;cursor:pointer;
   background:#f6f0fa;color:#a892c0;
-  font-size:13px;letter-spacing:1.5px;line-height:1.2;
-  transition:background .16s;
+  font-size:13px;letter-spacing:1.5px;line-height:1.2;transition:background .16s;
 }
 .p-foot .dots:active{background:#efe6f7}
 .p-foot .dots.on{background:linear-gradient(135deg,#ffd7ec,#e6dbff);color:#fff}
-
-/* 互动区 */
 .p-inter{
   margin-left:54px;margin-top:10px;border-radius:14px;
   background:linear-gradient(140deg,#fff4fa,#f7f1ff);overflow:hidden;
@@ -164,11 +160,7 @@ body{
 .cmt .to{color:var(--txt3)}
 .cmt .rp{font-size:11.5px;color:var(--txt3);margin-left:8px;cursor:pointer}
 
-/* 小菜单（··· 弹出来的） */
-.menu{
-  margin-left:54px;margin-top:8px;display:flex;gap:8px;
-  animation:fadeUp .22s ease;
-}
+.menu{margin-left:54px;margin-top:8px;display:flex;gap:8px;animation:fadeUp .22s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .menu span{
   padding:8px 16px;border-radius:11px;font-size:13px;cursor:pointer;
@@ -176,7 +168,6 @@ body{
 }
 .menu span.on{background:linear-gradient(135deg,#ffd7ec,#e6dbff);color:#fff;font-weight:600}
 
-/* ═══ 浮动按钮 ═══ */
 .fab{
   position:fixed;right:20px;z-index:45;
   bottom:calc(94px + env(safe-area-inset-bottom));
@@ -188,7 +179,6 @@ body{
 }
 .fab:active{transform:scale(.92)}
 
-/* ═══ 底部导航 ═══ */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:50;
   height:calc(66px + env(safe-area-inset-bottom));
@@ -206,7 +196,6 @@ body{
 .tabbar button.on{color:#a07ac4}
 .tabbar svg{width:22px;height:22px}
 
-/* ═══ 弹层 ═══ */
 .scrim{
   position:fixed;inset:0;z-index:60;background:rgba(120,90,140,.24);
   backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;
@@ -306,12 +295,10 @@ body{
 <div id="app">
   <div class="topbar">
     <div class="ico">‹</div>
-    <div class="t">朋友圈</div>
     <div class="ico" onclick="openCompose()">📷</div>
   </div>
 
-  <div class="hero">
-    <div class="cover" id="cover"></div>
+  <div class="cover" id="cover">
     <div class="corner">
       <div class="nm" id="myName">桐桐</div>
       <div class="av" id="myAvatar" onclick="openProfile()"></div>
@@ -393,7 +380,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v10';
+var LS = 'moments_v11';
 var db = null;
 
 function nowStr(){
@@ -463,8 +450,7 @@ function avatarInner(p){
   return esc(p.avatar||'🙂');
 }
 
-/* ═══ 渲染 ═══ */
-var openMenu = null;   /* 当前展开了 ··· 的帖子 */
+var openMenu = null;
 
 function render(){
   var mp = person(ME);
@@ -501,14 +487,11 @@ function render(){
       h += '</div>';
     }
     h +=   '</div>';
-
-    /* 底：时间 + ··· */
     h +=   '<div class="p-foot">';
     h +=     '<span class="tm">'+ since(p.time) +'</span>';
     h +=     '<span class="dots'+(isOpen?' on':'')+'" onclick="toggleMenu(\''+p.id+'\')">···</span>';
     h +=   '</div>';
 
-    /* ··· 展开的小菜单 */
     if(isOpen){
       h += '<div class="menu">';
       h +=   '<span class="'+(liked?'on':'')+'" onclick="like(\''+p.id+'\')">'+(liked?'♥ 已赞':'♡ 赞')+'</span>';
@@ -551,7 +534,6 @@ function like(id){
   save(); render();
 }
 
-/* ══ 评论 ══ */
 var cmTarget = null, cmTo = null;
 function openComment(id, to){
   var p = db.posts.filter(function(x){return x.id===id})[0];
@@ -575,9 +557,7 @@ function sendComment(){
   if(!p || !txt) return;
   p.comments = p.comments || [];
   p.comments.push({who:ME, to:cmTo||null, text:txt, time:nowStr()});
-  save();
-  openMenu = null;
-  render(); closeAll();
+  save(); openMenu = null; render(); closeAll();
 }
 
 function openSheet(id){
@@ -627,7 +607,6 @@ function publish(){
   save(); openMenu=null; render(); closeAll();
 }
 
-/* ══ 资料 ══ */
 var whoNow = 'me';
 function openProfile(){ whoNow='me'; fillWho(); openSheet('shProfile'); }
 function switchWho(w){ whoNow = w; fillWho(); }
@@ -669,7 +648,6 @@ function saveCover(){
   save(); render(); closeAll();
 }
 
-/* ══ 长按封面 ══ */
 (function(){
   var el = document.getElementById('cover');
   var t=null, sx=0, sy=0, fired=false, HOLD=520;
