@@ -29,15 +29,80 @@ window.__API__ = {
   },
   hasToken: function () { return !!this.token(); },
 
-  /* 没填口令时弹一个框让填。返回有没有拿到 */
-  ensureToken: function (force) {
-    if (this.hasToken() && !force) return true;
-    var t = window.prompt('第一次用，填一下我们俩的口令：', '');
-    if (t === null) return false;
-    t = String(t).trim();
-    if (!t) return false;
-    this.setToken(t);
-    return true;
+  /* 没口令就弹一个自己画的框（手机的浏览器常把 prompt 拦掉）　返回 Promise */
+  askToken: function () {
+    var self = this;
+    if (self._asking) return self._asking;
+
+    self._asking = new Promise(function (resolve) {
+      var old = document.getElementById('__linji_token_box');
+      if (old) old.parentNode.removeChild(old);
+
+      var box = document.createElement('div');
+      box.id = '__linji_token_box';
+      box.innerHTML =
+        '<div style="position:fixed;inset:0;z-index:99999;background:rgba(20,14,32,.72);' +
+        'backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;' +
+        'align-items:center;justify-content:center;padding:24px;' +
+        'font-family:-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Noto Sans SC\',sans-serif">' +
+          '<div style="width:100%;max-width:340px;background:#fff;border-radius:24px;' +
+          'padding:26px 22px 22px;box-shadow:0 24px 70px rgba(60,30,90,.4)">' +
+            '<div style="font-size:16px;font-weight:600;color:#5f5180;letter-spacing:1px;' +
+            'margin-bottom:8px">填一下口令</div>' +
+            '<div style="font-size:12px;color:#b8abca;line-height:1.7;margin-bottom:18px">' +
+            '只填这一次，以后这台手机就记住了。</div>' +
+            '<input id="__linji_token_input" type="password" inputmode="text" autocomplete="off" ' +
+            'placeholder="我们俩的口令" style="width:100%;box-sizing:border-box;' +
+            'background:#fbf7fe;border:1px solid rgba(178,138,190,.2);border-radius:15px;' +
+            'padding:14px 15px;color:#40365a;font-size:16px;outline:none">' +
+            '<div id="__linji_token_err" style="font-size:12px;color:#e0779f;' +
+            'margin-top:10px;min-height:16px"></div>' +
+            '<div style="display:flex;gap:10px;margin-top:14px">' +
+              '<button id="__linji_token_later" style="flex:1;padding:14px 0;border:none;' +
+              'border-radius:16px;background:#f6f1fa;color:#8a7fa4;font-size:15px;' +
+              'font-family:inherit;font-weight:600">先不填</button>' +
+              '<button id="__linji_token_ok" style="flex:1;padding:14px 0;border:none;' +
+              'border-radius:16px;background:linear-gradient(135deg,#ff9ecd,#a98cff);' +
+              'color:#fff;font-size:15px;font-family:inherit;font-weight:600;' +
+              'box-shadow:0 10px 24px rgba(169,140,255,.42)">好</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(box);
+
+      var inp = document.getElementById('__linji_token_input');
+      var err = document.getElementById('__linji_token_err');
+
+      function done(v) {
+        self._asking = null;
+        if (box.parentNode) box.parentNode.removeChild(box);
+        if (v) { self.setToken(v); resolve(true); }
+        else { resolve(false); }
+      }
+
+      document.getElementById('__linji_token_ok').onclick = function () {
+        var v = (inp.value || '').trim();
+        if (!v) { err.textContent = '还没填呢'; inp.focus(); return; }
+        done(v);
+      };
+      document.getElementById('__linji_token_later').onclick = function () { done(''); };
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') document.getElementById('__linji_token_ok').click();
+      });
+      inp.addEventListener('input', function () { err.textContent = ''; });
+
+      setTimeout(function () { try { inp.focus(); } catch (e) {} }, 120);
+    });
+
+    return self._asking;
+  },
+
+  /* 有口令就过，没有就问 */
+  needToken: function () {
+    var self = this;
+    if (self.hasToken()) return Promise.resolve(true);
+    return self.askToken();
   },
 
   /* 统一的请求头 */
@@ -57,23 +122,26 @@ window.__API__ = {
   state: function (w) {
     var self = this;
     var who = w || this.who;
-    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
-    return fetch(this.base + '/api/state', { headers: this.headers({ 'X-Who': who }) })
-      .then(function (r) {
-        if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      });
+    return this.needToken().then(function (ok) {
+      if (!ok) throw new Error('NO_TOKEN');
+      return fetch(self.base + '/api/state', { headers: self.headers({ 'X-Who': who }) });
+    }).then(function (r) {
+      if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
   },
 
   /* 通用 POST */
   post: function (path, body, extraHeaders) {
     var self = this;
-    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
-    return fetch(this.base + path, {
-      method: 'POST',
-      headers: this.headers(extraHeaders),
-      body: JSON.stringify(body || {})
+    return this.needToken().then(function (ok) {
+      if (!ok) throw new Error('NO_TOKEN');
+      return fetch(self.base + path, {
+        method: 'POST',
+        headers: self.headers(extraHeaders),
+        body: JSON.stringify(body || {})
+      });
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -84,12 +152,13 @@ window.__API__ = {
   /* 取记忆银河（走后端中转） */
   galaxy: function () {
     var self = this;
-    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
-    return fetch(this.base + '/api/galaxy', { headers: this.headers() })
-      .then(function (r) {
-        if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      });
+    return this.needToken().then(function (ok) {
+      if (!ok) throw new Error('NO_TOKEN');
+      return fetch(self.base + '/api/galaxy', { headers: self.headers() });
+    }).then(function (r) {
+      if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
   }
 };
