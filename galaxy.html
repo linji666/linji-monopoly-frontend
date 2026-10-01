@@ -15,17 +15,16 @@
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5/400.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5/500.min.css" rel="stylesheet">
 
+<!-- 后端地址在 memory-config.js 里，换域名只改那一个文件 -->
+<script src="memory-config.js"></script>
 <script>
-/* ── 后端地址：ngrok 域名换了，只改这一行，重推即可 ── */
-const MEMORY_API = 'https://princess-angling-hamburger.ngrok-free.dev/galaxy';
-
 const CONFIG = {
   title:    'Memory',
   subtitle: 'A constellation of our memories',
   motto:    '这里，是我们一起创造的星光。',
   coreName: '核心记忆',
   coreEn:   '我记着你，桐桐',
-  dataUrl:  MEMORY_API,
+  dataUrl:  (window.__MEMORY_API__ || './galaxy'),
 };
 </script>
 
@@ -248,6 +247,7 @@ function buildDust(){
 
 let mem=[], core=null, labeled=[], memPoints=null, memPos=[], origColor=null, origSize=null;
 function buildMemories(stars){
+  if(!stars.length) throw new Error('empty');
   const ts=stars.filter(s=>s.created).map(s=>+new Date(s.created));
   const t0=Math.min(...ts),t1=Math.max(...ts),span=Math.max(1,t1-t0);
   const sorted=stars.slice().sort((a,b)=>(a.created||'').localeCompare(b.created||''));
@@ -452,18 +452,22 @@ function boot(d){
   animate();
 }
 
-/* 先试真数据，失败就退回内嵌示例 + 在屏幕上说明白 */
-fetch(CONFIG.dataUrl+'?d='+Date.now())
+const apiWithCache = CONFIG.dataUrl + (CONFIG.dataUrl.indexOf('?')>=0 ? '&' : '?') + 'd=' + Date.now();
+
+fetch(apiWithCache)
   .then(r=>{if(!r.ok)throw 0;return r.json()})
-  .then(boot)
+  .then(d=>{
+    if(!d.stars || !d.stars.length) throw 0;
+    if(d.stars.length <= 20 && d.stars[0].id && d.stars[0].id.indexOf('src')===0) throw 0;  /* 别把示例当真的 */
+    boot(d);
+  })
   .catch(()=>{
     try{
       boot(JSON.parse(document.getElementById('memory-data').textContent));
       const el=document.getElementById('loading');
-      el.style.display='block';
-      el.style.zIndex=40;
-      el.innerHTML='后端没连上，现在看的是内嵌的示例星光<br><span style="font-size:12px;opacity:.6">（真数据要等 ngrok 地址是通的）</span>';
-      setTimeout(()=>{el.style.display='none';},3200);
+      el.style.display='block'; el.style.zIndex=40;
+      el.innerHTML='后端没连上，现在看的是内嵌的示例星光<br><span style="font-size:12px;opacity:.6">（真数据要等 ngrok 通着、口令对上）</span>';
+      setTimeout(()=>{el.style.display='none';},3400);
     }catch(e){
       document.getElementById('loading').textContent='星光加载失败，稍后再来 ♡';
       console.error(e);
