@@ -162,3 +162,49 @@ window.__API__ = {
     });
   }
 };
+
+/* ═══════════════════════════════════════════════════════
+   时间解析（全站统一）
+   ───────────────────────────────────────────────────────
+   服务器存的是 UTC。后端老数据长这样： "2026-10-01 17:20"
+   后端新数据长这样：                    "2026-10-01T09:20:00Z"
+   两种都当 UTC 读，再换算成本机时间。
+   ═══════════════════════════════════════════════════════ */
+window.parseTime = function (t) {
+  var raw = String(t == null ? '' : t).trim();
+  if (!raw) return null;
+
+  var iso;
+  if (/Z$|[+-]\d{2}:?\d{2}$/.test(raw)) {
+    iso = raw;                                  /* 已经带时区标记 */
+  } else {
+    iso = raw.replace(' ', 'T') + 'Z';          /* 没带，按 UTC 补上 */
+  }
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) {
+    /* 实在不认，退回按本地时间读，至少不会崩 */
+    d = new Date(raw.replace(/-/g, '/'));
+    if (isNaN(d.getTime())) return null;
+  }
+  return d;
+};
+
+/* 显示成"刚刚 / N 分钟前 / N 小时前 / N 天前 / 日期" */
+window.sinceText = function (t) {
+  var d = window.parseTime(t);
+  if (!d) return '';
+
+  var s = (Date.now() - d.getTime()) / 1000;
+  if (s < 0) s = 0;                             /* 时间比现在还晚就当作刚刚 */
+  if (s < 60) return '刚刚';
+  if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
+  if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
+  if (s < 86400 * 3) return Math.floor(s / 86400) + ' 天前';
+
+  function p(n) { return n < 10 ? '0' + n : '' + n; }
+  var now = new Date();
+  var same = (d.getFullYear() === now.getFullYear());
+  return (same ? '' : d.getFullYear() + '-') +
+         p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+         p(d.getHours()) + ':' + p(d.getMinutes());
+};
