@@ -14,6 +14,9 @@ window.__API__ = {
 
   KEY: 'linji_app_token',
 
+  /* 页面用它判断"配好了没"。地址写死，所以总是 true */
+  ready: function () { return !!this.base; },
+
   /* ── 口令 ── */
   token: function () {
     try { return localStorage.getItem(this.KEY) || ''; } catch (e) { return ''; }
@@ -26,10 +29,10 @@ window.__API__ = {
   },
   hasToken: function () { return !!this.token(); },
 
-  /* 没填口令时弹一个框让填 */
-  ensureToken: function () {
-    if (this.hasToken()) return true;
-    var t = window.prompt('第一次用，填一下我们俩的口令：');
+  /* 没填口令时弹一个框让填。返回有没有拿到 */
+  ensureToken: function (force) {
+    if (this.hasToken() && !force) return true;
+    var t = window.prompt('第一次用，填一下我们俩的口令：', '');
     if (t === null) return false;
     t = String(t).trim();
     if (!t) return false;
@@ -54,43 +57,37 @@ window.__API__ = {
   state: function (w) {
     var self = this;
     var who = w || this.who;
+    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
     return fetch(this.base + '/api/state', { headers: this.headers({ 'X-Who': who }) })
       .then(function (r) {
-        if (r.status === 403) throw new Error('TOKEN');
+        if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
-      })
-      .catch(function (e) {
-        /* 口令错了 → 清掉重新问一次 */
-        if (e && e.message === 'TOKEN') {
-          self.clearToken();
-          throw e;
-        }
-        throw e;
       });
   },
 
   /* 通用 POST */
   post: function (path, body, extraHeaders) {
     var self = this;
+    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
     return fetch(this.base + path, {
       method: 'POST',
       headers: this.headers(extraHeaders),
       body: JSON.stringify(body || {})
     }).then(function (r) {
-      if (r.status === 403) throw new Error('TOKEN');
+      if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
-    }).catch(function (e) {
-      if (e && e.message === 'TOKEN') self.clearToken();
-      throw e;
     });
   },
 
   /* 取记忆银河（走后端中转） */
   galaxy: function () {
+    var self = this;
+    if (!this.ensureToken()) return Promise.reject(new Error('NO_TOKEN'));
     return fetch(this.base + '/api/galaxy', { headers: this.headers() })
       .then(function (r) {
+        if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       });
