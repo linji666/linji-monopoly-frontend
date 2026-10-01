@@ -14,6 +14,9 @@ window.__API__ = {
 
   KEY: 'linji_app_token',
 
+  /* 最近一次出错的原因，页面上能显示出来，方便找问题 */
+  lastError: '',
+
   /* 页面用它判断"配好了没"。地址写死，所以总是 true */
   ready: function () { return !!this.base; },
 
@@ -118,6 +121,22 @@ window.__API__ = {
     return h;
   },
 
+  /* 把失败说清楚：到底是网络不通、还是被挡了、还是口令不对 */
+  why: function (err, r) {
+    var m = (err && err.message) || '';
+    if (m === 'NO_TOKEN') return '还没填口令';
+    if (m === 'TOKEN') return '口令不对';
+    if (r && r.status) {
+      if (r.status === 403) return '口令不对';
+      if (r.status === 404) return '地址不对（404）';
+      if (r.status === 502) return '后端连不上记忆库';
+      return '服务器回了 ' + r.status;
+    }
+    if (m.indexOf('Failed to fetch') >= 0) return '连不上服务器（网络或跨域被挡）';
+    if (m.indexOf('JSON') >= 0) return '收到的不是数据（可能被中间页挡了）';
+    return m || '不知道哪儿出了问题';
+  },
+
   /* 读全部 */
   state: function (w) {
     var self = this;
@@ -127,8 +146,11 @@ window.__API__ = {
       return fetch(self.base + '/api/state', { headers: self.headers({ 'X-Who': who }) });
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
+      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+    }).catch(function (e) {
+      self.lastError = self.why(e, e && e._r);
+      throw e;
     });
   },
 
@@ -144,8 +166,11 @@ window.__API__ = {
       });
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
+      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+    }).catch(function (e) {
+      self.lastError = self.why(e, e && e._r);
+      throw e;
     });
   },
 
@@ -157,8 +182,11 @@ window.__API__ = {
       return fetch(self.base + '/api/galaxy', { headers: self.headers() });
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
+      if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
+      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+    }).catch(function (e) {
+      self.lastError = self.why(e, e && e._r);
+      throw e;
     });
   }
 };
