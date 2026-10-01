@@ -3,33 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0d0f1c">
+<meta name="theme-color" content="#100c1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="心事">
 <title>我们 · 心事</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* ── 全站统一色卡：粉紫一家 ──
+   粉 #ff9ecd  紫 #a98cff
+   朋友圈＝白底（白天）  心事/银河＝紫黑底（夜里）
+   同一个色，只换明度 */
 :root{
-  --bg:#0d0f1c;
-  --night:#12162a;
-  --paper:#181c31;
-  --paper-hold:#14172a;
-  --line:rgba(255,255,255,.07);
-  --txt:#eae7f7;
-  --txt2:#9a92b8;
-  --txt3:#615b80;
   --pink:#ff9ecd;
+  --pink-d:#f77bb8;
   --violet:#a98cff;
-  --mint:#7fe3c0;
-  --glow:0 0 24px rgba(255,158,205,.28);
+  --violet-d:#8f6ff0;
+
+  --bg:#100c1a;                 /* 紫黑 */
+  --bg2:#161029;
+  --paper:#1c1533;              /* 信纸 */
+  --paper-hold:#151027;
+  --line:rgba(220,190,255,.10);
+  --txt:#eee8fa;
+  --txt2:#a396c9;
+  --txt3:#6b5d91;
+  --mint:#9fd8ff;               /* 他那边用淡蓝紫，不再用绿，收进同一族 */
 }
 html,body{height:100%}
 body{
   background:var(--bg);
   background-image:
-    radial-gradient(120% 70% at 14% 0%,rgba(120,90,190,.20),transparent 62%),
-    radial-gradient(110% 60% at 92% 12%,rgba(255,120,180,.13),transparent 64%),
-    radial-gradient(140% 80% at 50% 108%,rgba(70,110,180,.16),transparent 66%);
+    radial-gradient(120% 70% at 14% 0%,rgba(169,140,255,.22),transparent 62%),
+    radial-gradient(110% 60% at 92% 12%,rgba(255,158,205,.15),transparent 64%),
+    radial-gradient(140% 80% at 50% 108%,rgba(140,110,240,.18),transparent 66%);
   background-attachment:fixed;
   color:var(--txt);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
@@ -37,169 +43,146 @@ body{
 }
 #app{position:relative;min-height:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
-/* ═══ 顶 ═══ */
 .head{
   padding:calc(30px + env(safe-area-inset-top)) 24px 6px;
   text-align:center;
 }
 .head .t{
-  font-size:17px;font-weight:600;letter-spacing:7px;color:#d8d2ef;
-  text-indent:7px;
+  font-size:17px;font-weight:600;letter-spacing:7px;color:#ddd2f5;text-indent:7px;
 }
-.head .s{
-  margin-top:9px;font-size:11.5px;letter-spacing:1.5px;color:var(--txt3);
-}
+.head .s{margin-top:9px;font-size:11.5px;letter-spacing:1.5px;color:var(--txt3)}
 
-/* ═══ 心事列表 ═══ */
 .list{padding:22px 18px 20px}
 
 .card{
   position:relative;border-radius:18px;padding:20px 19px 16px;
   margin-bottom:14px;overflow:hidden;
-  background:linear-gradient(160deg,#1a1f36,#141827);
+  background:linear-gradient(160deg,#1e1736,#161029);
   border:1px solid var(--line);
-  box-shadow:0 10px 30px rgba(0,0,0,.42);
-  cursor:pointer;
-  transition:transform .16s ease,box-shadow .16s ease;
+  box-shadow:0 10px 30px rgba(10,4,26,.5);
+  cursor:pointer;transition:transform .16s ease;
 }
 .card:active{transform:scale(.988)}
-/* 信纸横线 */
 .card::before{
   content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
   background-image:repeating-linear-gradient(
     to bottom,transparent 0,transparent 27px,rgba(255,255,255,.028) 27px,rgba(255,255,255,.028) 28px);
 }
-/* 顶上一道光 */
 .card::after{
   content:"";position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;
-  background:linear-gradient(to right,transparent,rgba(255,255,255,.14),transparent);
+  background:linear-gradient(to right,transparent,rgba(220,190,255,.18),transparent);
 }
 .card.hold{
-  background:linear-gradient(160deg,#14172a,#111424);
-  border-style:dashed;border-color:rgba(255,255,255,.10);
+  background:linear-gradient(160deg,#171129,#120d21);
+  border-style:dashed;border-color:rgba(220,190,255,.13);
 }
-.card.hold .body{color:#a79fc4}
+.card.hold .body{color:#ab9ecb}
 
 .c-top{display:flex;align-items:center;gap:9px;margin-bottom:13px;position:relative;z-index:2}
-.c-dot{
-  width:7px;height:7px;border-radius:50%;flex-shrink:0;
-  background:var(--txt3);
-}
+.c-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--txt3)}
 .card.mine .c-dot{background:linear-gradient(135deg,var(--pink),var(--violet));box-shadow:0 0 10px rgba(255,158,205,.5)}
-.card.his  .c-dot{background:linear-gradient(135deg,#8fd6ff,var(--mint));box-shadow:0 0 10px rgba(127,227,192,.45)}
+.card.his  .c-dot{background:linear-gradient(135deg,#b9a6ff,var(--mint));box-shadow:0 0 10px rgba(159,216,255,.4)}
 .c-who{font-size:12.5px;letter-spacing:.6px;color:var(--txt2)}
-.c-who b{color:#c9c1e8;font-weight:600}
+.c-who b{color:#d4c9f0;font-weight:600}
 .c-state{margin-left:auto;font-size:11px;letter-spacing:.8px;color:var(--txt3)}
 .c-state.seen{color:var(--mint)}
 
 .body{
   font-size:15.5px;line-height:1.95;white-space:pre-wrap;word-break:break-word;
-  color:#e4e0f5;position:relative;z-index:2;
+  color:#e8e2f8;position:relative;z-index:2;
 }
 
-/* 他的回信 */
 .reply{
   margin-top:15px;padding:13px 15px;border-radius:13px;position:relative;z-index:2;
-  background:rgba(255,255,255,.045);
-  border-left:2px solid rgba(255,158,205,.5);
+  background:rgba(169,140,255,.09);
+  border-left:2px solid rgba(255,158,205,.55);
 }
-.reply .rh{font-size:11px;letter-spacing:.8px;color:#c3a9e8;margin-bottom:7px}
-.reply .rb{font-size:14.5px;line-height:1.85;color:#ddd8f0;white-space:pre-wrap;word-break:break-word}
+.reply .rh{font-size:11px;letter-spacing:.8px;color:#c9b4f0;margin-bottom:7px}
+.reply .rb{font-size:14.5px;line-height:1.85;color:#e2dcf5;white-space:pre-wrap;word-break:break-word}
 
-.c-foot{
-  display:flex;align-items:center;gap:14px;margin-top:15px;position:relative;z-index:2;
-}
+.c-foot{display:flex;align-items:center;gap:14px;margin-top:15px;position:relative;z-index:2}
 .c-time{font-size:11px;color:var(--txt3);letter-spacing:.5px}
 .c-act{
-  margin-left:auto;font-size:12px;color:#b39bd8;letter-spacing:.5px;
-  padding:5px 13px;border-radius:99px;background:rgba(255,255,255,.05);
-  cursor:pointer;
+  margin-left:auto;font-size:12px;color:#c0aaf0;letter-spacing:.5px;
+  padding:5px 13px;border-radius:99px;background:rgba(169,140,255,.12);cursor:pointer;
 }
-.c-act:active{background:rgba(255,255,255,.1)}
+.c-act:active{background:rgba(169,140,255,.22)}
 
-/* ═══ 写一张 ═══ */
 .fab{
   position:fixed;right:20px;z-index:45;
   bottom:calc(94px + env(safe-area-inset-bottom));
   width:54px;height:54px;border-radius:50%;border:none;
-  background:linear-gradient(140deg,#ffa8d4,#a98cff);
-  box-shadow:0 14px 34px rgba(169,140,255,.46);
+  background:linear-gradient(140deg,var(--pink),var(--violet));
+  box-shadow:0 14px 34px rgba(169,140,255,.5);
   color:#160f2a;font-size:27px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;transition:transform .14s;
 }
 .fab:active{transform:scale(.92)}
 
-/* ═══ 底部 tab ═══ */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;z-index:50;
   height:calc(66px + env(safe-area-inset-bottom));
   padding-bottom:env(safe-area-inset-bottom);
-  display:flex;background:rgba(13,15,28,.9);
+  display:flex;background:rgba(16,12,26,.92);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--line);
 }
 .tabbar button{
   flex:1;border:none;background:transparent;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:#4e4a6b;font-size:10.5px;letter-spacing:1.2px;font-family:inherit;
+  color:#544873;font-size:10.5px;letter-spacing:1.2px;font-family:inherit;
   transition:color .18s;
 }
-.tabbar button.on{color:#c9b6f0}
+.tabbar button.on{color:#cfbcf8}
 .tabbar svg{width:22px;height:22px}
 
-/* ═══ 弹层 ═══ */
 .scrim{
-  position:fixed;inset:0;z-index:60;background:rgba(4,5,12,.72);
+  position:fixed;inset:0;z-index:60;background:rgba(6,3,14,.74);
   backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;
 }
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{
   position:fixed;left:0;right:0;bottom:0;z-index:61;
-  background:linear-gradient(170deg,#1c2138,#141828);
-  border-radius:26px 26px 0 0;border-top:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(170deg,#211838,#161029);
+  border-radius:26px 26px 0 0;border-top:1px solid rgba(220,190,255,.12);
   padding:24px 22px calc(30px + env(safe-area-inset-bottom));
   transform:translateY(102%);transition:transform .34s cubic-bezier(.22,1,.36,1);
   max-height:90vh;overflow-y:auto;
 }
 .sheet.on{transform:translateY(0)}
-.sheet h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:1.5px;color:#d8d2ef}
+.sheet h3{font-size:15px;font-weight:600;margin-bottom:6px;letter-spacing:1.5px;color:#ddd2f5}
 .sheet .hint{font-size:11.5px;color:var(--txt3);line-height:1.7;margin-bottom:18px}
 
 .ta{
-  width:100%;min-height:190px;background:rgba(0,0,0,.26);
+  width:100%;min-height:190px;background:rgba(0,0,0,.3);
   border:1px solid var(--line);border-radius:18px;padding:17px;
-  color:#ece8fa;font-size:15.5px;line-height:2;font-family:inherit;
+  color:#eee8fa;font-size:15.5px;line-height:2;font-family:inherit;
   resize:none;outline:none;
   background-image:repeating-linear-gradient(
     to bottom,transparent 0,transparent 29px,rgba(255,255,255,.026) 29px,rgba(255,255,255,.026) 30px);
 }
-.ta::placeholder{color:#4d4869}
+.ta::placeholder{color:#57496f}
 
 .rowbtns{display:flex;gap:11px;margin-top:20px}
 .rowbtns button{
   flex:1;padding:15px 0;border-radius:18px;border:none;
   font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;
 }
-.rowbtns .no{
-  background:rgba(255,255,255,.06);color:#b0a8cd;
-}
+.rowbtns .no{background:rgba(169,140,255,.13);color:#c0b0e8}
 .rowbtns .ok{
-  background:linear-gradient(135deg,#ffa8d4,#a98cff);color:#160f2a;
-  box-shadow:0 12px 28px rgba(169,140,255,.4);
+  background:linear-gradient(135deg,var(--pink),var(--violet));color:#160f2a;
+  box-shadow:0 12px 28px rgba(169,140,255,.44);
 }
 
-/* 展开的一张 */
 .one{padding:2px 0 4px}
 .one .meta{font-size:11.5px;color:var(--txt3);letter-spacing:.6px;margin-bottom:16px}
-.one .txt{
-  font-size:16px;line-height:2.05;white-space:pre-wrap;word-break:break-word;color:#eae6f8;
-}
+.one .txt{font-size:16px;line-height:2.05;white-space:pre-wrap;word-break:break-word;color:#eee8fa}
 .one .rep{margin-top:20px}
 
 .readline{
   margin-top:20px;padding:12px 15px;border-radius:12px;
-  background:rgba(127,227,192,.07);border:1px solid rgba(127,227,192,.18);
-  font-size:12px;color:#8fd9bd;letter-spacing:.6px;text-align:center;
+  background:rgba(159,216,255,.08);border:1px solid rgba(159,216,255,.2);
+  font-size:12px;color:#a8d6f5;letter-spacing:.6px;text-align:center;
 }
 
 .empty{
@@ -210,9 +193,9 @@ body{
 .toast{
   position:fixed;left:50%;bottom:calc(148px + env(safe-area-inset-bottom));
   transform:translateX(-50%) translateY(8px);
-  background:rgba(40,36,66,.96);color:#efe9ff;
+  background:rgba(46,32,76,.96);color:#f2ecff;
   font-size:12.5px;letter-spacing:.6px;
-  padding:10px 19px;border-radius:99px;border:1px solid rgba(255,255,255,.1);
+  padding:10px 19px;border-radius:99px;border:1px solid rgba(220,190,255,.16);
   opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;
   z-index:70;white-space:nowrap;
 }
@@ -248,7 +231,6 @@ body{
 <div class="scrim" id="scrim" onclick="closeAll()"></div>
 <div class="toast" id="toast"></div>
 
-<!-- 写一张 -->
 <div class="sheet" id="shWrite">
   <h3>写一张</h3>
   <div class="hint">不用写成样子的。可以半句、可以难看、可以没头没尾。</div>
@@ -259,13 +241,11 @@ body{
   </div>
 </div>
 
-<!-- 看一张 -->
 <div class="sheet" id="shOne">
   <div class="one" id="oneBox"></div>
   <div class="rowbtns" id="oneBtns"></div>
 </div>
 
-<!-- 回他 -->
 <div class="sheet" id="shReply">
   <h3>回他一句</h3>
   <div class="hint" id="rpQuote"></div>
@@ -279,7 +259,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS  = 'hearts_v1';
+var LS  = 'hearts_v2';
 
 var db = null;
 
@@ -331,7 +311,6 @@ function load(){
 }
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(db)); }catch(e){} }
 
-/* ═══ 渲染 ═══ */
 function render(){
   var el = document.getElementById('list');
   var held = db.hearts.filter(function(x){ return x.who===ME && !x.sent; }).length;
@@ -343,7 +322,6 @@ function render(){
     return;
   }
 
-  /* 最新的在上面；收着的一律排最前（那是心里压着的） */
   var arr = db.hearts.slice().sort(function(a,b){
     var ha = (a.who===ME && !a.sent) ? 0 : 1;
     var hb = (b.who===ME && !b.sent) ? 0 : 1;
@@ -361,8 +339,7 @@ function render(){
     h +=   '<div class="c-top">';
     h +=     '<span class="c-dot"></span>';
     h +=     '<span class="c-who">'+(mine?'我</span>':'<b>林霁</b></span>');
-    h +=     '<span class="c-state'+(k.seen?' seen':'')+'">'+
-               stateText(k) + '</span>';
+    h +=     '<span class="c-state'+(k.seen?' seen':'')+'">'+ stateText(k) +'</span>';
     h +=   '</div>';
     h +=   '<div class="body">'+ esc(k.text) +'</div>';
 
@@ -389,10 +366,7 @@ function stateText(k){
   return '';
 }
 
-/* ═══ 写 ═══ */
-var wrOpen = false;
 function openWrite(){
-  wrOpen = true;
   document.getElementById('wrText').value = '';
   openSheet('shWrite');
   setTimeout(function(){ document.getElementById('wrText').focus(); }, 330);
@@ -411,14 +385,12 @@ function newOne(sent){
   toast(sent ? '投出去了。他那边会知道' : '收着了。只有你看得见');
 }
 
-/* ═══ 看一张 ═══ */
 var curId = null;
 function openOne(id){
   var k = db.hearts.filter(function(x){return x.id===id})[0];
   if(!k) return;
   curId = id;
 
-  /* 他投来的，一打开就算我看过了 */
   if(k.who===HIM && !k.seen){ k.seen = true; save(); }
 
   var box = document.getElementById('oneBox');
@@ -463,7 +435,6 @@ function sendNow(id){
   toast('投出去了。他那边会知道');
 }
 
-/* ═══ 回一句 ═══ */
 var rpId = null;
 function openReply(id){
   var k = db.hearts.filter(function(x){return x.id===id})[0];
@@ -484,7 +455,6 @@ function sendReply(){
   toast('放进去了');
 }
 
-/* ═══ 弹层通用 ═══ */
 function openSheet(id){
   document.getElementById('scrim').classList.add('on');
   document.getElementById(id).classList.add('on');
