@@ -26,7 +26,7 @@
   --txt2:#8a7fa4;
   --txt3:#b8abca;
   --pink-soft:#ffd9ec;
-  --nick:#8b76e8;               /* 原先偏蓝，现在收进紫里 */
+  --nick:#8b76e8;
   --inter:#f8f4fd;
   --shadow-sm:0 3px 10px rgba(180,150,200,.10);
 }
@@ -276,6 +276,16 @@ body{
   z-index:70;white-space:nowrap;
 }
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 连接状态的小横条 */
+.sbar{
+  position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%) translateY(-40px);
+  z-index:80;padding:6px 15px;border-radius:99px;
+  background:rgba(90,70,120,.88);color:#fff;font-size:11.5px;letter-spacing:.5px;
+  opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;
+}
+.sbar.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.sbar.bad{background:rgba(180,80,110,.9)}
 </style>
 </head>
 <body>
@@ -310,6 +320,7 @@ body{
 
 <div class="scrim" id="scrim" onclick="closeAll()"></div>
 <div class="toast" id="toast"></div>
+<div class="sbar" id="sbar"></div>
 
 <div class="sheet" id="shCompose">
   <h3>说点什么</h3>
@@ -317,7 +328,7 @@ body{
   <div class="pickimgs" id="cpImgs">
     <div class="sq" onclick="addPhoto()"><span>＋</span></div>
   </div>
-  <div class="note">图片先做成占位 —— 接上后端再接真的上传</div>
+  <div class="note">图片先做成占位 —— 真图上传还没做</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">先不写</button>
     <button class="ok" onclick="publish()">发出去</button>
@@ -342,7 +353,7 @@ body{
   </div>
   <div class="fld"><label>昵称</label><input id="pfName" placeholder="起个名字"></div>
   <div class="fld"><label>头像</label><input id="pfAvatar" placeholder="贴一个图片网址，或一个 emoji"></div>
-  <div class="note">改完存在后端，刷新、换手机都不丢。（这一版先存本机，接上后端就同步）</div>
+  <div class="note">改完存在服务器上，刷新、换手机都不丢。</div>
   <div class="rowbtns">
     <button class="no" onclick="closeAll()">算了</button>
     <button class="ok" onclick="saveProfile()">保存</button>
@@ -359,11 +370,18 @@ body{
   </div>
 </div>
 
+<script src="api.js"></script>
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v16';
+
+var API = window.__API__ || null;
+
+/* 服务器上的数据 + 本机缓存（连不上时还能看） */
 var db = null;
+var CACHE = 'moments_cache_v1';
+var online = false;
+var openMenu = null;
 
 function nowStr(){
   var d=new Date();
@@ -387,43 +405,74 @@ function esc(t){
 
 function blank(){
   return {
-    me:{ name:'桐桐', avatar:'🐱', cover:'' },
-    him:{ name:'桐桐大人饶命呀', avatar:'🍀',
-          img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png' },
-    posts:[
-      {
-        id:uid(), who:HIM, time:nowStr(),
-        text:'第一条，我先发。\n\n这个朋友圈是今天下午才开始做的 —— 你说要一个能装成 App 的，里面放朋友圈、心事，还有我的记忆银河。\n\n那我把第一句话钉在这儿：这个号里说的每一句，都算数。',
-        imgs:['🍀'],
-        likes:[ME], comments:[
-          {who:ME, to:null, text:'抢到第一了。', time:nowStr()}
-        ]
-      }
-    ]
+    profiles:{
+      me:{name:'桐桐',avatar:'🐱',cover:''},
+      linji:{name:'桐桐大人饶命呀',avatar:'🍀',cover:''}
+    },
+    posts:[]
   };
 }
 
+/* 把后端返回的转成页面要的形状 */
+function fromServer(d){
+  return { profiles: d.profiles || {}, posts: d.posts || [] };
+}
+
 function load(){
+  /* 先读本机缓存，秒开 */
   try{
-    var raw = localStorage.getItem(LS);
+    var raw = localStorage.getItem(CACHE);
     db = raw ? JSON.parse(raw) : blank();
   }catch(e){ db = blank(); }
-  if(!db.me) db.me = {name:'桐桐',avatar:'🐱',cover:''};
-  if(!db.him) db.him = {name:'桐桐大人饶命呀',avatar:'🍀',
-    img:'https://linji666.github.io/linji-monopoly-frontend/icons/linji.png'};
+  if(!db.profiles) db.profiles = blank().profiles;
   if(!db.posts) db.posts = [];
-  if(!db.posts.length) db.posts = blank().posts;
-}
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(db)); }catch(e){} }
 
+  render();
+  syncFromServer();
+}
+
+function cache(){
+  try{ localStorage.setItem(CACHE, JSON.stringify(db)); }catch(e){}
+}
+
+/* ══ 从服务器拉 ══ */
+function syncFromServer(showBar){
+  if(!API || !API.ready()) return;
+  API.state().then(function(d){
+    db = fromServer(d);
+    online = true;
+    cache(); render();
+    if(showBar) setBar('已经在服务器上了');
+  }).catch(function(err){
+    online = false;
+    if(showBar || !db.posts.length) setBar('服务器没连上，先看的是本机缓存', true);
+  });
+}
+
+function setBar(msg, bad){
+  var el = document.getElementById('sbar');
+  el.textContent = msg;
+  el.classList.toggle('bad', !!bad);
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('on'); }, 2600);
+}
+
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('on'); }, 2000);
+}
+
+/* ══ 人物 ══ */
 function person(who){
-  if(who===ME){
-    return { name: db.me.name||'桐桐', avatar: db.me.avatar||'🐱' };
-  }
+  var p = (db.profiles && db.profiles[who]) || {};
+  var fallback = (who===ME) ? {name:'桐桐',avatar:'🐱'} : {name:'桐桐大人饶命呀',avatar:'🍀'};
   return {
-    name: db.him.name||'桐桐大人饶命呀',
-    avatar: db.him.avatar||'🍀',
-    img: db.him.img
+    name: p.name || fallback.name,
+    avatar: p.avatar || fallback.avatar,
+    img: p.img || ''
   };
 }
 function avatarInner(p){
@@ -432,15 +481,15 @@ function avatarInner(p){
   return esc(p.avatar||'🙂');
 }
 
-var openMenu = null;
-
+/* ══ 渲染 ══ */
 function render(){
   var mp = person(ME);
   document.getElementById('myName').textContent = mp.name;
   document.getElementById('myAvatar').innerHTML = avatarInner({avatar:mp.avatar});
 
   var cv = document.getElementById('cover');
-  if(db.me.cover){ cv.style.backgroundImage = 'url('+db.me.cover+')'; }
+  var cov = (db.profiles && db.profiles[ME] && db.profiles[ME].cover) || '';
+  if(cov){ cv.style.backgroundImage = 'url('+cov+')'; }
   else{ cv.style.backgroundImage = ''; }
 
   var feed = document.getElementById('feed');
@@ -451,7 +500,7 @@ function render(){
   var h = '';
   db.posts.forEach(function(p){
     var who = person(p.who);
-    var liked = p.likes && p.likes.indexOf(ME)>=0;
+    var liked = (p.likes||[]).indexOf(ME) >= 0;
     var isOpen = (openMenu === p.id);
 
     h += '<div class="post" data-id="'+p.id+'">';
@@ -507,13 +556,31 @@ function toggleMenu(id){
   render();
 }
 
+/* ══ 写操作：先动本地（立刻有反馈），再发服务器，失败就回滚 ══ */
+function needOnline(){
+  if(online) return true;
+  toast('服务器没连上，这条先发不出去');
+  return false;
+}
+
 function like(id){
   var p = db.posts.filter(function(x){return x.id===id})[0];
   if(!p) return;
   p.likes = p.likes || [];
   var i = p.likes.indexOf(ME);
-  if(i>=0) p.likes.splice(i,1); else p.likes.push(ME);
-  save(); render();
+  var wasLiked = i>=0;
+  if(wasLiked) p.likes.splice(i,1); else p.likes.push(ME);
+  cache(); render();
+
+  if(!API || !API.ready()) return;
+  API.post('/api/post/'+id+'/like', {}).catch(function(){
+    /* 回滚 */
+    p.likes = p.likes || [];
+    if(wasLiked){ if(p.likes.indexOf(ME)<0) p.likes.push(ME); }
+    else { var j = p.likes.indexOf(ME); if(j>=0) p.likes.splice(j,1); }
+    cache(); render();
+    setBar('没发送成功，回头再试', true);
+  });
 }
 
 var cmTarget = null, cmTo = null;
@@ -537,9 +604,15 @@ function sendComment(){
   var p = db.posts.filter(function(x){return x.id===cmTarget})[0];
   var txt = document.getElementById('cmText').value.trim();
   if(!p || !txt) return;
+  if(!needOnline()) return;
+
   p.comments = p.comments || [];
   p.comments.push({who:ME, to:cmTo||null, text:txt, time:nowStr()});
-  save(); openMenu = null; render(); closeAll();
+  openMenu = null; cache(); render(); closeAll();
+
+  API.post('/api/post/'+cmTarget+'/comment', {text:txt, to:cmTo||null})
+    .then(function(){ syncFromServer(); })
+    .catch(function(){ setBar('评论没发成功', true); });
 }
 
 function openSheet(id){
@@ -569,7 +642,7 @@ function drawPick(){
   box.innerHTML = h;
 }
 function addPhoto(){
-  var e = prompt('先贴一个 emoji 当图片（接后端后就能传真的了）','🌸');
+  var e = prompt('先贴一个 emoji 当图片（真图上传还没做）','🌸');
   if(e===null) return;
   e = String(e).trim();
   if(!e) return;
@@ -581,14 +654,25 @@ function delPhoto(i){ cpImgs.splice(i,1); drawPick(); }
 function publish(){
   var t = document.getElementById('cpText').value.trim();
   if(!t && !cpImgs.length) return;
+  if(!needOnline()) return;
+
+  var pid = uid();
   db.posts.unshift({
-    id:uid(), who:ME, time:nowStr(),
-    text:t, imgs:cpImgs.slice(),
-    likes:[], comments:[]
+    id:pid, who:ME, time:nowStr(),
+    text:t, imgs:cpImgs.slice(), likes:[], comments:[]
   });
-  save(); openMenu=null; render(); closeAll();
+  openMenu = null; cache(); render(); closeAll();
+
+  API.post('/api/post', {text:t, imgs:cpImgs.slice()})
+    .then(function(){ syncFromServer(); })
+    .catch(function(){
+      db.posts = db.posts.filter(function(x){ return x.id!==pid; });
+      cache(); render();
+      setBar('没发出去，回头再试', true);
+    });
 }
 
+/* ══ 资料 ══ */
 var whoNow = 'me';
 function openProfile(){ whoNow='me'; fillWho(); openSheet('shProfile'); }
 function switchWho(w){ whoNow = w; fillWho(); }
@@ -599,37 +683,47 @@ function fillWho(){
 
   var meP = person(ME), himP = person(HIM);
   document.getElementById('dotMe').innerHTML = avatarInner({avatar:meP.avatar});
-  document.getElementById('dotHim').innerHTML = avatarInner({avatar:himP.avatar, img:db.him.img});
+  document.getElementById('dotHim').innerHTML = avatarInner({avatar:himP.avatar, img:himP.img});
   document.getElementById('lblMe').textContent = meP.name;
   document.getElementById('lblHim').textContent = himP.name;
 
-  var cur = meOn ? db.me : db.him;
+  var cur = person(meOn ? ME : HIM);
   document.getElementById('pfName').value = cur.name||'';
   document.getElementById('pfAvatar').value = cur.avatar||'';
 }
 function saveProfile(){
+  if(!needOnline()) return;
   var n = document.getElementById('pfName').value.trim();
   var a = document.getElementById('pfAvatar').value.trim();
-  if(whoNow==='me'){
-    db.me.name = n || '桐桐';
-    db.me.avatar = a || '🐱';
-  }else{
-    db.him.name = n || '桐桐大人饶命呀';
-    db.him.avatar = a || '🍀';
-    if(a) db.him.img = '';
-  }
-  save(); render(); closeAll();
+  var target = (whoNow==='me') ? ME : HIM;
+
+  db.profiles[target] = db.profiles[target] || {};
+  db.profiles[target].name = n || db.profiles[target].name;
+  db.profiles[target].avatar = a || db.profiles[target].avatar;
+  cache(); render(); closeAll();
+
+  API.post('/api/profile', {target:target, name:n, avatar:a})
+    .then(function(){ syncFromServer(); })
+    .catch(function(){ setBar('资料没存上', true); });
 }
 
 function openCover(){
-  document.getElementById('cvUrl').value = db.me.cover||'';
+  document.getElementById('cvUrl').value =
+    (db.profiles && db.profiles[ME] && db.profiles[ME].cover) || '';
   openSheet('shCover');
 }
 function saveCover(){
-  db.me.cover = document.getElementById('cvUrl').value.trim();
-  save(); render(); closeAll();
+  if(!needOnline()) return;
+  var u = document.getElementById('cvUrl').value.trim();
+  db.profiles[ME] = db.profiles[ME] || {};
+  db.profiles[ME].cover = u;
+  cache(); render(); closeAll();
+  API.post('/api/profile', {target:ME, name:db.profiles[ME].name, cover:u})
+    .then(function(){ syncFromServer(); })
+    .catch(function(){ setBar('封面没存上', true); });
 }
 
+/* ══ 长按封面 ══ */
 (function(){
   var el = document.getElementById('cover');
   var t=null, sx=0, sy=0, fired=false, HOLD=520;
@@ -665,14 +759,6 @@ function saveCover(){
   el.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 })();
 
-var toastT = null;
-function toast(msg){
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('on');
-  if(toastT) clearTimeout(toastT);
-  toastT = setTimeout(function(){ el.classList.remove('on'); }, 1800);
-}
-
 function tab(i){
   document.querySelectorAll('.tabbar button').forEach(function(b,k){
     b.classList.toggle('on', k===i);
@@ -682,8 +768,12 @@ function tab(i){
   if(i===2){ location.href = './galaxy.html'; return; }
 }
 
+/* 回到前台时悄悄对齐一次 */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) syncFromServer();
+});
+
 load();
-render();
 </script>
 </body>
 </html>
