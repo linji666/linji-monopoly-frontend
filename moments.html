@@ -33,25 +33,10 @@ body{
 }
 #app{position:relative;min-height:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
-.topbar{
-  position:fixed;top:0;left:0;right:0;z-index:40;
-  height:calc(50px + env(safe-area-inset-top));
-  padding:env(safe-area-inset-top) 14px 0;
-  display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(to bottom,rgba(255,250,253,.5),rgba(255,250,253,.14) 58%,rgba(255,250,253,0));
-  pointer-events:none;
-}
-.topbar .ico{
-  width:38px;height:38px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  color:#6b5a80;font-size:20px;cursor:pointer;
-  pointer-events:auto;transition:background .16s;
-}
-.topbar .ico:active{background:rgba(255,255,255,.5)}
-
+/* ═══ 封面：直接顶到屏幕最上 ═══ */
 .cover{
   position:relative;overflow:hidden;
-  height:calc(240px + env(safe-area-inset-top));
+  height:calc(248px + env(safe-area-inset-top));
   padding-top:env(safe-area-inset-top);
   background:
     radial-gradient(110% 85% at 16% 6%,rgba(255,182,222,.85),transparent 62%),
@@ -80,17 +65,17 @@ body{
   z-index:2;
 }
 
-/* 右下角：昵称 + 方形头像 —— 往上提了 */
+/* 右下角：昵称 + 方形头像 */
 .corner{
   position:relative;z-index:6;
   display:flex;justify-content:flex-end;align-items:flex-end;
-  gap:14px;padding:0 20px;margin-top:-72px;
+  gap:14px;padding:0 20px;margin-top:-98px;
   pointer-events:none;
 }
 .corner .nm{
   color:#fff;font-size:19px;font-weight:600;letter-spacing:.4px;
   text-shadow:0 2px 14px rgba(120,70,145,.55);
-  padding-bottom:20px;max-width:56vw;
+  padding-bottom:22px;max-width:56vw;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .corner .av{
@@ -102,9 +87,9 @@ body{
   font-size:36px;cursor:pointer;pointer-events:auto;
 }
 .corner .av img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-.spacer{height:22px}
+.spacer{height:8px}
 
-.feed{padding:8px 18px 18px}
+.feed{padding:6px 18px 18px}
 .post{
   background:var(--card);border-radius:24px;
   padding:20px 18px 16px;box-shadow:var(--shadow);margin-bottom:16px;
@@ -294,11 +279,6 @@ body{
 </head>
 <body>
 <div id="app">
-  <div class="topbar">
-    <div class="ico">‹</div>
-    <div class="ico" onclick="openCompose()">📷</div>
-  </div>
-
   <div class="cover" id="cover"></div>
 
   <div class="corner">
@@ -381,7 +361,7 @@ body{
 <script>
 var ME  = 'me';
 var HIM = 'linji';
-var LS = 'moments_v13';
+var LS = 'moments_v14';
 var db = null;
 
 function nowStr(){
@@ -464,7 +444,7 @@ function render(){
 
   var feed = document.getElementById('feed');
   if(!db.posts.length){
-    feed.innerHTML = '<div class="empty">还没有人说话<br>点右上角的相机，或右下角 ＋</div>';
+    feed.innerHTML = '<div class="empty">还没有人说话<br>点右下角那个 ＋</div>';
     return;
   }
   var h = '';
