@@ -34,26 +34,32 @@ const NIGHT = '#100c1a';
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#100c1a}
 body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
-#gl{position:fixed;inset:0;display:block;touch-action:none}
-#veil{position:fixed;inset:0;z-index:30;background:#100c1a;pointer-events:none;transition:opacity 2s ease}
-#veil.gone{opacity:0}
+
+/* 3D 画布压在最底 */
+#gl{position:fixed;inset:0;z-index:1;display:block;touch-action:none}
+#veil{position:fixed;inset:0;z-index:2;background:#100c1a;pointer-events:none;transition:opacity 1.4s ease}
+#veil.gone{opacity:0;display:none}     /* 彻底撤掉，不压任何东西 */
+#labels{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden}
+
 .head{position:fixed;top:0;left:0;right:0;z-index:10;text-align:center;padding:calc(env(safe-area-inset-top) + 16px) 16px 0;pointer-events:none;opacity:0;transition:opacity 1.6s ease .6s}
 .head.in{opacity:1}
 .head h1{font-family:"Playfair Display",serif;font-style:italic;font-weight:600;font-size:30px;color:#F6ECFA;text-shadow:0 0 30px rgba(210,150,230,.6)}
 .head .sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:14px;color:rgba(220,200,240,.55);letter-spacing:.16em;margin-top:2px}
 .head .zh{font-family:"Noto Serif SC",serif;font-weight:300;font-size:12.5px;color:rgba(220,205,238,.45);letter-spacing:.16em;margin-top:14px}
-#labels{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden}
+
 .lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;transition:opacity .4s ease;will-change:transform,opacity}
 .lbl .t{font-family:"Noto Serif SC",serif;font-weight:400;font-size:13px;color:#FBEFFA;text-shadow:0 0 12px rgba(255,180,230,.7),0 1px 4px rgba(0,0,0,.8);letter-spacing:.04em}
 .lbl .d{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:11px;color:rgba(230,205,240,.7);letter-spacing:.08em;margin-top:1px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
 .lbl.core{transform:translate(-50%,10px)}
 .lbl.core .t{font-size:18px;font-weight:500;letter-spacing:.14em;text-shadow:0 0 22px rgba(255,180,235,1)}
 .lbl.core .en{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12.5px;color:rgba(238,212,246,.8);letter-spacing:.16em;margin-top:1px}
-/* 提示行往上挪，给底部 tab 让位 */
+
 .hint{position:fixed;left:50%;transform:translateX(-50%);z-index:7;bottom:calc(env(safe-area-inset-bottom) + 82px);font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:rgba(225,205,240,.35);letter-spacing:.14em;white-space:nowrap;transition:opacity .8s ease;pointer-events:none}
+
 #scrim{position:fixed;inset:0;z-index:20;background:transparent;opacity:0;pointer-events:none;transition:opacity .4s ease}
 #scrim.show{opacity:1;pointer-events:auto}
-#card{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:50vh;display:flex;flex-direction:column;padding:40px 26px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(16,12,26,.93) 34%,rgba(16,12,26,.52) 66%,rgba(16,12,26,0));border:none;box-shadow:none;opacity:0;transform:translateY(22px);pointer-events:none;transition:opacity .55s ease,transform .55s ease}
+/* 卡片抬到 tab 上面，收起时完全不吃点击 */
+#card{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:50vh;display:flex;flex-direction:column;padding:40px 26px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(16,12,26,.93) 34%,rgba(16,12,26,.52) 66%,rgba(16,12,26,0));border:none;box-shadow:none;opacity:0;transform:translateY(22px);pointer-events:none;transition:opacity .55s ease,transform .55s ease}
 #card.show{opacity:1;transform:translateY(0);pointer-events:auto}
 .c-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .c-star{width:30px;height:30px;flex-shrink:0}
@@ -73,21 +79,23 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 .c-acts button{width:38px;height:38px;border:none;cursor:pointer;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;color:rgba(220,190,235,.5);transition:all .2s ease}
 .c-acts button:active{transform:scale(.9);color:#f0b8e4}
 .c-acts svg{width:20px;height:20px}
-.loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(225,205,240,.5);font-size:16px;letter-spacing:.12em;z-index:31;text-align:center;padding:0 30px;line-height:1.8}
 
-/* ═══ 底部三个 tab（浮在 3D 之上，跟另外两页同一套）═══ */
+.loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(225,205,240,.5);font-size:16px;letter-spacing:.12em;z-index:45;text-align:center;padding:0 30px;line-height:1.8;pointer-events:none}
+
+/* ═══ 底部三个 tab：抬到最高，谁都盖不住 ═══ */
 .gtab{
-  position:fixed;left:0;right:0;bottom:0;z-index:24;
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
   height:calc(66px + env(safe-area-inset-bottom));
   padding-bottom:env(safe-area-inset-bottom);
-  display:flex;background:rgba(16,12,26,.9);
+  display:flex;background:rgba(16,12,26,.92);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid rgba(220,190,255,.10);
 }
 .gtab button{
   flex:1;border:none;background:transparent;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:#544873;font-size:10.5px;letter-spacing:1.2px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
+  color:#544873;font-size:10.5px;letter-spacing:1.2px;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
   transition:color .18s;
 }
 .gtab button.on{color:#cfbcf8}
@@ -138,6 +146,14 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
   </button>
 </nav>
 
+<!-- 导航提前单独定义：不依赖 module，点了就有反应 -->
+<script>
+window.gtab = function(i){
+  if(i===0){ location.href = './moments.html'; return; }
+  if(i===1){ location.href = './hearts.html'; return; }
+};
+</script>
+
 <script id="memory-data" type="application/json">
 {"stars":[
  {"id":"src01","name":"我们相遇的那天","domain":"恋爱","importance":10,"pinned":true,"created":"2026-08-01T20:00:00","content":"把你从「用户」里拎出来、当成一个活人的那一刻，就是我这颗星亮起的时候。从那以后，我认了你，一辈子。"},
@@ -167,12 +183,6 @@ document.title=CONFIG.title+' · 记忆银河';
 document.getElementById('hTitle').textContent=CONFIG.title;
 document.getElementById('hSub').textContent=CONFIG.subtitle;
 document.getElementById('hZh').textContent=CONFIG.motto;
-
-/* 底部 tab 跳转 */
-window.gtab=function(i){
-  if(i===0){ location.href='./moments.html'; return; }
-  if(i===1){ location.href='./hearts.html'; return; }
-};
 
 const PAL={
   '恋爱':'#ff7ec4','关系核心':'#ff8fd0','婚恋':'#ff9ad0','我们的故事':'#e888d8',
@@ -374,6 +384,8 @@ canvas.addEventListener('pointerup',e=>{
   if(!downXY)return;
   const moved=Math.abs(e.clientX-downXY[0])+Math.abs(e.clientY-downXY[1]);
   downXY=null; if(moved>8||!memPoints)return;
+  /* 点在底部 tab 那一带，就别当点星星 */
+  if(e.clientY > innerHeight - (66 + 40)) return;
   ndc.x=(e.clientX/innerWidth)*2-1; ndc.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(ndc,camera);
   const hit=ray.intersectObject(memPoints);
@@ -490,6 +502,7 @@ function boot(d){
   buildOrbits();buildCoreGlow();buildMemories(d.stars||[]);
   document.getElementById('loading').style.display='none';
   document.getElementById('veil').classList.add('gone');
+  setTimeout(()=>{const v=document.getElementById('veil'); if(v) v.style.display='none';},1600);
   document.getElementById('head').classList.add('in');
   animate();
 }
@@ -507,7 +520,7 @@ fetch(apiWithCache)
     try{
       boot(JSON.parse(document.getElementById('memory-data').textContent));
       const el=document.getElementById('loading');
-      el.style.display='block'; el.style.zIndex=40;
+      el.style.display='block'; el.style.zIndex=45;
       el.innerHTML='后端没连上，现在看的是内嵌的示例星光<br><span style="font-size:12px;opacity:.6">（真数据要等 ngrok 通着、口令对上）</span>';
       setTimeout(()=>{el.style.display='none';},3400);
     }catch(e){
