@@ -17,7 +17,9 @@ window.__API__ = {
   /* 最近一次出错的原因，页面上能显示出来，方便找问题 */
   lastError: '',
 
-  /* 页面用它判断"配好了没"。地址写死，所以总是 true */
+  /* 出错时要不要弹个小条告诉用户（调试完可以关掉） */
+  showErrors: true,
+
   ready: function () { return !!this.base; },
 
   /* ── 口令 ── */
@@ -101,14 +103,12 @@ window.__API__ = {
     return self._asking;
   },
 
-  /* 有口令就过，没有就问 */
   needToken: function () {
     var self = this;
     if (self.hasToken()) return Promise.resolve(true);
     return self.askToken();
   },
 
-  /* 统一的请求头 */
   headers: function (extra) {
     var h = {
       'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ window.__API__ = {
     return h;
   },
 
-  /* 把失败说清楚：到底是网络不通、还是被挡了、还是口令不对 */
+  /* 把失败说清楚 */
   why: function (err, r) {
     var m = (err && err.message) || '';
     if (m === 'NO_TOKEN') return '还没填口令';
@@ -132,9 +132,42 @@ window.__API__ = {
       if (r.status === 502) return '后端连不上记忆库';
       return '服务器回了 ' + r.status;
     }
-    if (m.indexOf('Failed to fetch') >= 0) return '连不上服务器（网络或跨域被挡）';
-    if (m.indexOf('JSON') >= 0) return '收到的不是数据（可能被中间页挡了）';
+    if (m.indexOf('Failed to fetch') >= 0) return '连不上服务器（网络被挡）';
+    if (m.indexOf('JSON') >= 0) return '收到的不是数据（被中间页挡了）';
     return m || '不知道哪儿出了问题';
+  },
+
+  /* 出错时弹一个小条，字是给人看的 */
+  shout: function (msg) {
+    if (!this.showErrors) return;
+    try {
+      var id = '__linji_err_bar';
+      var el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = id;
+        el.style.cssText =
+          'position:fixed;left:14px;right:14px;bottom:96px;z-index:99998;' +
+          'background:rgba(190,60,110,.95);color:#fff;font-size:13px;line-height:1.6;' +
+          'padding:12px 16px;border-radius:16px;box-shadow:0 10px 30px rgba(120,20,60,.35);' +
+          'font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;' +
+          'word-break:break-all;transition:opacity .3s';
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = '1';
+      clearTimeout(el._t);
+      el._t = setTimeout(function () { el.style.opacity = '0'; }, 6000);
+    } catch (e) {}
+  },
+
+  /* 统一的失败处理 */
+  fail: function (e, r) {
+    var msg = '';
+    try { msg = this.why(e, r); } catch (x) {}
+    this.lastError = msg;
+    this.shout('出了点问题：' + msg);
+    return e;
   },
 
   /* 读全部 */
@@ -147,14 +180,12 @@ window.__API__ = {
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
       if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
-      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+      return r.json();
     }).catch(function (e) {
-      self.lastError = self.why(e, e && e._r);
-      throw e;
+      throw self.fail(e, e && e._r);
     });
   },
 
-  /* 通用 POST */
   post: function (path, body, extraHeaders) {
     var self = this;
     return this.needToken().then(function (ok) {
@@ -167,14 +198,12 @@ window.__API__ = {
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
       if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
-      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+      return r.json();
     }).catch(function (e) {
-      self.lastError = self.why(e, e && e._r);
-      throw e;
+      throw self.fail(e, e && e._r);
     });
   },
 
-  /* 取记忆银河（走后端中转） */
   galaxy: function () {
     var self = this;
     return this.needToken().then(function (ok) {
@@ -183,21 +212,15 @@ window.__API__ = {
     }).then(function (r) {
       if (r.status === 403) { self.clearToken(); throw new Error('TOKEN'); }
       if (!r.ok) { var e = new Error('HTTP ' + r.status); e._r = r; throw e; }
-      return r.json().catch(function () { throw new Error('JSON 读不出来'); });
+      return r.json();
     }).catch(function (e) {
-      self.lastError = self.why(e, e && e._r);
-      throw e;
+      throw self.fail(e, e && e._r);
     });
   }
 };
 
 /* ═══════════════════════════════════════════════════════
    时间解析（全站统一）
-   ───────────────────────────────────────────────────────
-   服务器存的是 UTC。
-   老数据： "2026-10-01 17:20"           （没带时区）
-   新数据： "2026-10-01T09:20:00Z"       （带了 Z）
-   两种都当 UTC 读，再换算成本机时间。
    ═══════════════════════════════════════════════════════ */
 window.parseTime = function (t) {
   var raw = String(t == null ? '' : t).trim();
@@ -205,9 +228,9 @@ window.parseTime = function (t) {
 
   var iso;
   if (/Z$|[+-]\d{2}:?\d{2}$/.test(raw)) {
-    iso = raw;                                  /* 已带时区标记 */
+    iso = raw;
   } else {
-    iso = raw.replace(' ', 'T') + 'Z';          /* 没带，按 UTC 补 */
+    iso = raw.replace(' ', 'T') + 'Z';
   }
   var d = new Date(iso);
   if (isNaN(d.getTime())) {
@@ -217,7 +240,6 @@ window.parseTime = function (t) {
   return d;
 };
 
-/* 显示成"刚刚 / N 分钟前 / N 小时前 / N 天前 / 日期" */
 window.sinceText = function (t) {
   var d = window.parseTime(t);
   if (!d) return '';
@@ -236,9 +258,7 @@ window.sinceText = function (t) {
          p(d.getHours()) + ':' + p(d.getMinutes());
 };
 
-/* ── 兜底：把页面里那个老的 since 也接到新的上面 ──
-   页面里写的是 function since(){}（在顶层就等于 window.since），
-   这里等它执行完再盖掉，之后所有 since(...) 都会走正确的那套。 */
+/* 把页面里那个老的 since 也接到新的上面 */
 (function () {
   function apply() {
     try { window.since = window.sinceText; } catch (e) {}
