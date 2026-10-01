@@ -28,6 +28,8 @@ const CONFIG = {
 };
 /* 全站统一底色：跟心事同一间屋子的夜 */
 const NIGHT = '#100c1a';
+/* 取数据要带的头（ngrok-skip-browser-warning 是关键，不然会被插警告页） */
+const FETCH_HEADERS = window.__MEMORY_HEADERS__ || { 'ngrok-skip-browser-warning': '1' };
 </script>
 
 <style>
@@ -38,7 +40,7 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 /* 3D 画布压在最底 */
 #gl{position:fixed;inset:0;z-index:1;display:block;touch-action:none}
 #veil{position:fixed;inset:0;z-index:2;background:#100c1a;pointer-events:none;transition:opacity 1.4s ease}
-#veil.gone{opacity:0;display:none}     /* 彻底撤掉，不压任何东西 */
+#veil.gone{opacity:0;display:none}
 #labels{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden}
 
 .head{position:fixed;top:0;left:0;right:0;z-index:10;text-align:center;padding:calc(env(safe-area-inset-top) + 16px) 16px 0;pointer-events:none;opacity:0;transition:opacity 1.6s ease .6s}
@@ -58,7 +60,6 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 
 #scrim{position:fixed;inset:0;z-index:20;background:transparent;opacity:0;pointer-events:none;transition:opacity .4s ease}
 #scrim.show{opacity:1;pointer-events:auto}
-/* 卡片抬到 tab 上面，收起时完全不吃点击 */
 #card{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:50vh;display:flex;flex-direction:column;padding:40px 26px calc(22px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(16,12,26,.93) 34%,rgba(16,12,26,.52) 66%,rgba(16,12,26,0));border:none;box-shadow:none;opacity:0;transform:translateY(22px);pointer-events:none;transition:opacity .55s ease,transform .55s ease}
 #card.show{opacity:1;transform:translateY(0);pointer-events:auto}
 .c-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
@@ -82,7 +83,6 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
 
 .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-style:italic;color:rgba(225,205,240,.5);font-size:16px;letter-spacing:.12em;z-index:45;text-align:center;padding:0 30px;line-height:1.8;pointer-events:none}
 
-/* ═══ 底部三个 tab：抬到最高，谁都盖不住 ═══ */
 .gtab{
   position:fixed;left:0;right:0;bottom:0;z-index:60;
   height:calc(66px + env(safe-area-inset-bottom));
@@ -146,7 +146,6 @@ body{font-family:"Noto Serif SC","Songti SC",serif;color:#F3EAF5}
   </button>
 </nav>
 
-<!-- 导航提前单独定义：不依赖 module，点了就有反应 -->
 <script>
 window.gtab = function(i){
   if(i===0){ location.href = './moments.html'; return; }
@@ -384,8 +383,7 @@ canvas.addEventListener('pointerup',e=>{
   if(!downXY)return;
   const moved=Math.abs(e.clientX-downXY[0])+Math.abs(e.clientY-downXY[1]);
   downXY=null; if(moved>8||!memPoints)return;
-  /* 点在底部 tab 那一带，就别当点星星 */
-  if(e.clientY > innerHeight - (66 + 40)) return;
+  if(e.clientY > innerHeight - (66 + 40)) return;   /* 底部 tab 那一带不算点星星 */
   ndc.x=(e.clientX/innerWidth)*2-1; ndc.y=-(e.clientY/innerHeight)*2+1;
   ray.setFromCamera(ndc,camera);
   const hit=ray.intersectObject(memPoints);
@@ -509,7 +507,8 @@ function boot(d){
 
 const apiWithCache = CONFIG.dataUrl + (CONFIG.dataUrl.indexOf('?')>=0 ? '&' : '?') + 'd=' + Date.now();
 
-fetch(apiWithCache)
+/* 关键：带上 ngrok-skip-browser-warning，否则会被 ngrok 的警告页挡掉 */
+fetch(apiWithCache, { headers: FETCH_HEADERS })
   .then(r=>{if(!r.ok)throw 0;return r.json()})
   .then(d=>{
     if(!d.stars || !d.stars.length) throw 0;
@@ -521,7 +520,7 @@ fetch(apiWithCache)
       boot(JSON.parse(document.getElementById('memory-data').textContent));
       const el=document.getElementById('loading');
       el.style.display='block'; el.style.zIndex=45;
-      el.innerHTML='后端没连上，现在看的是内嵌的示例星光<br><span style="font-size:12px;opacity:.6">（真数据要等 ngrok 通着、口令对上）</span>';
+      el.innerHTML='后端没连上，现在看的是内嵌的示例星光<br><span style="font-size:12px;opacity:.6">（下拉刷新一下试试）</span>';
       setTimeout(()=>{el.style.display='none';},3400);
     }catch(e){
       document.getElementById('loading').textContent='星光加载失败，稍后再来 ♡';
