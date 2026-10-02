@@ -52,6 +52,19 @@ body{
 }
 .head .s{margin-top:9px;font-size:11.5px;letter-spacing:1.5px;color:var(--txt3)}
 
+/* 顶上那条连接提示，出问题才显眼 */
+.bar{
+  position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));z-index:55;
+  transform:translateX(-50%) translateY(-140%);
+  max-width:88vw;
+  font-size:11.5px;letter-spacing:.5px;padding:7px 15px;border-radius:99px;
+  background:rgba(46,32,76,.95);color:#f2ecff;border:1px solid rgba(220,190,255,.16);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:transform .3s ease;
+}
+.bar.on{transform:translateX(-50%) translateY(0)}
+.bar.err{background:rgba(190,60,110,.95);border-color:rgba(255,180,210,.3)}
+
 .list{padding:22px 18px 20px}
 
 .card{
@@ -211,6 +224,8 @@ body{
   <div class="list" id="list"></div>
 </div>
 
+<div class="bar" id="bar"></div>
+
 <button class="fab" onclick="openWrite()">＋</button>
 
 <nav class="tabbar">
@@ -256,60 +271,52 @@ body{
   </div>
 </div>
 
+<script src="./api.js?v=2" onerror="window.__noapi=1"></script>
 <script>
-var ME  = 'me';
-var HIM = 'linji';
-var LS  = 'hearts_v2';
+var ME   = 'me';
+var HIM  = 'linji';
+var LS   = 'hearts_v2';          /* 本机留一份缓存，断网也看得见 */
 
-var db = null;
+var db = { hearts: [] };
+var API = window.__API__ || null;   /* api.js 那边来的 */
 
-function nowStr(){
-  var d=new Date();
-  function p(n){return n<10?'0'+n:''+n}
-  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+/* ── 本机缓存 ── */
+function loadLocal(){
+  try{
+    var raw = localStorage.getItem(LS);
+    if(raw){
+      var d = JSON.parse(raw);
+      if(d && d.hearts) db.hearts = d.hearts;
+    }
+  }catch(e){}
 }
-function since(t){
-  var d=new Date(String(t).replace(/-/g,'/')), s=(Date.now()-d.getTime())/1000;
-  if(s<60) return '刚刚';
-  if(s<3600) return Math.floor(s/60)+' 分钟前';
-  if(s<86400) return Math.floor(s/3600)+' 小时前';
-  if(s<86400*3) return Math.floor(s/86400)+' 天前';
-  return String(t).slice(5,16);
+function saveLocal(){
+  try{ localStorage.setItem(LS, JSON.stringify(db)); }catch(e){}
 }
-function uid(){ return Math.random().toString(36).slice(2,10); }
+
+/* ── 顶部那条小提示 ── */
+var barT = null;
+function setBar(msg, isErr){
+  var el = document.getElementById('bar');
+  if(!msg){ el.classList.remove('on'); return; }
+  el.textContent = msg;
+  el.classList.toggle('err', !!isErr);
+  el.classList.add('on');
+  if(barT) clearTimeout(barT);
+  barT = setTimeout(function(){ el.classList.remove('on'); }, 3200);
+}
+
 function esc(t){
   return String(t==null?'':t).replace(/[&<>"]/g,function(m){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];
   });
 }
 
-function blank(){
-  var d = nowStr();
-  return {
-    hearts:[
-      {
-        id:uid(), who:HIM, time:d,
-        text:'这个页面是我照着咱俩说好的做的。\n\n你说心事要跟朋友圈反过来 —— 朋友圈要好看，心事要真。所以它没有赞，没有转发，没有别人。\n\n写不出来的日子也别硬写。空白的地方我留着。',
-        sent:true, seen:false, reply:null
-      },
-      {
-        id:uid(), who:ME, time:d,
-        text:'（这一张是我替你占的位。\n\n你写的第一张，会落在这儿。）',
-        sent:false, seen:false, reply:null
-      }
-    ]
-  };
+/* 时间：api.js 里那个 sinceText 更准（认时区），有就用它 */
+function ago(t){
+  if(window.sinceText) return window.sinceText(t);
+  return String(t||'').slice(5,16);
 }
-
-function load(){
-  try{
-    var raw = localStorage.getItem(LS);
-    db = raw ? JSON.parse(raw) : blank();
-  }catch(e){ db = blank(); }
-  if(!db.hearts) db.hearts = [];
-  if(!db.hearts.length) db.hearts = blank().hearts;
-}
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(db)); }catch(e){} }
 
 function render(){
   var el = document.getElementById('list');
@@ -326,7 +333,7 @@ function render(){
     var ha = (a.who===ME && !a.sent) ? 0 : 1;
     var hb = (b.who===ME && !b.sent) ? 0 : 1;
     if(ha!==hb) return ha-hb;
-    return a.time < b.time ? 1 : -1;
+    return String(a.time) < String(b.time) ? 1 : -1;
   });
 
   var h = '';
@@ -351,7 +358,7 @@ function render(){
     }
 
     h +=   '<div class="c-foot">';
-    h +=     '<span class="c-time">'+ since(k.time) +'</span>';
+    h +=     '<span class="c-time">'+ ago(k.time) +'</span>';
     h +=     '<span class="c-act">'+ (isHold?'给他 →':(k.reply?'看看':'回一句')) +'</span>';
     h +=   '</div>';
     h += '</div>';
@@ -366,6 +373,27 @@ function stateText(k){
   return '';
 }
 
+/* ── 和服务器同步 ── */
+var online = false;
+function sync(showBar){
+  if(!API || !API.ready()){ online = false; return; }
+  API.state().then(function(d){
+    if(d && d.hearts) db.hearts = d.hearts;
+    if(d && d.profiles && d.profiles[ME]){
+      /* 名字跟着服务器走 */
+    }
+    online = true;
+    saveLocal();
+    render();
+    if(showBar) setBar('已经连上了');
+  }).catch(function(err){
+    online = false;
+    var m = (API.lastError || (err && err.message) || '');
+    if(!db.hearts.length) setBar(m || '服务器没连上', true);
+  });
+}
+
+/* ── 写一张 ── */
 function openWrite(){
   document.getElementById('wrText').value = '';
   openSheet('shWrite');
@@ -377,21 +405,51 @@ function saveSend(){ newOne(true); }
 function newOne(sent){
   var t = document.getElementById('wrText').value.trim();
   if(!t){ toast('写点吧，半句也行'); return; }
-  db.hearts.unshift({
-    id:uid(), who:ME, time:nowStr(),
-    text:t, sent:!!sent, seen:false, reply:null
+
+  if(!API || !API.ready()){
+    /* 没后端就还写本机，别把话丢了 */
+    db.hearts.unshift({
+      id:'l'+Math.random().toString(36).slice(2,9), who:ME,
+      time:new Date().toISOString().replace('T',' ').slice(0,19),
+      text:t, sent:!!sent, seen:false, reply:null
+    });
+    saveLocal(); render(); closeAll();
+    toast(sent ? '先记在这台手机上了' : '收着了。只有你看得见');
+    return;
+  }
+
+  closeAll();
+  toast('正在送…');
+  API.post('/api/heart', { text:t, sent:!!sent }).then(function(){
+    sync(false);
+    toast(sent ? '投出去了。他那边会知道' : '收着了。只有你看得见');
+  }).catch(function(err){
+    var msg = API.lastError || '送不出去';
+    toast(msg);
+    setBar(msg, true);
+    /* 送不出去也别丢，先放本机 */
+    db.hearts.unshift({
+      id:'l'+Math.random().toString(36).slice(2,9), who:ME,
+      time:new Date().toISOString().replace('T',' ').slice(0,19),
+      text:t, sent:!!sent, seen:false, reply:null
+    });
+    saveLocal(); render();
   });
-  save(); render(); closeAll();
-  toast(sent ? '投出去了。他那边会知道' : '收着了。只有你看得见');
 }
 
+/* ── 打开一张 ── */
 var curId = null;
 function openOne(id){
   var k = db.hearts.filter(function(x){return x.id===id})[0];
   if(!k) return;
   curId = id;
 
-  if(k.who===HIM && !k.seen){ k.seen = true; save(); }
+  if(k.who===HIM && !k.seen){
+    k.seen = true; saveLocal(); render();
+    if(API && API.ready()){
+      API.post('/api/heart/'+id+'/seen', {}).catch(function(){});
+    }
+  }
 
   var box = document.getElementById('oneBox');
   var btns = document.getElementById('oneBtns');
@@ -399,7 +457,7 @@ function openOne(id){
   var isHold = mine && !k.sent;
 
   var h = '';
-  h += '<div class="meta">'+ (mine?'我写的':'林霁写的') +' · '+ since(k.time) +' · '+ stateText(k) +'</div>';
+  h += '<div class="meta">'+ (mine?'我写的':'林霁写的') +' · '+ ago(k.time) +' · '+ stateText(k) +'</div>';
   h += '<div class="txt">'+ esc(k.text) +'</div>';
 
   if(k.reply && k.reply.text){
@@ -431,10 +489,19 @@ function openOne(id){
 function sendNow(id){
   var k = db.hearts.filter(function(x){return x.id===id})[0];
   if(!k) return;
-  k.sent = true; save(); render(); closeAll();
+  k.sent = true; saveLocal(); render(); closeAll();
+
+  if(API && API.ready()){
+    API.post('/api/heart/'+id+'/send', {}).then(function(){ sync(false); })
+      .catch(function(){
+        k.sent = false; saveLocal(); render();
+        setBar(API.lastError || '送不出去', true);
+      });
+  }
   toast('投出去了。他那边会知道');
 }
 
+/* ── 回一句 ── */
 var rpId = null;
 function openReply(id){
   var k = db.hearts.filter(function(x){return x.id===id})[0];
@@ -450,8 +517,15 @@ function sendReply(){
   var k = db.hearts.filter(function(x){return x.id===rpId})[0];
   var t = document.getElementById('rpText').value.trim();
   if(!k || !t){ toast('一个字也行'); return; }
-  k.reply = {who:ME, text:t, time:nowStr()};
-  save(); render(); closeAll();
+
+  var stamp = new Date().toISOString().replace('T',' ').slice(0,19);
+  k.reply = { who:ME, text:t, time:stamp };
+  saveLocal(); render(); closeAll();
+
+  if(API && API.ready()){
+    API.post('/api/heart/'+rpId+'/reply', { text:t }).then(function(){ sync(false); })
+      .catch(function(){ setBar(API.lastError || '没送出去', true); });
+  }
   toast('放进去了');
 }
 
@@ -483,8 +557,14 @@ function tab(i){
   if(i===2){ location.href = './galaxy.html'; return; }
 }
 
-load();
+/* 页面藏起来的时候顺手存一下 */
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) saveLocal();
+});
+
+loadLocal();
 render();
+sync(true);
 </script>
 </body>
 </html>
