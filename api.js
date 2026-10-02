@@ -12,7 +12,8 @@ window.__API__ = {
   /* 这台手机是谁：'me' = 桐桐，'linji' = 林霁 */
   who: 'me',
 
-  KEY: 'linji_app_token',
+  /* 改口令的时候把这个名字升一位（_v2 → _v3），旧口令就自动作废了 */
+  KEY: 'linji_app_token_v2',
 
   /* 最近一次出错的原因 */
   lastError: '',
@@ -44,7 +45,7 @@ window.__API__ = {
   tokenHint: function () {
     var t = this.token();
     if (!t) return '（还没填）';
-    return t.length <= 4 ? t : (t.slice(0, 4) + '…（共 ' + t.length + ' 位）');
+    return t.length <= 6 ? t : (t.slice(0, 6) + '…（共 ' + t.length + ' 位）');
   },
 
   /* 没口令就弹一个自己画的框 */
@@ -74,8 +75,10 @@ window.__API__ = {
             'placeholder="我们俩的口令" style="width:100%;box-sizing:border-box;' +
             'background:#fbf7fe;border:1px solid rgba(178,138,190,.2);border-radius:15px;' +
             'padding:14px 15px;color:#40365a;font-size:16px;outline:none">' +
+            '<div style="font-size:11px;color:#cbbfda;margin-top:8px">' +
+            '想粘贴的话：长按上面那个框</div>' +
             '<div id="__linji_token_err" style="font-size:12px;color:#e0779f;' +
-            'margin-top:10px;min-height:16px"></div>' +
+            'margin-top:8px;min-height:16px"></div>' +
             '<div style="display:flex;gap:10px;margin-top:14px">' +
               '<button id="__linji_token_later" style="flex:1;padding:14px 0;border:none;' +
               'border-radius:16px;background:#f6f1fa;color:#8a7fa4;font-size:15px;' +
