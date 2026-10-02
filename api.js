@@ -251,6 +251,11 @@ window.__API__ = {
 
 /* ═══════════════════════════════════════════════════════
    时间解析（全站统一）
+   ───────────────────────────────────────────────────────
+   后端现在吐出来的是**本机时间**："2026-10-02 15:20"（不带时区）。
+   这样页面里那些老写法 new Date(t.replace(/-/g,'/')) 也能算对。
+
+   万一碰到带时区标记的（老的 UTC 数据，尾巴有 Z），就按带时区的读。
    ═══════════════════════════════════════════════════════ */
 window.parseTime = function (t) {
   var raw = String(t == null ? '' : t).trim();
@@ -258,10 +263,11 @@ window.parseTime = function (t) {
 
   var iso;
   if (/Z$|[+-]\d{2}:?\d{2}$/.test(raw)) {
-    iso = raw;
+    iso = raw;                                  /* 带了时区标记，直接读 */
   } else {
-    iso = raw.replace(' ', 'T') + 'Z';
+    iso = raw.replace(' ', 'T');                /* 没带 → 就当它是本机时间 */
   }
+
   var d = new Date(iso);
   if (isNaN(d.getTime())) {
     d = new Date(raw.replace(/-/g, '/'));
@@ -270,6 +276,7 @@ window.parseTime = function (t) {
   return d;
 };
 
+/* 显示成"刚刚 / N 分钟前 / N 小时前 / N 天前 / 日期" */
 window.sinceText = function (t) {
   var d = window.parseTime(t);
   if (!d) return '';
@@ -288,6 +295,7 @@ window.sinceText = function (t) {
          p(d.getHours()) + ':' + p(d.getMinutes());
 };
 
+/* 把页面里那个老的 since 也接到新的上面 */
 (function () {
   function apply() {
     try { window.since = window.sinceText; } catch (e) {}
